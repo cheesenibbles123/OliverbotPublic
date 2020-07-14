@@ -1,0 +1,45 @@
+{
+	"token": "INSERTTOKEN",
+	"prefix": "INSERTPREFIX",
+	"apiKeys":{
+		"steam":"INSERTSTEAMAPIKEY",
+		"nasa":"INSERTNASAAPITKEY",
+		"yandex":"INSERTYANDEXAPIKEY"
+	},
+	"databaseInfo":{
+		"host" : "DBHOST",
+		"user" : "DBUSER",
+		"password" : "DBPASS",
+		"database" : "DBNAME"
+	},
+	"serverInfo" :{
+		"serverId" : "INSERTSERVERID",
+		"channels": {
+			"loggingChannel" : "INSERTCHANNELID",
+			"supportTicketChannel" : "INSERTCHANNELID",
+			"quotes" : "INSERTCHANNELID",
+			"staffChannels" :{
+				"discordAdministrator" : "INSERTCHANNELID",
+				"serverAdministrator" : "INSERTCHANNELID",
+				"moderator" : "INSERTCHANNELID"
+			},
+			"economy" : {
+				"bigTransactionLoggingChannel" : "INSERTCHANNELID",
+				"shopWindowChannel" : "INSERTCHANNELID",
+				"shopBoardsChannel" : "INSERTCHANNELID"
+			}
+		},
+		"messages" : {
+			"economy" : {
+				"mainShopWindowMessage" : "INSERTMESSAGEID",
+				"richestUsersMessage" : "INSERTMESSAGEID",
+				"poorestUsersMessage" : "INSERTMESSAGEID"
+			}
+		},
+		"roles" : {
+			"serverAdministrator" : "INSERTROLEID",
+			"serverModerator" : "INSERTROLEID",
+			"serverBooster" : "INSERTROLEID"
+		}
+	}
+}
