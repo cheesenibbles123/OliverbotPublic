@@ -8,4 +8,6 @@ There are likley lots of malpractises in here and in general don't expect everyt
 
 Incase the title of the files wasn't clear enough, the included config and datafile are simply templates containing the layout that should be used for them. A database is not included, however it should be fairly simple to identify the columns used based on the code.
 
-Please note idk wtf im doing with github.
+notes:
+ - Please note idk wtf im doing with github.
+ - Adding comments to the code to help readability
