@@ -2296,7 +2296,7 @@ function displayRichestUsers(){
 			}
 			newPoorest = newPoorest + name +"|"+ coins +"\n";
 		}
-		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.richestUsersMessage).then(msg => {
+		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.poorestUsersMessage).then(msg => {
 			msg.edit(newPoorest + "```");
 		});
 	});
@@ -2936,7 +2936,10 @@ bot.on("ready", () => {
 });
 
 bot.on("message", async message => {
+	//dont respond to bots
 	if (message.author.bot) return;
+
+	//this situation specific, if running your own just remove
 	if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
 
 	if (adjustableConfig.reactions.randomReactions){
@@ -2958,6 +2961,8 @@ bot.on("message", async message => {
 			message.channel.send("Hmmm, yes, much discussion <:thonkhonk:690138132343160854>");
 		}
 	}
+
+	//If enabled creates support tickets
 	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && adjustableConfig.misc.SupportTickets === true){
 		let content = message.content;
 		let d = new Date();
@@ -2980,6 +2985,8 @@ bot.on("message", async message => {
 		});
 		message.delete({timeout: 0, reason: "Support ticket creation."});
 	}
+
+	//N word filter
 	if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ")){
 		if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){}
 		else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
@@ -2988,6 +2995,8 @@ bot.on("message", async message => {
 			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: "+message.author);
 		}
 	}
+
+	//Prevents autoquote from taking from sensitive channels
 	if (adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
 		if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
 			if (message.channel.name.toLowerCase().includes("support")){
@@ -2998,6 +3007,8 @@ bot.on("message", async message => {
 			}
 		}
 	}
+
+	//XP Gain
 	if (message.guild.id === config.serverInfo.serverId){
 		try{
 			var con = mysql.createConnection({
@@ -3061,192 +3072,14 @@ bot.on("message", async message => {
 			console.log(e);
 		}
 	}
+
+	//Old larry reference (RIP Larry)
 	if (message.content.startsWith("...") & message.content.length === 3){
 		message.react("452064991688916995");
 	}
-	message.attachments.forEach(attachment => {
-    	if (message.attachments.size > 0) {
-      		if (attachment.url){
-        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
-          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
-          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-            			if (result.nudity.raw > 0.65){
-              				let nudityEmbed = new Discord.MessageEmbed()
-                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
-             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
-            			}
-          			}).catch(function(err){
-            			console.log(err);
-          			});
-        		}
-      		}
-    	}
-  	});
-	if (!message.content.startsWith(config.prefix)) return;
 
-	let messagearray = message.content.split(" ");
-	let command = messagearray[0].substring(1);
-	command = command.toLowerCase();
-	let args = messagearray.slice(1);
-	let serverid = message.channel.guild.id;
-
-	let TrackingCommand = false;
-	//MEMEZ
-	if (command === "delete-administrators"){
-		TrackingCommand = true;
-		message.channel.send("Deleting the administrators.").then(msg => {
-			setTimeout(function(){
-				msg.edit("Deleting the administrators..");
-				setTimeout(function(){
-					msg.edit("Deleting the administrators...");
-					setTimeout(function(){
-						msg.edit("Administrators deleted.");
-					},3000);
-				},3000);
-			},3000);
-		});
-	}
-
-	if (command === "dox"){
-		TrackingCommand = true;
-		message.channel.send(`Doxing ${args.join(" ")}...`);
-	}
-
-	if (command === "magic"){
-		TrackingCommand = true;
-		message.channel.send("https://giphy.com/gifs/magical-KFNQuuT1qx7I4");
-	}
-
-	if (command === "pong"){
-		TrackingCommand = true;
-		message.react("🏓");
-	}
-
-	if (command === "playaudio"){
-		TrackingCommand = true;
-		let voiceChannel = message.member.voice.channel;
-		if (!voiceChannel){
-			message.reply("You must be in a voice channel!");
-		}else if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else if (isPlaying){
-			message.reply("I'm already playing!");
-		}else{
-			song = args.join("");
-			if (song.includes("https://www.youtube.com/watch?v=")){
-				let songInfo = await ytdl.getInfo(song);
-				playAudio(message,args,voiceChannel);
-				let embed = new Discord.MessageEmbed()
-					.setTitle("Now Playing")
-					.setColor('#add8e6')
-					.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
-					.setThumbnail(`${message.author.displayAvatarURL}`)
-					.setTimestamp();
-				message.channel.send(embed).then(msg => {
-					setTimeout(function(){
-						msg.delete();
-					},songInfo.length_seconds*1000);
-				});
-			}else{
-				message.reply("Please enter a valid youtube link!");
-			}
-		}
-	}
-
-	if (command === "checknudity"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.checkNudity){
-			message.attachments.forEach(attachment => {
-				if (message.attachments.size > 0) {
-      				if (attachment.url){
-        				if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
-        	  				let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
-          					sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-           	 	  			let nudityEmbed = new Discord.MessageEmbed()
-           	 	    		  .addField("Rating",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}\nImage Link: [link](${attachment.url})`);
-           	 	 				message.channel.send(nudityEmbed);
-          					}).catch(function(err){
-           	 					console.log(err);
-          					});
-       	 				}else{
-        					message.channel.send("I can only use png, jpg or jpeg.");
-        				}
-      				}
-    			}else{
-    				message.channel.send("Must be an attachment!");
-    			}
-    		});
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "stopaudio"){
-		TrackingCommand = true;
-		if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else if (!isPlaying){
-			message.channel.send("I am not currently in a voice channel!");
-		}else if (!currentDispatcher){
-			message.channel.send("I am not currently playing anything!");
-		}else if (!message.member.voice.channel){
-			message.channel.send("You must be in the same voice channel!");
-		}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
-			message.channel.send("You must be in the same voice channel!");
-		}else{
-			currentDispatcher.destroy();
-			bot.voice.connections.get(message.guild.id).disconnect();
-			isPlaying=false;
-			message.react("🛑");
-			message.channel.send("I have stopped");
-		}
-	}
-
-	if (command === "randomsong"){
-		TrackingCommand = true;
-		let voiceChannel = message.member.voice.channel;
-		if (!voiceChannel){ return; }
-		else if (isPlaying){ return; }
-		else if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else{
-		let file = fs.readFileSync("./datafile.json").toString();
-		file = JSON.parse(file);
-		let song = file.randomsongs[getRandomInt(file.randomsongs.length)];
-		voiceChannel.join().then(connection => {
-		isPlaying = true;
-		currentDispatcher = connection
-			.play(
-         		ytdl(song)
-        	)
-        	.on("finish",() =>{
-        		voiceChannel.leave();
-        		isPlaying = false;
-        	})
-        	.on("error",e=>{
-        		console.error(e);
-       	 		voiceChannel.leave();
-       	 		isPlaying = false;
-       	 	});
-		});
-		}
-	}
-
-	if (command === "inspire"){
-		TrackingCommand = true;
-		if(adjustableConfig.apis.inspire){
-			fetch("http://inspirobot.me/api?generate=true").then(resp => resp.text()).then(picture => {
-				let InspireImage = new Discord.MessageEmbed()
-					.setImage(`${picture}`)
-					.setTimestamp();
-				message.channel.send(InspireImage);
-			});
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "ping"){
+	//Ping Oliverbot
+	if (message.content.startsWith("<@!556545106468012052>")){
 		TrackingCommand = true;
 		message.react("🤔");
 
@@ -3278,8 +3111,209 @@ bot.on("message", async message => {
 			});
 		}
 	}
-	//MEMEZ
 
+	//check content of any pictures sent for nudity
+	message.attachments.forEach(attachment => {
+    	if (message.attachments.size > 0) {
+      		if (attachment.url){
+        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
+          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
+          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
+            			if (result.nudity.raw > 0.65){
+              				let nudityEmbed = new Discord.MessageEmbed()
+                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
+             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
+            			}
+          			}).catch(function(err){
+            			console.log(err);
+          			});
+        		}
+      		}
+    	}
+  	});
+
+	if (!message.content.startsWith(config.prefix)) return;
+
+	//Split messages into the command and arguments
+	let messagearray = message.content.split(" ");
+	let command = messagearray[0].substring(1);
+	command = command.toLowerCase();
+	let args = messagearray.slice(1);
+	let serverid = message.channel.guild.id;
+
+	let TrackingCommand = false;
+
+	//MEMEZ
+	if (command === "delete-administrators"){
+		TrackingCommand = true;
+		message.channel.send("Deleting the administrators.").then(msg => {
+			setTimeout(function(){
+				msg.edit("Deleting the administrators..");
+				setTimeout(function(){
+					msg.edit("Deleting the administrators...");
+					setTimeout(function(){
+						msg.edit("Administrators deleted.");
+					},3000);
+				},3000);
+			},3000);
+		});
+	}
+
+	if (command === "dox"){
+		TrackingCommand = true;
+		message.channel.send(`Doxing ${args.join(" ")}...`);
+	}
+
+	if (command === "magic"){
+		TrackingCommand = true;
+		message.channel.send("https://giphy.com/gifs/magical-KFNQuuT1qx7I4");
+	}
+
+	if (command === "pong"){
+		TrackingCommand = true;
+		message.react("🏓");
+	}
+
+	if (command === "execute"){
+		TrackingCommand = true;
+		if (typeof args[0] === undefined){
+			message.channel.send("You need to say who to execute! 🤦");
+		}else{
+			message.channel.send(`Executing ${args[0]}\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
+			TrackingCommand = true;
+		}
+	}
+
+	//Play music from YT URL
+	if (command === "playaudio"){
+		TrackingCommand = true;
+		let voiceChannel = message.member.voice.channel;
+		if (!voiceChannel){
+			message.reply("You must be in a voice channel!");
+		}else if (!adjustableConfig.music.generalAudio){
+			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+		}else if (isPlaying){
+			message.reply("I'm already playing!");
+		}else{
+			song = args.join("");
+			if (song.includes("https://www.youtube.com/watch?v=")){
+				let songInfo = await ytdl.getInfo(song);
+				playAudio(message,args,voiceChannel);
+				let embed = new Discord.MessageEmbed()
+					.setTitle("Now Playing")
+					.setColor('#add8e6')
+					.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
+					.setThumbnail(`${message.author.displayAvatarURL}`)
+					.setTimestamp();
+				message.channel.send(embed).then(msg => {
+					setTimeout(function(){
+						msg.delete();
+					},songInfo.length_seconds*1000);
+				});
+			}else{
+				message.reply("Please enter a valid youtube link!");
+			}
+		}
+	}
+
+	//stop any currently playing audio
+	if (command === "stopaudio"){
+		TrackingCommand = true;
+		if (!adjustableConfig.music.generalAudio){
+			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+		}else if (!isPlaying){
+			message.channel.send("I am not currently in a voice channel!");
+		}else if (!currentDispatcher){
+			message.channel.send("I am not currently playing anything!");
+		}else if (!message.member.voice.channel){
+			message.channel.send("You must be in the same voice channel!");
+		}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+			message.channel.send("You must be in the same voice channel!");
+		}else{
+			currentDispatcher.destroy();
+			bot.voice.connections.get(message.guild.id).disconnect();
+			isPlaying=false;
+			message.react("🛑");
+			message.channel.send("I have stopped");
+		}
+	}
+
+	//Grab random song from datafile
+	if (command === "randomsong"){
+		TrackingCommand = true;
+		let voiceChannel = message.member.voice.channel;
+		if (!voiceChannel){ return; }
+		else if (isPlaying){ return; }
+		else if (!adjustableConfig.music.generalAudio){
+			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+		}else{
+		let file = fs.readFileSync("./datafile.json").toString();
+		file = JSON.parse(file);
+		let song = file.randomsongs[getRandomInt(file.randomsongs.length)];
+		voiceChannel.join().then(connection => {
+		isPlaying = true;
+		currentDispatcher = connection
+			.play(
+         		ytdl(song)
+        	)
+        	.on("finish",() =>{
+        		voiceChannel.leave();
+        		isPlaying = false;
+        	})
+        	.on("error",e=>{
+        		console.error(e);
+       	 		voiceChannel.leave();
+       	 		isPlaying = false;
+       	 	});
+		});
+		}
+	}
+
+	//Does what it says on the tin
+	if (command === "checknudity"){
+		TrackingCommand = true;
+		if (adjustableConfig.apis.checkNudity){
+			message.attachments.forEach(attachment => {
+				if (message.attachments.size > 0) {
+      				if (attachment.url){
+        				if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
+        	  				let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
+          					sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
+           	 	  			let nudityEmbed = new Discord.MessageEmbed()
+           	 	    		  .addField("Rating",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}\nImage Link: [link](${attachment.url})`);
+           	 	 				message.channel.send(nudityEmbed);
+          					}).catch(function(err){
+           	 					console.log(err);
+          					});
+       	 				}else{
+        					message.channel.send("I can only use png, jpg or jpeg.");
+        				}
+      				}
+    			}else{
+    				message.channel.send("Must be an attachment!");
+    			}
+    		});
+		}else{
+			message.reply("That command is currently disabled!");
+		}
+	}
+
+	//MEMEZ
+	if (command === "inspire"){
+		TrackingCommand = true;
+		if(adjustableConfig.apis.inspire){
+			fetch("http://inspirobot.me/api?generate=true").then(resp => resp.text()).then(picture => {
+				let InspireImage = new Discord.MessageEmbed()
+					.setImage(`${picture}`)
+					.setTimestamp();
+				message.channel.send(InspireImage);
+			});
+		}else{
+			message.reply("That command is currently disabled!");
+		}
+	}
+
+	//Translate ENG <-> RUS
 	if (command === "translate"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.translate){
@@ -3299,11 +3333,13 @@ bot.on("message", async message => {
 		}
 	}
 
+	//XP Rand Cards
 	if (command === "rankcard"){
 		TrackingCommand = true;
 		rankcardCreation(message);
 	}
 
+	//Lists all commands to you, depending on your roles
 	if (command === "listcommands"){
 		TrackingCommand = true;
 		let embed = new Discord.MessageEmbed()
@@ -3361,6 +3397,7 @@ bot.on("message", async message => {
    		}
 	}
 
+	//Provides info on how to use certain commands
 	if (command === "help"){
 		TrackingCommand = true;
 		let supportedQueries = ["listcommands","list","memegen","random","apod","marsweather","rankcard","translate","exchangerates","today","urban","quote","yodish","dad","8ball","bwstats","payday2","trump"];
@@ -3442,6 +3479,8 @@ bot.on("message", async message => {
 		}
 		delete supportedQueries;
 	}
+
+	//Urban dictionary
 	if (command === "urban"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.urban){
@@ -3465,6 +3504,8 @@ bot.on("message", async message => {
     		message.reply("That command is currently disabled!");
     	}
   	}
+
+  	//Fetch random quote
 	if (command === "quote"){
 		TrackingCommand = true;
 		let file = fs.readFileSync("./datafile.json").toString();
@@ -3488,12 +3529,16 @@ bot.on("message", async message => {
 		file = JSON.parse(file);
 		message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
 	}
+
+	//Random pingu doing Noot Noot gif
 	if (command === "nootnoot"){
 		TrackingCommand = true;
 		let file = fs.readFileSync("./datafile.json").toString();
 		file = JSON.parse(file);
 		message.channel.send(file.nootnoot[getRandomInt(file.nootnoot.length+1)]);
 	}
+
+	//Returns input text in yodish format
 	if (command === "yodish"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.yodish){
@@ -3533,6 +3578,7 @@ bot.on("message", async message => {
 		});
 	}
 
+	//Gets a random video/image/gif from the datafile
 	if (command === "random"){
 		if (levelchecker(message,4)){
 			TrackingCommand = true;
@@ -3714,6 +3760,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//Astronomy picture of the day
 	if (command === "apod"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.apod){
@@ -3723,6 +3770,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//Not working yet
 	if (command === "marsweather"){
 		//GetMarsWeatherData(message);
 		message.channel.send("This command is currently not working :(");
@@ -3797,6 +3845,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//Random Chuck norris
 	if (command === "chuck"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.chuck){
@@ -3806,6 +3855,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//Look up meaning for a word
 	if (command === "dictionary"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.dictionary){
@@ -3815,6 +3865,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//Mute + unmute for mods
 	if (command === "mute" && serverid === config.serverInfo.roles.serverModerator && adjustableConfig.misc.moderatorCommands){
 		let member = message.guild.members.find('id',message.mentions.users.first().id);
 		try{
@@ -3883,16 +3934,6 @@ bot.on("message", async message => {
 		}else{
 			message.channel.send("You cannot use this command");
 		}	
-	}
-
-	if (command === "execute"){
-		TrackingCommand = true;
-		if (typeof args[0] === undefined){
-			message.channel.send("You need to say who to execute! 🤦");
-		}else{
-			message.channel.send(`Executing ${args[0]}\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
-			TrackingCommand = true;
-		}
 	}
 
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){ // if moderator
@@ -4009,6 +4050,7 @@ bot.on("message", async message => {
 				message.channel.send("Please enter a User.");
 			}
 		}	
+		//Gets info about server command is sent in
 		if (command === "serverinfo"){
 			let features = "";
 			if (!(message.guild.features.length > 0)){
@@ -4036,6 +4078,7 @@ bot.on("message", async message => {
 								.setTimestamp();
 			message.channel.send(serverinfo);
 		}
+		//Gets info about channel commmand is sent in
 		if (command === "channelinfo"){
 			let channelinfo = new Discord.MessageEmbed()
 							.setColor('#0099ff')
@@ -4055,6 +4098,7 @@ bot.on("message", async message => {
 
 	}
 
+	//restarts the bot
 	if (command === "restart"){
 		if (message.author.id === "337541914687569920"){
 			await message.channel.send("Restarting....");
@@ -4071,6 +4115,8 @@ bot.on("message", async message => {
 		}
 	}
 
+	//VERY DANGEROUS, GIVE ACCESS TO WITH CAUTION
+	//Allows you to run code through a single command
 	if (command === "do"){
 		if (message.author.id === "337541914687569920"){
 			try{
@@ -4085,7 +4131,6 @@ bot.on("message", async message => {
     		}
 		}
 	}
-	//VERY DANGEROUS, GIVE ACCESS TO WITH CAUTION
 
 	if (command === "payday2"){
 		TrackingCommand = true;
@@ -4209,6 +4254,7 @@ bot.on("message", async message => {
 		}
 	}
 
+	//If command is being tracked, update table
 	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
 		var conCheckIfInTable = mysql.createConnection({
 			host : mysqlLoginData.host,
@@ -4303,7 +4349,7 @@ bot.on("message", async message => {
 		}else{
 			message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
 		}
-}
+	}
 
 	if (command === "search"){
 		if (args){
@@ -4390,6 +4436,7 @@ bot.on("message", async message => {
 	return;
 });
 
+//Pure Logging of events
 bot.on('raw', async event => {
 	if (["CHANNEL_CREATE","CHANNEL_DELETE","CHANNEL_PINS_UPDATE","GUILD_BAN_ADD","GUILD_BAN_REMOVE","GUILD_BAN_REMOVE","GUILD_MEMBER_REMOVE","GUILD_ROLE_CREATE","GUILD_ROLE_DELETE","MESSAGE_REACTION_ADD","MESSAGE_REACTION_REMOVE","MESSAGE_DELETE"].indexOf(event.t) === -1){
 		return;
@@ -4569,16 +4616,5 @@ bot.on('raw', async event => {
 
 bot.on('error', console.error);
 bot.on("warn", (e) => {console.warn(e); e = undefined; delete e;});
-
-bot.on("messageDelete", function(message){
-	let msgDeleteEmbed = new Discord.MessageEmbed()
-		.setTitle(`${message.content}`)
-		.setDescription(`${message.author}`)
-		.setTimestamp();
-    bot.channels.cache.get("732318686186045440").send(msgDeleteEmbed);
-    message = null;
-    delete message;
-});
-
 
 bot.login(config.token);
