@@ -3388,11 +3388,12 @@ bot.on("message", async message => {
 			if (term === "payday2"){
 				message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
 			}else{
-			if (term === "trump"){
-				message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
-			}else{
-				message.reply("That command currently either has no help section or is detailed in the commands list.");
-				message.react("448435180286509066");
+				if (term === "trump"){
+					message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
+				}else{
+					message.reply("That command currently either has no help section or is detailed in the commands list.");
+					message.react("448435180286509066");
+				}
 			}
 		}else{
 			message.channel.send("I currently have help for:\n`"
