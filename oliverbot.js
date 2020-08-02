@@ -474,8 +474,7 @@ function updateleaderboard(msg){
 		con.connect(err => {
 			if(err) console.log(err);
 		});
-		con.query(`SELECT * FROM xp`, (err,rows) =>{
-			rows = sortingrows(rows);
+		con.query(`SELECT * FROM xp order by level desc, xp desc limit 31`, (err,rows) =>{
 			let length = 0;
 			if (rows.length<leaderboardlimits.listsizelimit){
 				length = rows.length;
@@ -529,28 +528,6 @@ function updateleaderboard(msg){
 		});
 		con.end();
 	},delay);
-}
-
-function sortingrows(rows){
-	for (var i = 1; i < rows.length; i++){
-    	for (var j = 0; j < i; j++){
-       		if (parseInt(rows[i].level) < parseInt(rows[j].level)){
-    	    var x = rows[i];
-    	   	rows[i] = rows[j];
-    	   	rows[j] = x;
-    		}
-    	}
-	}
-	for (var i = 1; i < rows.length; i++){
-    	for (var j = 0; j < i; j++){
-       		if ((parseInt(rows[i].level) === parseInt(rows[j].level)) & (parseInt(rows[i].xp) < parseInt(rows[j].xp))){
-    	    var x = rows[i];
-    	   	rows[i] = rows[j];
-    	   	rows[j] = x;
-    		}
-    	}
-	}
-	return rows.reverse();
 }
 
 function levelsystem(xp,currentlevel){
