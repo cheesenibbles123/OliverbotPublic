@@ -10,4 +10,9 @@ Incase the title of the files wasn't clear enough, the included config and dataf
 
 notes:
  - Please note idk wtf im doing with github.
- - Adding comments to the code to help readability
+ - Adding comments to the code to help readability (I'll get round to it some day)
+
+Latest update notes:
+ - Removed lots of the unneeded "delete X;" lines
+ - Added in some ";"s cause im stupid
+ - Added the package.json file
