@@ -3413,7 +3413,7 @@ bot.on("message", async message => {
 			}else{
 			if (term === "trump"){
 				message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
-			}else
+			}else{
 				message.reply("That command currently either has no help section or is detailed in the commands list.");
 				message.react("448435180286509066");
 			}
