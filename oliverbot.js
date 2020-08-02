@@ -9,7 +9,6 @@ const btoa = require("btoa");
 const ytdl = require("ytdl-core");
 const Canvas = require('canvas');
 
-var SupportTickets = false;
 var serverStatus = {
 	"active" : false,
 	"msg" : null,
@@ -71,13 +70,11 @@ var adjustableConfig = {
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 var isPlaying = false;
 var currentDispatcher = null;
-var economyIsActive = true;
 
 var customCommandList = [];
 var miniCommands = [];
 var reactionRoles = [];
 
-//Loads all data from the database
 function LoadDataFromDatabase(){
 	loadConfigFromDB();
 	loadCustomCommandsFromDB();
@@ -87,9 +84,7 @@ function LoadDataFromDatabase(){
 	return;
 }
 
-//Not currently in use, planned to allow passive income for future economy projects
 function scheduleDbEvent(type,time,reason,query,affectedUserID){
-	//Setup DB Connection
 	var scheduleEventCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -99,8 +94,6 @@ function scheduleDbEvent(type,time,reason,query,affectedUserID){
 	scheduleEventCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	scheduleEventCon.query(`SELECT COUNT(*) FROM eventcounts`, (err,length) =>{
 		if (err) konsole(err);
 		if (type === "oneUse"){
@@ -110,20 +103,13 @@ function scheduleDbEvent(type,time,reason,query,affectedUserID){
 		}
 		scheduleEventCon.query(`INSERT INTO eventcounts (number,reason,type,userAffectedID) values ('${length + 1}','${reason}','${type}','${affectedUserID}`);
 	});
-
-	//Close connection
 	scheduleEventCon.end();
-
-	//Clearing any possible remnants of data
-	scheduleEventCon = undefined;
-	delete scheduleEventCon;
-
+	scheduleEventCon = null;
 	return;
 }
 
-//Loading XP Gain info (Income factors for different economy options)
+//Loading Data
 function loadXpDataFromDB(){
-	//Setup DB Connection
 	var loadCustCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -133,33 +119,22 @@ function loadXpDataFromDB(){
 	loadCustCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	loadCustCon.query(`SELECT * FROM xpGainData`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
 		}
 		else{
 			for (i=0;i<rows.length;i++){
-				//Stored as "factor name" "factor value"
 				xpdetails[`${rows[i].factorName}`] = rows[i].val;
 			}
 		}
 	});
-
-	//Close connection
 	loadCustCon.end();
-
-	//Clearing any possible remnants of data
-	loadCustCon = undefined;
-	delete loadCustCon;
-
+	loadCustCon = null;
 	return;
 }
 
-//Loading enabled/disabled commands from DB
 function loadConfigFromDB(){
-	//Setup DB Connection
 	var setupCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -170,42 +145,40 @@ function loadConfigFromDB(){
 		if(err) console.log(err);
 	});
 
-	//Main Query
 	setupCon.query(`SELECT * FROM config`, (err,rows) => {
 		if (rows.length < 1){
 			console.log("------ERROR LOADING CONFIG------");
 		}else{
 			for (i=0;i<rows.length;i++){
 
-				//Status of reactions
 				if (rows[i].category === 'reactions'){
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.reactions[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
 					}else{
 						adjustableConfig.reactions[`${rows[i].name}`] = parseInt(rows[i].currentval);
 					}
-				}else //Status of the quoting system
+				}else
 				if (rows[i].category === 'quotes'){
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.quotes[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
 					}else{
 						adjustableConfig.quotes[`${rows[i].name}`] = parseInt(rows[i].currentval);
 					}
-				}else //Status of misc commands/events
+				}else
 				if (rows[i].category === 'misc'){
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.misc[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
 					}else{
 						adjustableConfig.misc[`${rows[i].name}`] = parseInt(rows[i].currentval);
 					}
-				}else //Status of music commands
+				}else
 				if (rows[i].category === 'music'){
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.music[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
 					}else{
 						adjustableConfig.music[`${rows[i].name}`] = parseInt(rows[i].currentval);
 					}
-				}else //Status of api commands/events
+				}else
 				if (rows[i].category === 'apis'){
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.apis[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
@@ -217,17 +190,11 @@ function loadConfigFromDB(){
 			}
 		}
 	})
-
-	//Close connection
 	setupCon.end();
-
-	//Clearing any possible remnants of data
-	setupCon = undefined;
-	delete setupCon;
+	setupCon = null;
 	return;
 }
 
-//Checks if "toCheck" is a bool or not
 function checkIfBool(toCheck){
 	let val = false;
 	if (toCheck === 'true'){
@@ -236,12 +203,8 @@ function checkIfBool(toCheck){
 	return val;
 }
 
-//Loads custom commands from the database
 function loadCustomCommandsFromDB(){
-	//Clear list - allows this to be called during runtime
 	customCommandList = [];
-
-	//Setup DB Connection
 	var loadCustCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -251,8 +214,6 @@ function loadCustomCommandsFromDB(){
 	loadCustCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	loadCustCon.query(`SELECT * FROM CustomCommands`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
@@ -263,23 +224,13 @@ function loadCustomCommandsFromDB(){
 			}
 		}
 	});
-
-	//Close Connection
 	loadCustCon.end();
-
-	//Clearing any possible remnants of data
-	loadCustCon = undefined;
-	delete loadCustCon;
-
+	loadCustCon = null;
 	return;
 }
 
-//Essentially the same thing, except these cannot be edited/created using the `createcommand` and `deletecommand` commands
 function loadPermanentCommandsFromDB(){
-	//Clear list - allows this to be called during runtime
 	miniCommands = [];
-
-	//Setup DB Connection
 	var loadCustCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -289,8 +240,6 @@ function loadPermanentCommandsFromDB(){
 	loadCustCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	loadCustCon.query(`SELECT * FROM permanentCommands`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
@@ -301,22 +250,13 @@ function loadPermanentCommandsFromDB(){
 			}
 		}
 	});
-
-	//Close Connection
 	loadCustCon.end();
-
-	//Clearing any possible remnants of data
-	loadCustCon = undefined;
-	delete loadCustCon;
-
+	loadCustCon = null;
 	return;
 }
 
 function loadReactionRolesFromDB(){
-	//Clear list - allows this to be called during runtime
 	reactionRoles = [];
-
-	//Setup DB Connection
 	var loadReactCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -326,8 +266,6 @@ function loadReactionRolesFromDB(){
 	loadReactCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	loadReactCon.query(`SELECT * FROM reactionRoles`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
@@ -338,20 +276,14 @@ function loadReactionRolesFromDB(){
 			}
 		}
 	});
-
-	//Close Connection
 	loadReactCon.end();
-
-	//Clearing any possible remnants of data
-	loadReactCon = undefined;
-	delete loadReactCon;
-
+	loadReactCon = null;
 	return;
 }
 
 //Altering Config
+
 async function updateDBConfig(message,args){
-	//Setup DB Connection
 	var alterConfigCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -366,12 +298,9 @@ async function updateDBConfig(message,args){
 	let commandName = args[0];
 	let newValue = args[1];
 
-	//Main Query
 	await alterConfigCon.query(`SELECT * FROM config`, (err,rows) =>{
 		let notFound = true;
 		let type;
-
-		//Loop through list to try find command specified for modifying
 		for (i=0;i<rows.length;i++){
 			if (rows[i].name === commandName){
 				notFound = false;
@@ -383,8 +312,6 @@ async function updateDBConfig(message,args){
 		if (notFound){
 			message.reply("Config option not found!");
 		}else{
-
-			//Check if new value is appropriate
 			if (type === 'int'){
 				newValue = parseInt(newValue);
 				if (newValue !== NaN){
@@ -398,7 +325,6 @@ async function updateDBConfig(message,args){
 			}
 
 			if (correctInput){
-				//update DB
 				alterConfigCon.query(`update config set currentval='${newValue}' where name='${commandName}'`, (err) => {
 					if (err){
 						message.channel.send("ERROR, please check you entered the correct information!");
@@ -412,29 +338,20 @@ async function updateDBConfig(message,args){
 	});
 
 	setTimeout(function(){
-		//Close Connection
 		alterConfigCon.end();
-		//Clearing any possible remnants of data
-		alterConfigCon = undefined;
-		delete alterConfigCon;
+		alterConfigCon = null;
 	},3000);
 
-	//Update config
-	// - Loads new values into the config variables
-	// - Updates in discord showcase
 	loadConfigFromDB();
 
 	return;
 }
 
-//#####Custom Commands#####
+//Custom Commands
 
-//Loading Custom Commands
 function customCommands(message,command){
 	if (customCommandList.length < 1){return;}
 	else{
-		//Loop through list to find if the command specified is in it
-		//Could add a response in the form of doing a if ( .indexOf() === -1) and giving an appropriate response to the user 
 		for (i=0;i<customCommandList.length;i++){
 			if (customCommandList[i].command === command){
 				message.channel.send(customCommandList[i].response);
@@ -443,7 +360,6 @@ function customCommands(message,command){
 	}
 	return;
 }
-//Same as the above function but for the other type
 function permanentCommands(message,command){
 	if (miniCommands.length < 1){return;}
 	else{
@@ -456,9 +372,7 @@ function permanentCommands(message,command){
 	return;
 }
 
-//Creating a user created command
 async function createCustomCommands(message,args){
-	//Setup DB Connection
 	var customCommand = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -468,24 +382,15 @@ async function createCustomCommands(message,args){
 	customCommand.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//M<ain Query - Inserting command to DB
 	customCommand.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
-
-	//Close Connection
 	await customCommand.end();
-
 	setTimeout(function(){
-		//Clearing any possible remnants of data
-		customCommand = undefined;
-		delete customCommand;
-		//Reload custom commands
+		customCommand = null;
 		loadCustomCommandsFromDB();
 	},900);
 	return;
 }
 
-//Removing a user created command
 async function deleteCustomCommands(message,args){
 	let commandToDelete = "";
 	if (Array.isArray(args)){
@@ -493,8 +398,6 @@ async function deleteCustomCommands(message,args){
 	}else{
 		commandToDelete = args;
 	}
-
-	//Setup DB Connection
 	var deletecustomCommand = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -504,28 +407,18 @@ async function deleteCustomCommands(message,args){
 	deletecustomCommand.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query
 	deletecustomCommand.query(`delete from CustomCommands where command='${commandToDelete}'`);
-
-	//Close Connection
 	await deletecustomCommand.end();
-
 	setTimeout(function(){
-		//Clearing any possible remnants of data
-		deletecustomCommand = undefined;
-		delete deletecustomCommand;
-		//Reload custom commands
+		deletecustomCommand = null;
 		loadCustomCommandsFromDB();
 	},900);
 	return;
 }
 
-//####Reaction Roles#####
+//Reaction Roles
 
-//Creating a custom reaction role
 async function createReactionRole(message,name,roleID){
-	//Setup DB Connection
 	var reactionRolesCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -535,30 +428,18 @@ async function createReactionRole(message,name,roleID){
 	reactionRolesCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query - Inserting new reaction role to DB
+	console.log(`insert into reactionRoles values ('${name}' , '${roleID}' )`);
 	reactionRolesCon.query(`insert into reactionRoles values ('${name}' , '${roleID}' )`);
-
-	//Close Connection
 	await reactionRolesCon.end();
-
 	setTimeout(function(){
-		//Clearing any possible remnants of data
-		reactionRolesCon = undefined;
-		delete reactionRolesCon;
-		//Reloading reaction roles
+		reactionRolesCon = null;
 		loadReactionRolesFromDB();
 	},900);
-
-	//Feedback for user
 	message.channel.send("Role added!");
-
 	return;
 }
 
-//Removing a custom reaction role
 async function deleteReactionRole(message,name){
-	//Setup DB Connection
 	var reactionRolesCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -568,37 +449,21 @@ async function deleteReactionRole(message,name){
 	reactionRolesCon.connect(err => {
 		if(err) console.log(err);
 	});
-
-	//Main Query - Removing reaction role from DB
 	reactionRolesCon.query(`delete from reactionRoles where emojiName='${name}'`);
-
-	//Close Connection
 	await reactionRolesCon.end();
-
 	setTimeout(function(){
-		//Clearing any possible remnants of data
-		reactionRolesCon = undefined;
-		delete reactionRolesCon;
-		//Reloading reaction roles
+		reactionRolesCon = null;
 		loadReactionRolesFromDB();
 	},900);
-
-	//Feedback for user
 	message.channel.send("Role removed!");
-
 	return;
 }
 
 //////////////////////////////////////////////////////////////////XP
 
 function updateleaderboard(msg){
-	//Set Delay for interval
 	let delay = 30000;
-
-	//Start interval
-	var interval = setInterval(function(){
-
-		//Setup DB Connection
+	setInterval(function(){
 		var con = mysql.createConnection({
 			host : mysqlLoginData.host,
 			user : mysqlLoginData.user,
@@ -609,30 +474,18 @@ function updateleaderboard(msg){
 		con.connect(err => {
 			if(err) console.log(err);
 		});
-
-		//Main Query
 		con.query(`SELECT * FROM xp`, (err,rows) =>{
-			//Sort rows (can be done on DB sql query end, i simply haven't changed the code here because im lazy)
 			rows = sortingrows(rows);
-
-			//Make sure there are not over X rows, else we run into character limit per message issues
 			let length = 0;
 			if (rows.length<leaderboardlimits.listsizelimit){
 				length = rows.length;
 			}else{
 				length = leaderboardlimits.listsizelimit; 
 			}
-
-			//Init final LB message
-			//Set syntax highlighting colour to diff
 			let finalmsg = "```diff\n"
 							+"-XP LeaderBoard\n"
 							+"+Rank  Username          level     XP\n";
-
-			//Loop through rows array
 			for (i=0;i<length;){
-
-				//Set their rank (1-30)
 				let rank = (i+1).toString();
 				if (rank.length > leaderboardlimits.rank){
 					conosle.log("EXPAND SIZE");
@@ -640,29 +493,20 @@ function updateleaderboard(msg){
 					let x = leaderboardlimits.rank - rank.length;
 					rank = rank + new Array(x + 1).join(' ');
 				}
-
 				let user;
 				let username = "";
-
-				//Try fetch their in discord username
-				//on fail (due to user not being in server anymore) simply use their ID instead
 				try{
 					user = bot.users.cache.get(rows[i].id);
 					username = user.username;
 				}catch(e){
 					username = rows[i].id;
 				}
-
-				//Trim/extend username char length to match character limit
 				if (username.length > leaderboardlimits.username){
 					username = username.slice(0,leaderboardlimits.username);
 				}else{
 					let x = leaderboardlimits.username - username.length;
 					username = username + new Array(x + 1).join(' ');
 				}
-
-				//Get user level
-				//Trim/extend level char length to match character limit
 				let level = rows[i].level.toString();
 				if (level.length > leaderboardlimits.level){
 					level.slice(0,leaderboardlimits.level);
@@ -670,9 +514,6 @@ function updateleaderboard(msg){
 					let x = leaderboardlimits.level - level.length;
 					level = level + new Array(x + 1).join(' ');
 				}
-
-				//Get user Xp
-				//Trim/extend Xp char length to match character limit
 				let xp = rows[i].xp.toString();
 				if (xp.length > leaderboardlimits.xp){
 					score.slice(0,leaderboardlimits.xp);
@@ -680,28 +521,17 @@ function updateleaderboard(msg){
 					let x = leaderboardlimits.xp - xp.length;
 					xp = xp + new Array(x + 1).join(' ');
 				}
-
-				//Append to final LB message
 				finalmsg = finalmsg + `${rank} | ${username} | ${level} | ${xp}\n`;
-
-				//Increment i
 				i++;
 			}
-
-			//Append "```" to end embed
 			finalmsg = finalmsg+"```";
-
-			//Fetch Message to update Leaderboard
-			bot.channels.cache.get("630783753400352768").messages.fetch("675898610180816928").then(msg => {msg.edit(finalmsg);});
+			bot.channels.cache.get(config.serverInfo.channels.xpLeaderboard).messages.fetch(config.serverInfo.messages.xpLeaderboard).then(msg => {msg.edit(finalmsg);});
 		});
-		//Close Connection
 		con.end();
 	},delay);
 }
-//Sort LB XP rows
-function sortingrows(rows){
 
-	//Sort rows based off level
+function sortingrows(rows){
 	for (var i = 1; i < rows.length; i++){
     	for (var j = 0; j < i; j++){
        		if (parseInt(rows[i].level) < parseInt(rows[j].level)){
@@ -711,11 +541,8 @@ function sortingrows(rows){
     		}
     	}
 	}
-
-	//Sort rows based off xp
 	for (var i = 1; i < rows.length; i++){
     	for (var j = 0; j < i; j++){
-    		//Will only sort if level is the same
        		if ((parseInt(rows[i].level) === parseInt(rows[j].level)) & (parseInt(rows[i].xp) < parseInt(rows[j].xp))){
     	    var x = rows[i];
     	   	rows[i] = rows[j];
@@ -723,16 +550,6 @@ function sortingrows(rows){
     		}
     	}
 	}
-
-	//Clearing any possible remnants of data
-	i = undefined;
-	j = undefined;
-	x = undefined;
-	delete x;
-	delete j;
-	delete i;
-
-	//Flip rows
 	return rows.reverse();
 }
 
@@ -748,7 +565,6 @@ function levelsystem(xp,currentlevel){
 	}
 }
 
-//generate random XP value
 function genXp(){
 	return Math.floor(Math.random()*(xpdetails.max+xpdetails.min+1))+xpdetails.max;
 }
@@ -771,10 +587,9 @@ function rolecheckformutes(member,msg){
 	return response;
 }
 
-//Mute functions have not been given failed checks yet
 async function mute(member,message){
 	try{
-		member.roles.add("460512430510964766");
+		member.roles.add(config.serverInfo.roles.muted);
 		message.channel.send(member+" has been muted");
 	}catch (e) {
 		console.log(e);
@@ -785,20 +600,17 @@ async function mute(member,message){
 
 async function unmute(member,message){
 	try{
-		member.roles.remove("460512430510964766");
+		member.roles.remove(config.serverInfo.roles.muted);
 		message.channel.send(member+" has been unmuted");
 	}catch (e) {
 		message.channel.send("Can't unmute "+member+"right now, something doesnt seem to be working");
 	}
 	return;
 }
-
 ///////////////////////////////////////////////////////////////GETTING A NUMBER
-// 0 - max (0 Inc, max exc)
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 };
-// min - max (min inc, max exc)
 function getRandomBetweenInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -806,7 +618,6 @@ function getRandomBetweenInt(min, max) {
 };
 //////////////////////////////////////////////////////////////level check
 function levelchecker(msg,reqlvl){
-	//Setup DB Connection
 	var lvlcon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -817,10 +628,7 @@ function levelchecker(msg,reqlvl){
 	lvlcon.connect(err => {
 		if(err) console.log(err);
 	});
-
 	let response = true
-
-	//Main Query
 	lvlcon.query(`SELECT * FROM xp WHERE id='${msg.author.id}'`, (err,rows) => {
 		if (rows.length < 1){
 			response = false;
@@ -828,21 +636,13 @@ function levelchecker(msg,reqlvl){
 			response = false;
 		}
 	});
-
-	//Close Connection
 	lvlcon.end()
-
-	//Clearning any possible remnant data
-	lvlcon = undefined;
-	delete lvlcon;
-
-
+	lvlcon = null;
 	return response;
 }
 
 ///////////////////////////////////////////////////////////////RANDOM RESPONSES
 function randomgif(message,content){
-	//get random number to randomize chance of occuring
 	let yay = getRandomInt(5);
 	if ( yay === 1){
 		if (content.includes("roll")){
@@ -876,7 +676,6 @@ function randomgif(message,content){
 	return;
 }
 
-//All reactions based on key words
 function randomresponse(message,content,serverid){
 	if (content.includes("bot")){
 		message.react("👋");
@@ -1072,7 +871,6 @@ function randomresponse(message,content,serverid){
 	return;
 }
 
-//Random pirate response to given content
 function randompirateshit(msg,content){
 	if (content.includes("yarr")){
 		msg.channel.send("Yarr");
@@ -1119,12 +917,8 @@ function randompirateshit(msg,content){
 
 /////////////////////////////////////////////Rankcard Generation
 
-//STILL FRESH AND WIP, VERY MUCH NOT OPTIMIZED
-//For example there is no need to query data twice in the event of a successful match
-
 function rankcardCreation(message){
 
-	//Setup DB Connection
 	var conCheckRankcard = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -1136,19 +930,16 @@ function rankcardCreation(message){
 		if(err) console.log(err);
 	});
 
-	//Main Query
 	conCheckRankcard.query(`SELECT * FROM inventoryGT WHERE ID = '${message.author.id}'`, (err,rows) => {
 		if(err) console.log(err);
 		if(rows.length < 1){
-			createDefaultRankCard(message); //placeholder
+			createDefaultRankCard(message);
 		}else if(rows.length > 1){
-			createDefaultRankCard(message); //placeholder
+			createDefaultRankCard(message);
 		}else{
 			let inventory = JSON.parse(rows[0].inventory);
 			let notFound = true;
 			let shipName = "";
-
-			//Loop through inventory to find if they have a ship of class `largeships`
 			for (i=0; i < inventory.length; i++){
 				if (inventory[i].type === "largeShips"){
 					shipName = inventory[i].name;
@@ -1157,10 +948,8 @@ function rankcardCreation(message){
 			}
 
 			if (notFound){
-				//If they do not own a vesssel of `largeships` class
 				createDefaultRankCard(message);
 			}else{
-				//If they do own a vesssel of `largeships` class
 				createRankCanvas(message.channel,message.member,shipName,message.author.id);
 			}
 
@@ -1168,20 +957,15 @@ function rankcardCreation(message){
 	});
 
 	setTimeout(function(){
-		//Close Connection
 		conCheckRankcard.destroy();
-		//Clear any remaining data
-		conCheckRankcard = undefined;
-		delete conCheckRankcard;
+		conCheckRankcard = null;
 	},3000);
 
 	return;
 }
 
-//Old Default rankcard
 function createDefaultRankCard(message){
 
-	//Setup DB Connection
 	var conDefaultRankcard = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -1193,24 +977,18 @@ function createDefaultRankCard(message){
 		if(err) console.log(err);
 	});
 
-	//Main Query
 	conDefaultRankcard.query(`SELECT * FROM xp WHERE id = '${message.author.id}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
 		let level;
-
-		//Clac XP needed for rankup
 		if (parseInt(rows[0].level) === 0){
 			xpneeded = 400;
 		}else{
 			xpneeded = xpdetails.levelupfactor * parseInt(rows[0].level);
 		}
 
-		//Current user XP + Level
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-
-		//Check which largeship class they own to specify which background image to use, will require modification to allow customization later on
 		conDefaultRankcard.query(`SELECT * FROM inventoryGT WHERE ID = ${message.author.id}`, (err,rows) => {
 			let rankcard = new Discord.MessageEmbed()
 				.setColor('#0099ff')
@@ -1219,10 +997,8 @@ function createDefaultRankCard(message){
 				.setThumbnail(`${message.author.displayAvatarURL()}`)
 				.setTimestamp();
 			if (rows.length >0){
-				//If they are in the DB
 				rankcard.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}\n Giraffe Coins: ${parseFloat(rows[0].giraffeCoins).toFixed(2)}`);
 			}else{
-				//If they are new to the server and have not earned any coins yet
 				rankcard.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}`);
 			}
 			message.channel.send(rankcard);
@@ -1230,17 +1006,12 @@ function createDefaultRankCard(message){
 	});
 
 	setTimeout(function(){
-		//Close Connection
 		conDefaultRankcard.destroy();
-		//Clear any remaining data
-		conDefaultRankcard = undefined;
-		delete conDefaultRankcard
+		conDefaultRankcard = null;
 	},3000);
 }
 
-//New WIP Rankcard system
 async function createRankCanvas(channel,member,ship, ID){
-	//Setup DB Connection
 	var conCustomCanvas = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -1252,45 +1023,34 @@ async function createRankCanvas(channel,member,ship, ID){
 		if(err) console.log(err);
 	});
 
-	//Main Query
 	conCustomCanvas.query(`SELECT * FROM xp WHERE id = '${ID}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
 		let level;
-
-		//Clac XP needed for rankup
 		if (parseInt(rows[0].level) === 0){
 			xpneeded = 400;
 		}else{
 			xpneeded = xpdetails.levelupfactor * parseInt(rows[0].level);
 		}
 
-		//Current user XP + Level
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-
 		conCustomCanvas.query(`SELECT * FROM inventoryGT WHERE ID = ${ID}`, (err,rows) => {
 			if (rows.length > 0 ){
-				//If they are in the DB
 				creatingCanvas(channel, member, ship, level, rnxp, xpneeded, rows[0].giraffeCoins);
 			}else{
-				//If they are new to the server and have not earned any coins yet
 				creatingCanvas(channel, member, ship, level, rnxp, xpneeded, "N/A");
 			}
 		});
 	});
 
 	setTimeout(function(){
-		//Close Connection
 		conCustomCanvas.destroy();
-		//Clear any remaining data
-		conCustomCanvas = undefined;
-		delete conCustomCanvas;
+		conCustomCanvas = null;
 	},3000);
 	return;
 }
 
-//Still heavily WIP, will likley change on a regular basis
 async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
 
 	let canvas = Canvas.createCanvas(1920,950);
@@ -1417,7 +1177,7 @@ function ExchangeRates(message,currency){
 		if (response.result === "error"){
 			message.channel.send("Please enter a valid currency, use `;help ExchangeRates` for a list");
 		}else{
-			text = JSON.stringify(response.rates).replace(/,/g,"\n");
+			let text = JSON.stringify(response.rates).replace(/,/g,"\n");
 			message.author.send("```"+text+"```");
 		}
 	});
@@ -1583,8 +1343,8 @@ async function translating(msg,args,lang1,lang2){
 		args[i] = encodeURIComponent(args[i]);
 		i++;
 	}
-	query = `https://translate.yandex.net/api/v1.5/tr.json/translate?lang=${lang1}-${lang2}&key=${config.apiKeys.yandex}&text=${args.join('%20')}`;
-	translation = await fetch(query).then(response => response.json()).then(result =>{
+	let query = `https://translate.yandex.net/api/v1.5/tr.json/translate?lang=${lang1}-${lang2}&key=${config.apiKeys.yandex}&text=${args.join('%20')}`;
+	let  translation = await fetch(query).then(response => response.json()).then(result =>{
 		return result.text;
 	});
 	msg.channel.send(translation);
@@ -1644,25 +1404,18 @@ async function playAudio(message,args,voiceChannel){
 }
 
 function BwServerStatus(){
-	if(!serverStatus.active){
-		if (serverinterval){
-			clearInterval(serverinterval);
-			serverStatus.msg = null;
-		}
-		return;
-	}else{
 	if(serverStatus.msg === null){
 		bot.channels.cache.get(serverStatus.channel).send("Getting Updates").then((msg)=>{
 			serverStatus.msg = msg;
 		});
 	}
-	var serverinterval = setInterval(function(){
+	setInterval(function(){
   		fetch(`https://api.steampowered.com/IGameServersService/GetServerList/v1/?key=${config.apiKeys.steam}&format=json&limit=50&filter=\\appid\\420290`).then(res=>res.json()).then(resp=>{ //fetch the server list through the steam API, convert the result into a json object (makes it easier to access)
     		let serverlist = resp.response.servers; 
     			if (typeof serverlist === undefined){
       			console.log("Got an empty response"); 
     		}else{
-    	  		finalmsg = "```markdown\n"; 
+    	  		let finalmsg = "```markdown\n"; 
       			let active = new Array(); 
       			for (i in serverlist){ 
        	 			if(parseInt(serverlist[i].players) > 0){ 
@@ -1671,7 +1424,7 @@ function BwServerStatus(){
       			}
       			active = serversort(active); 
       			for (i in active){
-       			 	serverinfo = `[${active[i].players}/${active[i].max_players}][${active[i].name.split("d::")[0].replace(/]/g,"\\").substr(8)}]\n`;
+       			 	let serverinfo = `[${active[i].players}/${active[i].max_players}][${active[i].name.split("d::")[0].replace(/]/g,"\\").substr(8)}]\n`;
        	 			finalmsg = finalmsg+serverinfo;
       			}
       			finalmsg = finalmsg + "```";
@@ -1679,7 +1432,6 @@ function BwServerStatus(){
     		}
   		});
   	},5000);
-	}
 }
 
 function serversort(servers){
@@ -1692,12 +1444,6 @@ function serversort(servers){
     		}
     	}
 	}
-	i = undefined;
-	j = undefined;
-	x = undefined;
-	delete i;
-	delete j;
-	delete x;
 	return servers.reverse(); //return the sorted array
 }
 
@@ -1746,7 +1492,7 @@ function jeanieAPI(message,args){
 
 function BaconIpsum(message){
 	let opt = getRandomInt(2);
-	content = "";
+	let content = "";
 	if (opt === 0){
 		content += "https://baconipsum.com/api/?type=meat-and-filler";
 	}else
@@ -1871,11 +1617,6 @@ function convertToRoman(num) {
     str += i.repeat(q);
   }
 
-  i = undefined;
-  q = undefined;
-  delete i;
-  delete q;
-
   return str;
 }
 
@@ -1998,8 +1739,9 @@ async function getBlackwakeStats(message,args){
 
 				}
 				if (args[0] === "overview"){
+					let achieves = "";
 					if (JSON.stringify(response).includes("achievements")){
-						achieves = response.playerstats.achievements.length;
+						achieves = response.playerstats.achievements.length.toString();
 					}else{
 						achieves = "NA";
 					}
@@ -2428,8 +2170,7 @@ function updateShopWindow(){
 	
 	setTimeout(function(){
 		conShopWindow.destroy();
-		conShopWindow = undefined;
-		delete conShopWindow;
+		conShopWindow = null;
 		return;
 	},9000);
 }
@@ -2518,8 +2259,7 @@ function displayRichestUsers(){
 	
 	setTimeout(function(){
 		conRichestUsers.destroy();
-		conRichestUsers = undefined;
-		delete conRichestUsers;
+		conRichestUsers = null;
 	},6000);
 }
 function giveUserMoney(amount,ID){
@@ -2547,8 +2287,7 @@ function giveUserMoney(amount,ID){
 
 	setTimeout(function(){
 		conUserMoney.destroy();
-		conUserMoney = undefined;
-		delete conUserMoney;
+		conUserMoney = null;
 	},3000);
 	return;
 }
@@ -2630,8 +2369,8 @@ function purchaseItem(ID,item,message){
 						if (parseInt(rows2[0].value) > 5000){
 							let logEmbed = new Discord.MessageEmbed()
 								.setTitle("Transaction Occured")
-								.setDescription(`${itemInfo.name}\nPurchased by <@${message.author}> for ${rows2[0].value}GC`)
-							bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(fancyPurchaseEmbed);
+								.setDescription(`${itemInfo.name}\nPurchased by <@${message.author}> for ${rows2[0].value}GC`);
+							bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(logEmbed);
 						}
 						updateShopWindow();
 					}
@@ -2642,8 +2381,7 @@ function purchaseItem(ID,item,message){
 
 	setTimeout(function(){
 		conpurchase.destroy();
-		conpurchase = undefined;
-		delete conpurchase;
+		conpurchase = null;
 	},3000);
 }
 
@@ -2701,8 +2439,7 @@ function searchForItem(item,message){
 
 	setTimeout(function(){
 		conSearch.destroy();
-		conSearch = undefined;
-		delete conSearch;
+		conSearch = null;
 	},3000);
 }
 
@@ -2767,8 +2504,7 @@ function sellItem(ID,item,message){
 
 	setTimeout(function(){
 		conSellItem.destroy();
-		conSellItem = undefined;
-		delete conSellItem;
+		conSellItem = null;
 	},3000);
 }
 
@@ -2812,8 +2548,7 @@ async function listInventory(ID,message){
 
 	setTimeout(function(){
 		conlistInventory.destroy();
-		conlistInventory = undefined;
-		delete conlistInventory;
+		conlistInventory = null;
 	},3000);
 }
 
@@ -2876,8 +2611,7 @@ function giftUserItem(gifterID,reciever,item,message){
 
 	setTimeout(function(){
 		conGiftUser.destroy();
-		conGiftUser = undefined;
-		delete conGiftUser;
+		conGiftUser = null;
 	},3000);
 }
 
@@ -2928,8 +2662,7 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 
 	setTimeout(function(){
 		conGiftUserCoins.destroy();
-		conGiftUserCoins = undefined;
-		delete conGiftUserCoins;
+		conGiftUserCoins = null;
 	},3000);
 	return;
 }
@@ -2980,8 +2713,7 @@ function gambleMoney(amount,message){
 	});
 	setTimeout(function(){
 		conGamble.destroy();
-		conGamble = undefined;
-		delete conGamble;
+		conGamble = null;
 	},3000);
 	return;
 }
@@ -3040,8 +2772,7 @@ function customizeShip(ID,args,message){
 
 	setTimeout(function(){
 		conCustomShip.destroy();
-		conCustomShip = undefined;
-		delete conCustomShip;
+		conCustomShip = null;
 	},3000);
 }
 
@@ -3181,7 +2912,7 @@ bot.on("message", async message => {
 	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && adjustableConfig.misc.SupportTickets === true){
 		let content = message.content;
 		let d = new Date();
-		let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear()
+		let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
 		message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
 			{
 				id : config.serverInfo.serverId,
@@ -3262,8 +2993,7 @@ bot.on("message", async message => {
 
 			setTimeout(function(){
 				con.destroy();
-				con = undefined;
-				delete con;
+				con = null;
 			},3000);
 
 			setTimeout(function(){
@@ -3279,8 +3009,7 @@ bot.on("message", async message => {
 				con.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
 				setTimeout(function(){
 					con.destroy();
-					con = undefined;
-					delete con;
+					con = null;
 				},3000);
 			}, 180000);
 		}catch (e){
@@ -3289,7 +3018,7 @@ bot.on("message", async message => {
 	}
 
 	//Old larry reference (RIP Larry)
-	if (message.content.startsWith("...") & message.content.length === 3){
+	if (message.content.startsWith("...") && message.content.length === 3){
 		message.react("452064991688916995");
 	}
 
@@ -3692,7 +3421,6 @@ bot.on("message", async message => {
 			message.channel.send("I currently have help for:\n`"
 				+`${supportedQueries.join("` `")}`+"`");
 		}
-		delete supportedQueries;
 	}
 
 	//Urban dictionary
@@ -3835,7 +3563,6 @@ bot.on("message", async message => {
 			if (adjustableConfig.apis.randomUselessFactAPI){
 				RandomUselessFactAPI(message);
 			}
-			delete file;
 		}else{
     		message.reply("You are not a high enough level yet to use this command, you must be level 4, use ;rankcard to see your current level");
     	}
@@ -3948,7 +3675,7 @@ bot.on("message", async message => {
 		if (min >= max){
 			message.channel.send("Please use a maximum value greater than the minimum.");
 		}else
-		if (isNaN(min)){z
+		if (isNaN(min)){
 			message.channel.send("Please enter a number.");
 		}else
 		if (parseInt(args[1]) > 1){
@@ -4007,7 +3734,7 @@ bot.on("message", async message => {
 			if (args[0]){
 				rate = args[0].toUpperCase();
 			}else{
-				rate = "GBP"
+				rate = "GBP";
 			}
 			ExchangeRates(message,rate);
 		}else{
@@ -4189,7 +3916,7 @@ bot.on("message", async message => {
 				serverDeaf = userInformation.serverDeaf;
 				serverMute = userInformation.serverMute;
 
-				displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar)
+				displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
 
 			}else{
 				if (!message.mentions.users.size) {
@@ -4210,7 +3937,7 @@ bot.on("message", async message => {
 					serverDeaf = userInformation.serverDeaf;
 					serverMute = userInformation.serverMute;
 
-					displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar)
+					displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
 				}
 			}
 		}
@@ -4357,8 +4084,6 @@ bot.on("message", async message => {
 							let achievements = response.playerstats.achievements;
 							let stats = response.playerstats.stats;
 
-							let temparray = [];
-
 							let unassignedUsed = true;
 							let unassignedKills = true;
 					
@@ -4497,8 +4222,7 @@ bot.on("message", async message => {
 
 		setTimeout(function(){
 			conCheckIfInTable.end();
-			conCheckIfInTable = undefined;
-			delete conCheckIfInTable;
+			conCheckIfInTable = null;
 		},3000);
 		TrackingCommand = false;
 	}
@@ -4611,7 +4335,7 @@ bot.on("message", async message => {
 
 	if (command === "beg"){
 		let num = getRandomInt(300);
-		if (num = 243){
+		if (num == 243){
 			let amount = getRandomInt(20);
 			giveUserMoney(parseFloat(amount).toFixed(2) * 1);
 			message.channel.send(`Considering how desperate you are, I think I can spare you ${amount}GC, consider yourself lucky.`);
@@ -4830,6 +4554,16 @@ bot.on('raw', async event => {
 // });
 
 bot.on('error', console.error);
-bot.on("warn", (e) => {console.warn(e); e = undefined; delete e;});
+bot.on("warn", (e) => console.warn(e));
+
+bot.on("messageDelete", function(message){
+	let msgDeleteEmbed = new Discord.MessageEmbed()
+		.setTitle(`${message.content}`)
+		.setDescription(`${message.author}\n${message.channel}`)
+		.setTimestamp();
+    bot.channels.cache.get("732318686186045440").send(msgDeleteEmbed);
+    message = null;
+});
+
 
 bot.login(config.token);
