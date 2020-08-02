@@ -4534,9 +4534,11 @@ bot.on('error', console.error);
 bot.on("warn", (e) => console.warn(e));
 
 bot.on("messageDelete", function(message){
+	if (message.channel.id === "562013905426317322" || message.channel.id === "522864242626658305") return;
 	let msgDeleteEmbed = new Discord.MessageEmbed()
-		.setTitle(`${message.content}`)
-		.setDescription(`${message.author}\n${message.channel}`)
+		.setTitle(`${message.author}`)
+		.setDescription(`${message.content}`)
+		.setFooter(`From: ${message.channel}`)
 		.setTimestamp();
     bot.channels.cache.get("732318686186045440").send(msgDeleteEmbed);
     message = null;
