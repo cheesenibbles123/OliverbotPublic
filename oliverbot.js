@@ -314,7 +314,7 @@ async function updateDBConfig(message,args){
 		}else{
 			if (type === 'int'){
 				newValue = parseInt(newValue);
-				if (newValue !== NaN){
+				if (!isNaN(newValue)){
 					correctInput = true;
 				}
 			}else
@@ -3022,6 +3022,8 @@ bot.on("message", async message => {
 		message.react("452064991688916995");
 	}
 
+	let TrackingCommand = false;
+
 	//Ping Oliverbot
 	if (message.content.startsWith("<@!556545106468012052>")){
 		TrackingCommand = true;
@@ -3084,8 +3086,6 @@ bot.on("message", async message => {
 	command = command.toLowerCase();
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
-
-	let TrackingCommand = false;
 
 	//MEMEZ
 	if (command === "delete-administrators"){
