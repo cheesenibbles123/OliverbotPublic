@@ -1,6 +1,7 @@
 {
 	"token": "INSERTTOKEN",
 	"prefix": "INSERTPREFIX",
+	"ownerId" : "INSERTOWNERDISCORDID",
 	"apiKeys":{
 		"steam":"INSERTSTEAMAPIKEY",
 		"nasa":"INSERTNASAAPITKEY",
@@ -15,6 +16,7 @@
 	"serverInfo" :{
 		"serverId" : "INSERTSERVERID",
 		"channels": {
+			"xpLeaderboard" : "630783753400352768",
 			"loggingChannel" : "INSERTCHANNELID",
 			"supportTicketChannel" : "INSERTCHANNELID",
 			"quotes" : "INSERTCHANNELID",
@@ -30,6 +32,7 @@
 			}
 		},
 		"messages" : {
+			"xpLeaderboard" : "675898610180816928",
 			"economy" : {
 				"mainShopWindowMessage" : "INSERTMESSAGEID",
 				"richestUsersMessage" : "INSERTMESSAGEID",
@@ -39,7 +42,8 @@
 		"roles" : {
 			"serverAdministrator" : "INSERTROLEID",
 			"serverModerator" : "INSERTROLEID",
-			"serverBooster" : "INSERTROLEID"
+			"serverBooster" : "INSERTROLEID",
+			"muted" : "INSERTROLEID"
 		}
 	}
 }

@@ -2442,7 +2442,7 @@ function sellItem(ID,item,message){
 		if(rows.length < 1){
 			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
 		}else if(rows.length > 1){
-			message.channel.send("Something has gone wrong, please message <@337541914687569920>");
+			message.channel.send(`Something has gone wrong, please message <@${config.ownerId}>`);
 		}else{
 			let inventory = JSON.parse(rows[0].inventory);
 			let notFound = true;
@@ -2552,7 +2552,7 @@ function giftUserItem(gifterID,reciever,item,message){
 		if(rows.length < 1){
 			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
 		}else if(rows.length > 1){
-			message.channel.send("Something has gone wrong, please message <@337541914687569920>");
+			message.channel.send(`Something has gone wrong, please message <@${config.ownerId}>`);
 		}else{
 			let inventory = JSON.parse(rows[0].inventory);
 			let notFound = true;
@@ -2840,9 +2840,9 @@ bot.on("ready", () => {
 	// }, 20000);
 	LoadDataFromDatabase();
 
-	setInterval(() =>{
-		BwServerStatus();
-	}, 3000);
+	//setInterval(() =>{
+	//	BwServerStatus();
+	//}, 3000);
 	setInterval(() =>{
 		ISSLocation();
 	}, 10000);
@@ -3929,7 +3929,7 @@ bot.on("message", async message => {
 		}
 	}
 
-	if (command === "botinfo" && (message.author.id === "337541914687569920" || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator))){ // if archie or admin
+	if (command === "botinfo" && (message.author.id === config.ownerId || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator))){ // if archie or admin
 			let totalSeconds = (bot.uptime / 1000);
 			let days = Math.floor(totalSeconds / 86400);
 			let hours = Math.floor(totalSeconds / 3600);
@@ -3940,12 +3940,27 @@ bot.on("message", async message => {
 
 			hours -= days * 24;
 			let uptime = `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
-			let ramusage = (parseInt(process.memoryUsage().rss) * (10**-6) ).toString();
+
+			let used = process.memoryUsage();
+			let ramusage = (parseInt(used.rss) * (10**-6) ).toString();
 			ramusage = ramusage.slice(0,ramusage.indexOf(".") + 3);
 
+			let memoryInformation = "";
+			for (let key in used) {
+			  memoryInformation = memoryInformation + `${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB\n`;
+			}
+			if (memoryInformation.length < 1)
+			{
+				memoryInformation = "N/A";
+			}
+
 			let botInfo = new Discord.MessageEmbed()
-				.addField(`Stats`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${isPlaying}`)
+				.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${isPlaying}`)
 				.setTimestamp();
+
+			if (args[0] === "adv"){
+				botInfo.addField("Memory Information", `${memoryInformation}`);
+			}
 
 			message.channel.send(botInfo);
 	}
@@ -4020,7 +4035,7 @@ bot.on("message", async message => {
 
 	//restarts the bot
 	if (command === "restart"){
-		if (message.author.id === "337541914687569920"){
+		if (message.author.id === config.ownerId){
 			await message.channel.send("Restarting....");
 			process.exit();
 		}
@@ -4038,7 +4053,7 @@ bot.on("message", async message => {
 	//VERY DANGEROUS, GIVE ACCESS TO WITH CAUTION
 	//Allows you to run code through a single command
 	if (command === "do"){
-		if (message.author.id === "337541914687569920"){
+		if (message.author.id === config.ownerId){
 			try{
 				let code = args.join(" ");
 				let evaled = eval(code);
