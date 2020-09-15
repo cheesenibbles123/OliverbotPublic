@@ -7,7 +7,7 @@ const fs = require("fs");
 const mysql = require("mysql");
 const btoa = require("btoa");
 const ytdl = require("ytdl-core");
-const Canvas = require('canvas');
+const Canvas = require("canvas");
 
 var serverStatus = {
 	"active" : false,
@@ -21,7 +21,7 @@ var cooldowns = {
 		"allowed" : true,
 		"timeoutLength" : 60000
 	}
-}
+};
 
 var isAllowed = true;
 
@@ -32,18 +32,18 @@ const leaderboardlimits = {
 	"level" : 7,
 	"xp" : 10,
 	"usernameEco" : 20
-}
+};
 
 const xpdetails = {
 	"max" : 0
-}
+};
 
 const mysqlLoginData = {
 	"host":config.databaseInfo.host,
 	"user":config.databaseInfo.user,
 	"password":config.databaseInfo.password,
 	"database":config.databaseInfo.database,
-}
+};
 
 // const userActivitiesLimits = {
 // 	"Name" : 30
@@ -65,7 +65,7 @@ var adjustableConfig = {
 	"apis" : {
 		"checkNudity" : true,
 	}
-}
+};
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 var isPlaying = false;
@@ -189,7 +189,7 @@ function loadConfigFromDB(){
 
 			}
 		}
-	})
+	});
 	setupCon.end();
 	setupCon = null;
 	return;
@@ -279,6 +279,113 @@ function loadReactionRolesFromDB(){
 	loadReactCon.end();
 	loadReactCon = null;
 	return;
+}
+
+function loadFromDatafile(commandUsed,data,message){
+	let file = fs.readFileSync("./datafile.json").toString();
+	file = JSON.parse(file);
+	let p = 0
+	try{
+	switch (commandUsed){
+		case "randomsong":
+			let voiceChannel = message.member.voice.channel;
+			if (!voiceChannel){ return; }
+			else if (isPlaying){ return; }
+			else if (!adjustableConfig.music.generalAudio){
+				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+			}else{
+			let song = file.randomsongs[getRandomInt(file.randomsongs.length)];
+			voiceChannel.join().then(connection => {
+			isPlaying = true;
+			currentDispatcher = connection
+				.play(
+        	 		ytdl(song)
+        		)
+        		.on("finish",() =>{
+        			voiceChannel.leave();
+        			isPlaying = false;
+        		})
+        		.on("error",e=>{
+        			console.error(e);
+       	 			voiceChannel.leave();
+       		 		isPlaying = false;
+       		 	});
+			});
+			}
+			break;
+		case "random":
+			p = getRandomInt(10);
+				if (p === 0){
+					message.channel.send(file.Responses.gif[getRandomInt(file.Responses.gif.length)]);
+				}else
+				if (p === 1){
+					let item =getRandomInt(file.Responses.vid.length);
+					message.channel.send(file.Responses.vid[item]);
+				}else
+				if (p === 2){
+					let item = getRandomInt(file.Responses.img.length);
+					message.channel.send(file.Responses.img[item]);
+				}else
+				//if (p === 3){
+				//	getRandomNonsenseWord();
+				//}else
+				if (p === 3){
+					getRandomMeme(message);
+				}else
+				if (p === 4){
+					getRandomMeme2(message);
+				}else
+				if (p === 5){
+					getRandomGeekJoke(message);
+				}else
+				if (p === 6){
+					getRandomCorpPhrase(message);
+				}else
+				if (p === 7){
+					getRandomBlankMyBlank(message);
+				}else
+				if (p === 8){
+					getRandomStartupIdea(message);
+				}else
+				if (adjustableConfig.apis.randomUselessFactAPI){
+					RandomUselessFactAPI(message);
+				}
+			break;
+		case "quote":
+			message.channel.send(file.quotes[getRandomInt(file.quotes.length+1)]);
+			break;
+		case "nootnoot":
+			message.channel.send(file.nootnoot[getRandomInt(file.nootnoot.length+1)]);
+			break;
+		case "dance":
+			p = getRandomInt(file.Responses.dance.length);
+			message.channel.send(file.Responses.dance[p]);
+			break;
+		case "beg":
+			p = getRandomInt(file.responses.beg.length);
+			message.channel.send(file.repsonses.beg[p]);
+			break;
+		case "dad":
+			message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
+			break;
+		case "insult":
+			let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
+			try{
+				if (typeof data === "undefined"){
+					message.reply("Please ensure you have use the correct syntax.");
+				}else{
+					insult = insult.replace("TARGET",`${data}`);
+					message.channel.send(insult);
+				}
+			}catch(e){
+				message.reply("Please ensure you have use the correct syntax.");
+			}
+	}
+	}catch(e){
+		console.log("###########################################");
+		console.log(e);
+		console.log("###########################################");
+	}
 }
 
 //Altering Config
@@ -1185,10 +1292,10 @@ function Cat(message){
 }
 
 function underground(message){
-	let file = fs.readFileSync("./datafile.json").toString();
-	file = JSON.parse(file);
-	let a = getRandomInt(file.Responses.underground.length+1);
-	message.channel.send(file.Responses.underground[a]);
+	let fileUnderground = fs.readFileSync("./datafile.json").toString();
+	fileUnderground = JSON.parse(fileUnderground);
+	let a = getRandomInt(fileUnderground.Responses.underground.length+1);
+	message.channel.send(fileUnderground.Responses.underground[a]);
 	return;
 }
 
@@ -1757,7 +1864,7 @@ async function getBlackwakeStats(message,args){
 					let BwShipsEmbed = new Discord.MessageEmbed()
 						.setTitle(`${args[1]}`)
 						.addField("Ships",`${ShipStats}`,true)
-						.addField("General",`Wins: ${captainWins}\nUntracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true)
+						.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true)
 						.setTimestamp();;
 					message.channel.send(BwShipsEmbed);
 					setSteamApiNotAllowed();
@@ -2110,23 +2217,49 @@ function updateShopWindow(){
 		let cannons = "";
 		for (i=0;i<rows.length;i++){
 			let itemInfo = JSON.parse(rows[i].info);
-			if (itemInfo.type === "megaShips"){
-				megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "smallShips"){
-				smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "largeShips"){
-				bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "primary"){
-				primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "secondary"){
-				secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "melee"){
-				melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "swivelType"){
-				swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			}else if(itemInfo.type === "cannons"){
-				cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			switch(itemInfo.type){
+				case "megaShips":
+					megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "smallShips":
+					smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "largeShips":
+					bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "primary":
+					primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "secondary":
+					secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "melee":
+					melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "swivelType":
+					swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					break;
+				case "cannons":
+					cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					break;
 			}
+			//if (itemInfo.type === "megaShips"){
+			//	megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "smallShips"){
+			//	smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "largeShips"){
+			//	bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "primary"){
+			//	primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "secondary"){
+			//	secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "melee"){
+			//	melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "swivelType"){
+			//	swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			//}else if(itemInfo.type === "cannons"){
+			//	cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+			//}
 		}
 		setTimeout(function(){
 			newShopListing.addField("Melee",`${melee}`,true)
@@ -2660,17 +2793,34 @@ function gambleMoney(amount,message){
 			message.channel.send("You must gamble a minimum of 5 coins!");
 		}else{
 			let result = getRandomInt(30);
-			if (result < 15){
-				income = -0.7;
-			}else if (result < 23){
-				income = 1;
-			}else if (result < 26){
-				income = 1.2;
-			}else if (result < 28){
-				income = 1.4;
-			}else if (result < 30){
-				income = 2;
+			switch(true){
+				case result < 15:
+					income = -0.7;
+					break;
+				case result < 23:
+					income = 1;
+					break;
+				case result < 26:
+					income = 1.2;
+					break;
+				case result < 28:
+					income = 1.4;
+					break;
+				case result < 30:
+					income = 2;
+					break;
 			}
+			//if (result < 15){
+			//	income = -0.7;
+			//}else if (result < 23){
+			//	income = 1;
+			//}else if (result < 26){
+			//	income = 1.2;
+			//}else if (result < 28){
+			//	income = 1.4;
+			//}else if (result < 30){
+			//	income = 2;
+			//}
 			if ((income * amount) !== amount){
 				conGamble.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
 					conGamble.query(`update inventoryGT set giraffeCoins='${(((rows[0].giraffeCoins * 100) + (((income * amount) - amount) * 100)) / 100).toFixed(2)}' where ID='${message.author.id}'`);
@@ -2766,7 +2916,6 @@ function quizQuestions(message){
 		cooldowns.quiz.allowed = true;
 	},cooldowns.quiz.timeoutLength);
 	return;
-
 }
 
 async function textQuizQuestions(message,item){
@@ -2792,25 +2941,127 @@ async function textQuizQuestions(message,item){
 function specificQuiz(message,type){
 	if (type === "flags"){}else if (type === "blackwake"){}else if (type === "science"){}else if (type === "sports"){}else if (type === "geography"){}else if (type === "show/music"){}else if (type === "music"){}else if (type === "tech"){}else {}
 }
+
+function work(message){
+	var workCon = mysql.createConnection({
+		host : mysqlLoginData.host,
+		user : mysqlLoginData.user,
+		password : mysqlLoginData.password,
+		database : mysqlLoginData.database,
+	});
+
+	workCon.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
+		let result = getRandomInt(30);
+
+		if (rows.length != 0 && rows.length < 2)
+		{
+			if (rows[0].lastWorked === null)
+			{
+				workCon.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+				let income = 10;
+				if (rows[0].inventory.length)
+				{
+					if (rows[0].inventory.indexOf('income') != 0)
+					{
+						for (var incomeMethod in rows[0].inventory.income)
+						{
+							income += incomeMethod.income;
+						}
+					}
+				}
+				giveUserMoney(income, message.author.id);
+
+				message.channel.send(`You have earnt: ${income}GC!`);
+
+			}else
+			{
+				if ( (parseInt(rows[0].lastWorked) + 86400) < (new Date().getTime()) )
+				{
+					let income = 10;
+
+					if (rows[0].inventory.indexOf('income') != 0)
+					{
+						for (var incomeMethod in rows[0].inventory.income)
+						{
+							income += incomeMethod.income;
+						}
+					}
+
+					giveUserMoney(income, message.author.id);
+					message.channel.send(`You have earnt: ${income}GC!`);
+				}
+				else
+				{
+					let time = ( parseInt(rows[0].lastWorked) + 86400 - parseInt(new Date().getTime()) );
+
+					message.channel.send(`You cannot work yet! You must wait until ${(Math.trunc( ( (time - time%60) /60) /60) ) %24}h ${((time - time%60)/60)%60}m ${time%60}s`);
+				}
+			}
+		}
+	});
+
+	setTimeout(function(){
+		workCon.destroy();
+	},3000);
+	return;
+}
 //Not yet complete
 
-//bot.on("guildMemberAdd", function(member){
-//	bot.channels.cache.get("440517167440461825").send(`Welcome to Great Tortuga traveller${member.user.username}! Come say hello in <#402118654248091678> ! We play various games and organise game nights, check out <#607491352598675457> to get access to those game channels. Feel free to join us and get involved! If you have any issues feel free to contact us using  <#619651226551713843>`);
-//	member.roles.add("401925484952420362").catch(console.error);		
-//	member.send("Thank you for joining Great Tortuga!\n"
-//				+"\n"
-//				+"Welcome to our Blackwake Community. There are some great people here, and we all play Blackwake! so don't be shy ;-)\n"
-//				+"\n"
-//				+"If you are not a fan of notifications.. It is advised that you adjust your discord notification settings to a 'mention only' status.\n"
-//				+"\n"
-//				+"We have a number of channels you can explore, so please feel free to get involved with us. A good place to start would be in our Blackwake-chat ;-)\n"
-//				+"\n"
-//				+"Make sure to have a look at our rules in the Information section.\n"
-//				+"\n"
-//				+"Happy Sailing out there!"
-//				+"\n"
-//				+"-Spartan");
-//});
+function listTheCommands(message){
+		let embed = new Discord.MessageEmbed()
+			.setTitle("Commands")
+   			.setColor(0x008000)
+   			.addField(`Prefix:`,`;`)
+   			.addField(`Translate:`,`translate en (words) --- this translates from russian to english\ntranslate ru (words) --- this translates from english to russian`)
+   			.addField(`Listcommands:`,`Lists all the available commands`)
+   			.addField(`Suggest:`,`Use this command to suggest something to the admin/mod team, if it gets apporved it will be put into #voting where it will be voted on`)
+   			.addField(`Help:`,`Get help on how to use a command! Currently only works on a few commands, use ";help list" to view all available`)
+   			.addField(`Quote:`,`Get a random quote from someone`)
+   			.addField(`Rankcard:`,`using this command shows you your current level and the amount of XP you have`)
+   			.addField(`User Commands`,` - Em\n - Jakka\n - Extra\n - Emjakka\n - Torden\n - Spartan\n - Metz\n - Oli\n - Edward`,true)
+   			.addField(`Misc Commands`,` - Nerds\n - Hangover\n - Russia\n - Ew\n - Dog\n - Cat\n - Art\n - Dance\n - Playdie\n - Rolldie\n - Rollcustom\n - Coinflip\n - Dad\n - Nootnoot\n - Urban\n - Today`,true)
+   			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish`,true)
+   			.addField(`Music Commands`,` - PlayAudio\n - RandomSong`,true)
+   			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates\n - Jeanie`,true)
+   			.setTimestamp();
+   		message.author.send(embed);
+
+   		let dembed = new Discord.MessageEmbed()
+			.setTitle("Currently Unavailable Commands")
+   			.setColor(0x008000)
+   			.addField(`Misc:`,` - math`)
+   			.setTimestamp();
+   		message.author.send(dembed);
+
+   		if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
+
+   			let Membed = new Discord.MessageEmbed()
+				.setTitle("Moderator Commands")
+   				.setColor(0xeecd17)
+   				.addField(`Mute::`,`Mute @user`)
+   				.addField(`Unmute:`,`Unmute @user`)
+   				.addField(`Tempmute:`,`Tempmute @user`)
+   				.addField(`Warn:`,`Warn @user **Reason**`)
+   				.addField(`Totalusers:`,`Shows the total number of people`)
+   				.addField(`UserInfo`,`Use without any arguments for information about yourself, Use:\n - ;UserInfo @user\nTo get specific information on one person`)
+   				.addField(`Misc`,` - savequote *messageID*\n`)
+   				.setTimestamp();
+   			message.author.send(Membed); //Mods
+
+   		}
+
+   		if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+
+   			let Aembed = new Discord.MessageEmbed()
+				.setTitle("Admin Commands")
+   				.setColor(0xdb1a1a)
+   				.addField(`Ban:`,`Ban @user`)
+   				.addField(`ServerInfo:`,`Gives information about the server`)
+   				.addField(`ChannelInfo:`,`Gives information about a channel`)
+   				.setTimestamp();
+   			message.author.send(Aembed); //Admins
+   		}
+}
 
 
 bot.on("ready", () => {
@@ -2829,7 +3080,7 @@ bot.on("ready", () => {
 
 	updateleaderboard();
 
-	updateMClist();
+	//updateMClist();
 	getSteamGroupData();
 
 	setInterval(() =>{
@@ -2851,14 +3102,14 @@ bot.on("ready", () => {
 		displayRichestUsers();
 	}, 3600000);
 	updateShopWindow();
-
-//	bot.channels.cache.get("").send("7DTD Server-status, getting updates.").then((msg)=>{
-//		update7DTDlist(msg);
-//	});
 	return;
 });
 
 bot.on("message", async message => {
+
+
+	try{
+
 	//dont respond to bots
 	if (message.author.bot) return;
 
@@ -2999,8 +3250,6 @@ bot.on("message", async message => {
 		message.react("452064991688916995");
 	}
 
-	let TrackingCommand = false;
-
 	//Ping Oliverbot
 	if (message.content.startsWith("<@!556545106468012052>")){
 		TrackingCommand = true;
@@ -3064,725 +3313,707 @@ bot.on("message", async message => {
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
 
+	let TrackingCommand = false;
+
 	//MEMEZ
-	if (command === "delete-administrators"){
-		TrackingCommand = true;
-		message.channel.send("Deleting the administrators.").then(msg => {
-			setTimeout(function(){
-				msg.edit("Deleting the administrators..");
+	switch (command){
+		case "delete-administrators":
+			TrackingCommand = true;
+			message.channel.send("Deleting the administrators.").then(msg => {
 				setTimeout(function(){
-					msg.edit("Deleting the administrators...");
+					msg.edit("Deleting the administrators..");
 					setTimeout(function(){
-						msg.edit("Administrators deleted.");
+						msg.edit("Deleting the administrators...");
+						setTimeout(function(){
+							msg.edit("Administrators deleted.");
+						},3000);
 					},3000);
 				},3000);
-			},3000);
-		});
-	}
-
-	if (command === "dox"){
-		TrackingCommand = true;
-		message.channel.send(`Doxing ${args.join(" ")}...`);
-	}
-
-	if (command === "magic"){
-		TrackingCommand = true;
-		message.channel.send("https://giphy.com/gifs/magical-KFNQuuT1qx7I4");
-	}
-
-	if (command === "pong"){
-		TrackingCommand = true;
-		message.react("🏓");
-	}
-
-	if (command === "execute"){
-		TrackingCommand = true;
-		if (typeof args[0] === undefined){
-			message.channel.send("You need to say who to execute! 🤦");
-		}else{
-			message.channel.send(`Executing ${args[0]}\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
-			TrackingCommand = true;
-		}
-	}
-
-	//Play music from YT URL
-	if (command === "playaudio"){
-		TrackingCommand = true;
-		let voiceChannel = message.member.voice.channel;
-		if (!voiceChannel){
-			message.reply("You must be in a voice channel!");
-		}else if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else if (isPlaying){
-			message.reply("I'm already playing!");
-		}else{
-			song = args.join("");
-			if (song.includes("https://www.youtube.com/watch?v=")){
-				let songInfo = await ytdl.getInfo(song);
-				playAudio(message,args,voiceChannel);
-				let embed = new Discord.MessageEmbed()
-					.setTitle("Now Playing")
-					.setColor('#add8e6')
-					.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
-					.setThumbnail(`${message.author.displayAvatarURL}`)
-					.setTimestamp();
-				message.channel.send(embed).then(msg => {
-					setTimeout(function(){
-						msg.delete();
-					},songInfo.length_seconds*1000);
-				});
-			}else{
-				message.reply("Please enter a valid youtube link!");
-			}
-		}
-	}
-
-	//stop any currently playing audio
-	if (command === "stopaudio"){
-		TrackingCommand = true;
-		if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else if (!isPlaying){
-			message.channel.send("I am not currently in a voice channel!");
-		}else if (!currentDispatcher){
-			message.channel.send("I am not currently playing anything!");
-		}else if (!message.member.voice.channel){
-			message.channel.send("You must be in the same voice channel!");
-		}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
-			message.channel.send("You must be in the same voice channel!");
-		}else{
-			currentDispatcher.destroy();
-			bot.voice.connections.get(message.guild.id).disconnect();
-			isPlaying=false;
-			message.react("🛑");
-			message.channel.send("I have stopped");
-		}
-	}
-
-	//Grab random song from datafile
-	if (command === "randomsong"){
-		TrackingCommand = true;
-		let voiceChannel = message.member.voice.channel;
-		if (!voiceChannel){ return; }
-		else if (isPlaying){ return; }
-		else if (!adjustableConfig.music.generalAudio){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else{
-		let file = fs.readFileSync("./datafile.json").toString();
-		file = JSON.parse(file);
-		let song = file.randomsongs[getRandomInt(file.randomsongs.length)];
-		voiceChannel.join().then(connection => {
-		isPlaying = true;
-		currentDispatcher = connection
-			.play(
-         		ytdl(song)
-        	)
-        	.on("finish",() =>{
-        		voiceChannel.leave();
-        		isPlaying = false;
-        	})
-        	.on("error",e=>{
-        		console.error(e);
-       	 		voiceChannel.leave();
-       	 		isPlaying = false;
-       	 	});
-		});
-		}
-	}
-
-	//Does what it says on the tin
-	if (command === "checknudity"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.checkNudity){
-			message.attachments.forEach(attachment => {
-				if (message.attachments.size > 0) {
-      				if (attachment.url){
-        				if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
-        	  				let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
-          					sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-           	 	  			let nudityEmbed = new Discord.MessageEmbed()
-           	 	    		  .addField("Rating",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}\nImage Link: [link](${attachment.url})`);
-           	 	 				message.channel.send(nudityEmbed);
-          					}).catch(function(err){
-           	 					console.log(err);
-          					});
-       	 				}else{
-        					message.channel.send("I can only use png, jpg or jpeg.");
-        				}
-      				}
-    			}else{
-    				message.channel.send("Must be an attachment!");
-    			}
-    		});
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//MEMEZ
-	if (command === "inspire"){
-		TrackingCommand = true;
-		if(adjustableConfig.apis.inspire){
-			fetch("http://inspirobot.me/api?generate=true").then(resp => resp.text()).then(picture => {
-				let InspireImage = new Discord.MessageEmbed()
-					.setImage(`${picture}`)
-					.setTimestamp();
-				message.channel.send(InspireImage);
 			});
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//Translate ENG <-> RUS
-	if (command === "translate"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.translate){
-			let translate=" ";
-			if (args[0] === "ru"){
-				args = args.slice(1);
-				translating(message,args,"en","ru");
-			}else
-			if (args[0] === "en"){
-				args = args.slice(1);
-				translating(message,args,"ru","en");
+			break;
+		case "dox":
+			TrackingCommand = true;
+			message.channel.send(`Doxing ${args.join(" ")}...`);
+			break;
+		case "magic":
+			TrackingCommand = true;
+			message.channel.send("https://giphy.com/gifs/magical-KFNQuuT1qx7I4");
+			break;
+		case "pong":
+			TrackingCommand = true;
+			message.react("🏓");
+			break;
+		case "execute":
+			TrackingCommand = true;
+			if (typeof args[0] === undefined){
+				message.channel.send("You need to say who to execute! 🤦");
 			}else{
-				message.reply("The only supported languages are ru and en.");
+				message.channel.send(`Executing ${args[0]}\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
+				TrackingCommand = true;
 			}
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//XP Rand Cards
-	if (command === "rankcard"){
-		TrackingCommand = true;
-		rankcardCreation(message);
-	}
-
-	//Lists all commands to you, depending on your roles
-	if (command === "listcommands"){
-		TrackingCommand = true;
-		let embed = new Discord.MessageEmbed()
-			.setTitle("Commands")
-   			.setColor(0x008000)
-   			.addField(`Prefix:`,`;`)
-   			.addField(`Translate:`,`translate en (words) --- this translates from russian to english\ntranslate ru (words) --- this translates from english to russian`)
-   			.addField(`Listcommands:`,`Lists all the available commands`)
-   			.addField(`Suggest:`,`Use this command to suggest something to the admin/mod team, if it gets apporved it will be put into #voting where it will be voted on`)
-   			.addField(`Help:`,`Get help on how to use a command! Currently only works on a few commands, use ";help list" to view all available`)
-   			.addField(`Quote:`,`Get a random quote from someone`)
-   			.addField(`Rankcard:`,`using this command shows you your current level and the amount of XP you have`)
-   			.addField(`User Commands`,` - Em\n - Jakka\n - Extra\n - Emjakka\n - Torden\n - Spartan\n - Metz\n - Oli\n - Edward`,true)
-   			.addField(`Misc Commands`,` - Nerds\n - Hangover\n - Russia\n - Ew\n - Dog\n - Cat\n - Art\n - Dance\n - Playdie\n - Rolldie\n - Rollcustom\n - Coinflip\n - Dad\n - Nootnoot\n - Urban\n - Today`,true)
-   			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish`,true)
-   			.addField(`Music Commands`,` - PlayAudio\n - RandomSong`,true)
-   			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates\n - Jeanie`,true)
-   			.setTimestamp();
-   		message.author.send(embed);
-
-   		let dembed = new Discord.MessageEmbed()
-			.setTitle("Currently Unavailable Commands")
-   			.setColor(0x008000)
-   			.addField(`Misc:`,` - math`)
-   			.setTimestamp();
-   		message.author.send(dembed);
-
-   		if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
-
-   			let Membed = new Discord.MessageEmbed()
-				.setTitle("Moderator Commands")
-   				.setColor(0xeecd17)
-   				.addField(`Mute::`,`Mute @user`)
-   				.addField(`Unmute:`,`Unmute @user`)
-   				.addField(`Tempmute:`,`Tempmute @user`)
-   				.addField(`Warn:`,`Warn @user **Reason**`)
-   				.addField(`Totalusers:`,`Shows the total number of people`)
-   				.addField(`UserInfo`,`Use without any arguments for information about yourself, Use:\n - ;UserInfo @user\nTo get specific information on one person`)
-   				.addField(`Misc`,` - savequote *messageID*\n`)
-   				.setTimestamp();
-   			message.author.send(Membed); //Mods
-
-   		}
-
-   		if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-
-   			let Aembed = new Discord.MessageEmbed()
-				.setTitle("Admin Commands")
-   				.setColor(0xdb1a1a)
-   				.addField(`Ban:`,`Ban @user`)
-   				.addField(`ServerInfo:`,`Gives information about the server`)
-   				.addField(`ChannelInfo:`,`Gives information about a channel`)
-   				.setTimestamp();
-   			message.author.send(Aembed); //Admins
-   		}
-	}
-
-	//Provides info on how to use certain commands
-	if (command === "help"){
-		TrackingCommand = true;
-		let supportedQueries = ["listcommands","list","memegen","random","apod","marsweather","rankcard","translate","exchangerates","today","urban","quote","yodish","dad","8ball","bwstats","payday2","trump"];
-		if (args[0]){
-			let term = args[0].toLowerCase();
-			if (term === "listcommands"){
-				message.channel.send("Sends you a list of all my commands that you can use :)");
-			}else
-			if (term === "list"){
-				message.author.send(`Commands I can help with:\n ${supportedQueries.join("\n - ")}`);
-				message.channel.send("Check your DM's ;)");
-			}else
-			if (term === "memegen"){
-				message.channel.send("Currently available formats and the website version can be found at https://memegen.link/");
-			}else
-			if (term === "random"){
-				message.channel.send("Why not try and find out?");
-			}else
-			if (term === "apod"){
-				message.channel.send("Nasa's Astronomy Picture of the Day.");
-			}else
-			if (term === "marsweather"){
-				message.channel.send("Get the weather data of several points on mars.\n"
-					+" - av: Average of samples over the Sol (°F for AT; m/s for HWS; Pa for PRE)\n"
-					+" - ct: Total number of recorded samples over the Sol\n"
-					+" - mn: Minimum data sample over the sol (same units as av)\n"
-					+" - mx: Maximum data sample over the sol (same units as av)\n");
-			}else
-			if (term === "rankcard"){
-				message.channel.send("Display your rankcard");
-			}else
-			if (term === "translate"){
-				message.channel.send("Use: `translate ru *words to translate*` to translate to russian.\nUse: `translate eu *words to translate*` to translate the words to english.");
-			}else
-			if (term === "exchangerates"){
-				message.channel.send("Convert the currency you wish to another currency, a full list of supported currencies is at: https://www.exchangerate-api.com/docs/supported-currencies");
-			}else
-			if (term === "today"){
-				message.channel.send("Usage of the command is as followed: `;today *term*`\nTerms Allowed are:\n - Events\n - Births\n - Deaths");
-			}else
-			if (term === "urban"){
-				message.channel.send("Usage of the command is as followed: `;urban *word to search*`");
-			}else
-			if (term === "quote"){
-				message.channel.send("Sends a random quote!");
-			}else
-			if (term === "yodish"){
-				message.channel.send("Returns your words in yosidh format.");
-			}else
-			if (term === "dad"){
-				message.channel.send("Get a dad quote!");
-			}else
-			if (term === "8ball"){
-				message.channel.send("Get a yes/no awnser to your question!");
-			}else
-			if (term === "insult"){
-				message.channel.send("insult whoever you wish!");
-				message.react("🙊");
-			}else
-			if (term === "me"){
-				message.channel.send("What can i help you with?");
-				message.react("🤔");
-			}else
-			if (term === "bwstats"){
-				message.channel.send("There are several actions for the blackwake command, currently the supported options are: `overview` `weaponstats` `shipstats` `maintenance` `shipweaponry`\nNote: requires your profile to be set to public!");
-			}else
-			if (term === "payday2"){
-				message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
+			break;
+		case "rankcard":
+			TrackingCommand = true;
+			rankcardCreation(message);
+			break;
+		case "listcommands":
+			TrackingCommand = true;
+			listTheCommands(message);
+			break;
+		case "apod":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.apod){
+				AstronomyPictureoftheDay(message);
 			}else{
-				if (term === "trump"){
-					message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "quote":
+			TrackingCommand = true;
+			loadFromDatafile(command,"",message);
+			break;
+		case "8ball":
+			TrackingCommand = true;
+			let option = getRandomInt(0,3);
+			switch (option){
+				case 0:
+					message.channel.send("Yes");
+					break;
+				case 1:
+					message.channel.send("No");
+					break;
+				case 2:
+					message.channel.send("Im not sure 🤔");
+					break;
+			}
+			break;
+		case "nootnoot":
+			TrackingCommand = true;
+			loadFromDatafile(command,"",message);
+			break;
+		case "dad":
+			TrackingCommand = true;
+			loadFromDatafile(command,"",message);
+			break;
+		case "yodish":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.yodish){
+				yodish(message,args);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "nerds":
+			if (message.member.roles.cache.has("639142448345513984")){
+				TrackingCommand = true;
+				message.channel.send("<@&639142448345513984> Assemble!");
+			}
+			break;
+		case "cat":
+			TrackingCommand = true;
+			Cat(message);
+			break;
+		case "trump":
+			fetch(`https://api.whatdoestrumpthink.com/api/v1/quotes`).then(resp=>resp.json()).then(response => {
+				message.channel.send(`${args.join(" ")} ${response.messages.personalized[getRandomInt(response.messages.personalized.length)]}`);
+			});
+			break;
+		case "rolldie":
+			TrackingCommand = true;
+			message.channel.send(getRandomInt(7));
+			break;
+		case "marsweather":
+			//GetMarsWeatherData(message);
+			message.channel.send("This command is currently not working :(");
+			break;
+		case "numtrivia":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.numTrivia){
+				NumbersTrivia(message);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "advice":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.advice){
+				Advice(message);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "bacon":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.bacon){
+				BaconIpsum(message);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "chuck":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.chuck){
+				chuckNorrisAPI(message);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "dictionary":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.dictionary){
+				wordsAPI(message,args);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "restart":
+			if (message.author.id === config.ownerId){
+				await message.channel.send("Restarting....");
+				process.exit();
+			}
+			break;
+		case "underground":
+			if (message.guild.id === "341261290607607818"){
+				underground(message);
+			}
+			else{
+				message.reply("Im sorry, your too much of a normie to use this command.");
+			}
+			break;
+		case "createcommand":
+			if (message.member.roles.cache.has("615214073843548163")){
+				createCustomCommands(message,args);
+				message.reply("Your command is ready to go!");
+			}else{
+				message.reply("You do not have permission to use this!");
+			}
+			break;
+		case "deletecommand":
+			if (message.member.roles.cache.has("615214073843548163")){
+				deleteCustomCommands(message,args[0]);
+				message.reply("Command deleted!");
+			}else{
+				message.reply("You do not have permission to use this!");
+			}
+			break;
+		case "createrole":
+			if (args.length > 2){
+				message.channel.send("Please use the following format:\n `;createrole <emoji> <role ping>`");
+			}else{
+				if (message.member.roles.cache.has("665939545371574283")){
+					if (args[0].indexOf(":") !== -1){
+						createReactionRole(message,args[0].split(":")[1],args[1].slice(3,args[1].length - 1));
+					}else{
+						createReactionRole(message,args[0],args[1].slice(3,args[1].length - 1));
+					}
 				}else{
-					message.reply("That command currently either has no help section or is detailed in the commands list.");
-					message.react("448435180286509066");
+					message.reply("You don't have permission to use this command!");
 				}
 			}
-		}else{
-			message.channel.send("I currently have help for:\n`"
-				+`${supportedQueries.join("` `")}`+"`");
-		}
-	}
-
-	//Urban dictionary
-	if (command === "urban"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.urban){
-    		let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
-    		fetch(api).then(response => response.json()).then(resp => {
-    			let option = resp.list[getRandomInt(resp.list.length)];
-    			let embed = new Discord.MessageEmbed()
-        		.setTitle("Urban Response")
-        		.setColor(0x008000)
-        		.addField(`Author:`,`${option.author}`)
-        		.addField(`Permalink:`,`${option.permalink}`,true)
-        		.addField(`Vote Ratio:`,`${option.thumbs_up} 👍\n${option.thumbs_down} 👎`,true)
-        		.addField(`Word:`,`${option.word}`,true)
-        		.addField(`Definition:`,`${option.definition}`)
-        		.addField(`Example:`,`${option.example}`)
-        		.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
-        		.setTimestamp();
-    			message.channel.send(embed);
-    		});
-    	}else{
-    		message.reply("That command is currently disabled!");
-    	}
-  	}
-
-  	//Fetch random quote
-	if (command === "quote"){
-		TrackingCommand = true;
-		let file = fs.readFileSync("./datafile.json").toString();
-		file = JSON.parse(file);
-		message.channel.send(file.quotes[getRandomInt(file.quotes.length+1)]);
-	}
-	if (command === "8ball"){
-		TrackingCommand = true;
-		let option = getRandomInt(0,3);
-		if (option === 0){
-			message.channel.send("Yes");
-		}else if (option === 1){
-			message.channel.send("No");
-		}else if (option === 2){
-			message.channel.send("Im not sure 🤔");
-		}
-	}
-	if (command === "dad"){
-		TrackingCommand = true;
-		let file = fs.readFileSync("./datafile.json").toString();
-		file = JSON.parse(file);
-		message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
-	}
-
-	//Random pingu doing Noot Noot gif
-	if (command === "nootnoot"){
-		TrackingCommand = true;
-		let file = fs.readFileSync("./datafile.json").toString();
-		file = JSON.parse(file);
-		message.channel.send(file.nootnoot[getRandomInt(file.nootnoot.length+1)]);
-	}
-
-	//Returns input text in yodish format
-	if (command === "yodish"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.yodish){
-			yodish(message,args);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	////Custom commands
-	if (command === "nerds"){
-		if (message.member.roles.cache.has("639142448345513984")){
-			TrackingCommand = true;
-			message.channel.send("<@&639142448345513984> Assemble!");
-		}
-	}
-	if (command === "cat"){
-		TrackingCommand = true;
-		Cat(message);
-	}
-
-	if (command === "dance"){
-		if (levelchecker(message,3)){
-			TrackingCommand = true;
-			let file = fs.readFileSync('./datafile.json').toString();
-			file = JSON.parse(file);
-			let p = getRandomInt(file.Responses.dance.length);
-			message.channel.send(file.Responses.dance[p]);
-		}else{
-    		message.reply("You are not a high enough level yet to use this command, you must be level 3, use ;rankcard to see your current level");
-    	}
-	}
-
-	if (command === "trump"){
-		fetch(`https://api.whatdoestrumpthink.com/api/v1/quotes`).then(resp=>resp.json()).then(response => {
-			message.channel.send(`${args.join(" ")} ${response.messages.personalized[getRandomInt(response.messages.personalized.length)]}`);
-		});
-	}
-
-	//Gets a random video/image/gif from the datafile
-	if (command === "random"){
-		if (levelchecker(message,4)){
-			TrackingCommand = true;
-			let file = fs.readFileSync('./datafile.json').toString();
-			file = JSON.parse(file);
-			let p = getRandomInt(10);
-			if (p === 0){
-				message.channel.send(file.Responses.gif[getRandomInt(file.Responses.gif.length)]);
-			}else
-			if (p === 1){
-				let item =getRandomInt(file.Responses.vid.length);
-				message.channel.send(file.Responses.vid[item]);
-			}else
-			if (p === 2){
-				let item = getRandomInt(file.Responses.img.length);
-				message.channel.send(file.Responses.img[item]);
-			}else
-			//if (p === 3){
-			//	getRandomNonsenseWord();
-			//}else
-			if (p === 3){
-				getRandomMeme(message);
-			}else
-			if (p === 4){
-				getRandomMeme2(message);
-			}else
-			if (p === 5){
-				getRandomGeekJoke(message);
-			}else
-			if (p === 6){
-				getRandomCorpPhrase(message);
-			}else
-			if (p === 7){
-				getRandomBlankMyBlank(message);
-			}else
-			if (p === 8){
-				getRandomStartupIdea(message);
-			}else
-			if (adjustableConfig.apis.randomUselessFactAPI){
-				RandomUselessFactAPI(message);
+			break;
+		case "deleterole":
+			if (args.length > 1){
+				message.channel.send("Please use the following format:\n `;deleterole <emoji>`");
+			}else{
+				if (message.member.roles.cache.has("665939545371574283")){
+					if (args[0].indexOf(":") !== -1){
+						deleteReactionRole(message,args[0].split(":")[1]);
+					}else{
+						deleteReactionRole(message,args[0]);
+					}
+				}else{
+					message.reply("You don't have permission to use this command!");
+				}
 			}
-		}else{
-    		message.reply("You are not a high enough level yet to use this command, you must be level 4, use ;rankcard to see your current level");
-    	}
-	}
-
-	if (command === "memegen"){
-		if (levelchecker(message,4)){
+			break;
+		case "purchase":
+			if (args[0] && args.length < 2){
+				purchaseItem(message.author.id,args[0],message);
+			}else{
+				message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
+			}
+			break;
+		case "search":
+			if (args){
+				searchForItem(args,message);
+			}else{
+				message.channel.send("Please enter the correct format:\n`;search` `Item Name`");
+			}
+			break;
+		case "sell":
+			if (args[0] && args.length < 2){
+				sellItem(message.author.id,args[0],message);
+			}else{
+				message.channel.send("Please enter the correct format:\n`;sell` `Item Name`");
+			}
+			break;
+		case "inventory":
+			if (args.length < 1){
+				listInventory(message.author.id,message);
+			}else{
+				message.channel.send("Please enter the correct format:\n`;inventory`");
+			}
+			break;
+		case "giftcoins":
+			if (args.length < 3){
+				let user = getUserFromMention(args[0]);
+				giftUserCoins(message.author.id,user.id,args[1],message);
+				user = null;
+			}else{
+				message.channel.send("Please enter the correct format:\n`;giftCoins` `@userToGiftTo` `amount`");
+			}
+			break;
+		case "gamble":
+			if (args[0] && (args.length === 1)){
+				gambleMoney(args[0],message);
+			}else{
+				message.channel.send("Please use the correct format! `;gamble` `amount`");
+			}
+			break;
+		case "quiz":
+			if (cooldowns.quiz.allowed){
+				quizQuestions(message);
+			}else{
+				message.channel.send(`Please wait, this command is currently on a ${parseInt(cooldowns.quiz.timeoutLength / 1000)}sec cooldown.`);
+			}
+			break;
+		case "beg":
+			let num = getRandomInt(300);
+			if (num == 243){
+				let amount = getRandomInt(20);
+				giveUserMoney(parseFloat(amount).toFixed(2) * 1);
+				message.channel.send(`Considering how desperate you are, I think I can spare you ${amount}GC, consider yourself lucky.`);
+			}else{
+				loadFromDatafile(command,"",message);
+			}
+			break;
+		case "config":
+			if (message.member.roles.cache.has("665939545371574283")){
+				if (args.length > 2){
+					message.reply("Please ensure you enter the correct number of arguments!");
+				}else{
+					updateDBConfig(message,args);
+				}
+			}else{
+				message.reply("You don't have permission to use this!");
+				message.react("690144528312696969");
+			}
+			break;
+		case "do":
+			if (message.author.id === config.ownerId){
+				try{
+					let code = args.join(" ");
+					let evaled = eval(code);
+					if (typeof evaled !== "string"){
+       					evaled = require("util").inspect(evaled);
+					}
+					message.channel.send(clean(evaled), {code:"xl"});
+    			} catch (err) {
+      				message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
+    			}
+			}
+			break;
+		case "coinflip":
 			TrackingCommand = true;
-			if (adjustableConfig.apis.memegen){
-				let contents = message.content.split(",");
-    	    	for (i=0;i<contents.length;){
-    	        	let word = contents[i];
-    	        	if (i === 0){
-    	        	    word = word.slice(command.length+2);
-    	        	}
-    	        	word = word.replace(/_/g, "__");
-    	        	word = word.replace(/-/g, "--");
-    	   	    	word = word.replace(/ /g, "-");
-    	   	    	word = word.replace(/\?/g, "~q");
-    	   	     	word = word.replace(/%/g, "~p");
-    	   	     	word = word.replace(/#/g, "~h");
-    	   	     	word = word.replace(/''/g, `"`);
-    	    	    word = word.replace(/\//g, "~s");
-    	    	    contents[i] = word;
-    	    	    i++;
-    	    	}
-        		let URL = `https://memegen.link/${contents[0]}/${contents[1]}/${contents[2]}.jpg`;
-        		fetch(URL).then(response =>{
-        		    message.channel.send(response.url);
-        		});
+			let coin = getRandomInt(2);
+			message.channel.send("💰").then((msg)=>{
+				msg.edit("💰🤔").then((msg)=>{
+					msg.edit("💰").then((msg)=>{
+						msg.edit("😯");	
+					});
+				});
+			});
+			if (coin === 0){
+				message.channel.send("Tails!");
+			}else{
+				message.channel.send("Heads!");
+			}
+			break;
+		case "today":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.today){
+				if (args[0]){
+					let allowedInputs = ["events","births","deaths"];
+					if (allowedInputs.indexOf(args[0]) >= 0){
+						TodayInHistory(message,args[0]);
+					}else{
+						message.channel.send("That type doesnt exist!");
+					}
+				}else{
+					message.channel.send("You need to give the type!");
+				}
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "jeanie":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.jeanie){
+				jeanieAPI(message,args);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "exchangerates":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.exchangeRates){
+				let rate = "";
+				if (args[0]){
+					rate = args[0].toUpperCase();
+				}else{
+					rate = "GBP";
+				}
+				ExchangeRates(message,rate);
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "playdie":
+			TrackingCommand = true;
+			let user = getRandomInt(7);
+			let botroll = getRandomInt(7);
+			message.channel.send("🎲").then((msg)=>{
+				msg.edit("..🎲").then((msg)=>{
+					msg.edit("You: "+user+", Bot: "+botroll+" ....🎲");
+					if (user>botroll){
+						message.channel.send("You Win!");
+					}else
+					if (user<botroll){
+						message.channel.send("You Lose!");
+					}else{
+						message.channel.send("Draw!");
+					}
+				});
+			});
+			break;
+		case "rollcustom":
+			TrackingCommand = true;
+			let min = parseInt(args[0]);
+			let max = parseInt(args[1]);
+			if (parseInt(args[0]) < 1){
+				message.channel.send("Please use a starting number greater than 0.");
+			}else
+			if (min >= max){
+				message.channel.send("Please use a maximum value greater than the minimum.");
+			}else
+			if (isNaN(min)){
+				message.channel.send("Please enter a number.");
+			}else
+			if (parseInt(args[1]) > 1){
+				message.channel.send(getRandomBetweenInt(min,max));
+			}else{
+				message.channel.send(getRandomInt(parseInt(args[0])+1));
+			}
+			break;
+		case "translate":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.translate){
+				let translate=" ";
+				if (args[0] === "ru"){
+					args = args.slice(1);
+					translating(message,args,"en","ru");
+				}else
+				if (args[0] === "en"){
+					args = args.slice(1);
+					translating(message,args,"ru","en");
+				}else{
+					message.reply("The only supported languages are ru and en.");
+				}
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "inspire":
+			TrackingCommand = true;
+			if(adjustableConfig.apis.inspire){
+				fetch("http://inspirobot.me/api?generate=true").then(resp => resp.text()).then(picture => {
+					let InspireImage = new Discord.MessageEmbed()
+						.setImage(`${picture}`)
+						.setTimestamp();
+					message.channel.send(InspireImage);
+				});
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "checknudity":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.checkNudity){
+				message.attachments.forEach(attachment => {
+					if (message.attachments.size > 0) {
+      					if (attachment.url){
+        					if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
+        		  				let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
+        	  					sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
+        	   	 	  			let nudityEmbed = new Discord.MessageEmbed()
+        	   	 	    		  .addField("Rating",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}\nImage Link: [link](${attachment.url})`);
+        	   	 	 				message.channel.send(nudityEmbed);
+        	  					}).catch(function(err){
+        	   	 					console.log(err);
+        	  					});
+       		 				}else{
+        						message.channel.send("I can only use png, jpg or jpeg.");
+        					}
+      					}
+    				}else{
+    					message.channel.send("Must be an attachment!");
+    				}
+    			});
+			}else{
+				message.reply("That command is currently disabled!");
+			}
+			break;
+		case "dance":
+			if (levelchecker(message,3)){
+				TrackingCommand = true;
+				loadFromDatafile(command,"",message);
+			}else{
+    			message.reply("You are not a high enough level yet to use this command, you must be level 3, use ;rankcard to see your current level");
+    		}
+    		break;
+    	case "playaudio":
+    		TrackingCommand = true;
+			let voiceChannel = message.member.voice.channel;
+			if (!voiceChannel){
+				message.reply("You must be in a voice channel!");
+			}else if (!adjustableConfig.music.generalAudio){
+				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+			}else if (isPlaying){
+				message.reply("I'm already playing!");
+			}else{
+				song = args.join("");
+				if (song.includes("https://www.youtube.com/watch?v=")){
+					let songInfo = await ytdl.getInfo(song);
+					playAudio(message,args,voiceChannel);
+					let embed = new Discord.MessageEmbed()
+						.setTitle("Now Playing")
+						.setColor('#add8e6')
+						.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
+						.setThumbnail(`${message.author.displayAvatarURL}`)
+						.setTimestamp();
+					message.channel.send(embed).then(msg => {
+						setTimeout(function(){
+							msg.delete();
+						},songInfo.length_seconds*1000);
+					});
+				}else{
+					message.reply("Please enter a valid youtube link!");
+				}
+			}
+    		break;
+    	case "stopaudio":
+    		TrackingCommand = true;
+			if (!adjustableConfig.music.generalAudio){
+				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+			}else if (!isPlaying){
+				message.channel.send("I am not currently in a voice channel!");
+			}else if (!currentDispatcher){
+				message.channel.send("I am not currently playing anything!");
+			}else if (!message.member.voice.channel){
+				message.channel.send("You must be in the same voice channel!");
+			}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+				message.channel.send("You must be in the same voice channel!");
+			}else{
+				currentDispatcher.destroy();
+				bot.voice.connections.get(message.guild.id).disconnect();
+				isPlaying=false;
+				message.react("🛑");
+				message.channel.send("I have stopped");
+			}
+			break;
+		case "randomsong":
+			TrackingCommand = true;
+			loadFromDatafile(command,"",message);
+			break;
+		case "urban":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.urban){
+    			let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
+    			fetch(api).then(response => response.json()).then(resp => {
+    				let option = resp.list[getRandomInt(resp.list.length)];
+    				let embed = new Discord.MessageEmbed()
+        			.setTitle("Urban Response")
+        			.setColor(0x008000)
+        			.addField(`Author:`,`${option.author}`)
+        			.addField(`Permalink:`,`${option.permalink}`,true)
+        			.addField(`Vote Ratio:`,`${option.thumbs_up} 👍\n${option.thumbs_down} 👎`,true)
+        			.addField(`Word:`,`${option.word}`,true)
+        			.addField(`Definition:`,`${option.definition}`)
+        			.addField(`Example:`,`${option.example}`)
+        			.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
+        			.setTimestamp();
+    				message.channel.send(embed);
+    			});
+    		}else{
+    			message.reply("That command is currently disabled!");
+    		}
+    		break;
+    	case "memegen":
+    		if (levelchecker(message,4)){
+				TrackingCommand = true;
+				if (adjustableConfig.apis.memegen){
+					let contents = message.content.split(",");
+    		    	for (i=0;i<contents.length;){
+    		        	let word = contents[i];
+    		        	if (i === 0){
+    		        	    word = word.slice(command.length+2);
+    		        	}
+    		        	word = word.replace(/_/g, "__");
+    		        	word = word.replace(/-/g, "--");
+    		   	    	word = word.replace(/ /g, "-");
+    		   	    	word = word.replace(/\?/g, "~q");
+    		   	     	word = word.replace(/%/g, "~p");
+    		   	     	word = word.replace(/#/g, "~h");
+    		   	     	word = word.replace(/''/g, `"`);
+    		    	    word = word.replace(/\//g, "~s");
+    		    	    contents[i] = word;
+    		    	    i++;
+    		    	}
+        			let URL = `https://memegen.link/${contents[0]}/${contents[1]}/${contents[2]}.jpg`;
+        			fetch(URL).then(response =>{
+        			    message.channel.send(response.url);
+        			});
+        		}
+        	}else{
+        		message.channel.send("You are not a high enough level yet to use this command, you must be level 4, use ;rankcard to see your current level");
         	}
-        }else{
-        	message.channel.send("You are not a high enough level yet to use this command, you must be level 4, use ;rankcard to see your current level");
-        }
-    }
-
-	if (command === "insult"){
-		if (levelchecker(message,7)){
-			TrackingCommand = true;
-			let fine = true;
-			for (i=0; i<args.length;){
-				let mentionrole = message.guild.roles.cache.get(args[i]);
-				if (!(typeof mentionrole === "undefined")){
+        	break;
+        case "random":
+        	if (levelchecker(message,4)){
+				TrackingCommand = true;
+				loadFromDatafile(command,"",message);
+			}else{
+    			message.reply("You are not a high enough level yet to use this command, you must be level 4, use ;rankcard to see your current level");
+    		}
+        	break;
+        case "insult":
+        	if (levelchecker(message,7)){
+				TrackingCommand = true;
+				let fine = true;
+				for (i=0; i<args.length;){
+					let mentionrole = message.guild.roles.cache.get(args[i]);
+					if (!(typeof mentionrole === "undefined")){
+						fine = false;
+					}
+					i++;
+				}
+				if (message.content.includes("@everyone")){
+					message.channel.send("No.");
 					fine = false;
 				}
-				i++;
-			}
-			if (message.content.includes("@everyone")){
-				message.channel.send("No.");
-				fine = false;
-			}
-			if (message.content.includes("@here")){
-				message.channel.send("No.");
-				fine = false;
-			}
-			if (fine){
-				let member = args.join(" ");
-				let file = fs.readFileSync("./datafile.json").toString();
-				file = JSON.parse(file);
-				let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
-				try{
-					if (typeof member === "undefined"){
-						message.reply("Please ensure you have use the correct syntax.");
-					}else{
-						insult = insult.replace("TARGET",`${member}`);
-						message.channel.send(insult);
-					}
-				}catch(e){
-					message.reply("Please ensure you have use the correct syntax.");
+				if (message.content.includes("@here")){
+					message.channel.send("No.");
+					fine = false;
+				}
+				if (fine){
+					loadFromDatafile(command,args.join(" "),message);
+				}else{
+					message.reply("Please enter a correct target. Please also refrain from insulting and pinging roles.");
 				}
 			}else{
-				message.reply("Please enter a correct target. Please also refrain from insulting and pinging roles.");
+				message.channel.send("You are not a high enough level yet to use this command, you must be level 7, use ;rankcard to see your current level");
 			}
-		}else{
-			message.channel.send("You are not a high enough level yet to use this command, you must be level 7, use ;rankcard to see your current level");
-		}
-	}
-
-	if (command === "playdie"){
-		TrackingCommand = true;
-		let user = getRandomInt(7);
-		let botroll = getRandomInt(7);
-		message.channel.send("🎲").then((msg)=>{
-			msg.edit("..🎲").then((msg)=>{
-				msg.edit("You: "+user+", Bot: "+botroll+" ....🎲");
-				if (user>botroll){
-					message.channel.send("You Win!");
+        	break;
+        case "help":
+        	TrackingCommand = true;
+			let supportedQueries = ["listcommands","list","memegen","random","apod","marsweather","rankcard","translate","exchangerates","today","urban","quote","yodish","dad","8ball","bwstats","payday2","trump"];
+			if (args[0]){
+				let term = args[0].toLowerCase();
+			switch (term){
+				case "listcommands":
+					message.channel.send("Sends you a list of all my commands that you can use :)");
+					break;			
+				case "list":
+					message.author.send(`Commands I can help with:\n ${supportedQueries.join("\n - ")}`);
+					message.channel.send("Check your DM's ;)");
+					break;
+				case "memegen":
+					message.channel.send("Currently available formats and the website version can be found at https://memegen.link/");
+					break;
+				case "random":
+					message.channel.send("Why not try and find out?");
+					break;
+				case "apod":
+					message.channel.send("Nasa's Astronomy Picture of the Day.");
+					break;
+				case "marsweather":
+					message.channel.send("Get the weather data of several points on mars.\n"
+						+" - av: Average of samples over the Sol (°F for AT; m/s for HWS; Pa for PRE)\n"
+						+" - ct: Total number of recorded samples over the Sol\n"
+						+" - mn: Minimum data sample over the sol (same units as av)\n"
+						+" - mx: Maximum data sample over the sol (same units as av)\n");
+					break;
+				case "rankcard":
+					message.channel.send("Display your rankcard");
+					break;
+				case "translate":
+					message.channel.send("Use: `translate ru *words to translate*` to translate to russian.\nUse: `translate eu *words to translate*` to translate the words to english.");
+					break;
+				case "exchangerates":
+					message.channel.send("Convert the currency you wish to another currency, a full list of supported currencies is at: https://www.exchangerate-api.com/docs/supported-currencies");
+					break;
+				case "today":
+					message.channel.send("Usage of the command is as followed: `;today *term*`\nTerms Allowed are:\n - Events\n - Births\n - Deaths");
+					break;
+				case "urban":
+					message.channel.send("Usage of the command is as followed: `;urban *word to search*`");
+					break;
+				case "quote":
+					message.channel.send("Sends a random quote!");
+					break;
+				case "yodish":
+					message.channel.send("Returns your words in yosidh format.");
+					break;
+				case "dad":
+					message.channel.send("Get a dad quote!");
+					break;
+				case "8ball":
+					message.channel.send("Get a yes/no awnser to your question!");
+					break;
+				case "insult":
+					message.channel.send("insult whoever you wish!");
+					message.react("🙊");
+					break;
+				case "me":
+					message.channel.send("What can i help you with?");
+					message.react("🤔");
+					break;
+				case "bwstats":
+					message.channel.send("There are several actions for the blackwake command, currently the supported options are: `overview` `weaponstats` `shipstats` `maintenance` `shipweaponry`\nNote: requires your profile to be set to public!");
+					break;
+				case "payday2":
+					message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
+					break;
+				case "trump":
+					message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
+					break;
+				default:
+					message.reply("That command currently either has no help section or is detailed in the commands list.");
+					message.react("448435180286509066");
+					break;
+				}
+			}else{
+				message.channel.send("I currently have help for:\n`"
+					+`${supportedQueries.join("` `")}`+"`");
+			}
+			break;
+		case "blackwake":
+			TrackingCommand = true;
+			if (adjustableConfig.apis.blackwake){
+				if (!args){
+					message.reply("Please enter the valid terms!");
 				}else
-				if (user<botroll){
-					message.channel.send("You Lose!");
-				}else{
-					message.channel.send("Draw!");
-				}
-			});
-		});
-	}
-
-	if (command === "rolldie"){
-		TrackingCommand = true;
-		message.channel.send(getRandomInt(7));
-	}
-
-	if (command === "rollcustom"){
-		TrackingCommand = true;
-		let min = parseInt(args[0]);
-		let max = parseInt(args[1]);
-		if (parseInt(args[0]) < 1){
-			message.channel.send("Please use a starting number greater than 0.");
-		}else
-		if (min >= max){
-			message.channel.send("Please use a maximum value greater than the minimum.");
-		}else
-		if (isNaN(min)){
-			message.channel.send("Please enter a number.");
-		}else
-		if (parseInt(args[1]) > 1){
-			message.channel.send(getRandomBetweenInt(min,max));
-		}else{
-			message.channel.send(getRandomInt(parseInt(args[0])+1));
-		}
-	}
-
-	if (command === "coinflip"){
-		TrackingCommand = true;
-		let coin = getRandomInt(2);
-		message.channel.send("💰").then((msg)=>{
-			msg.edit("💰🤔").then((msg)=>{
-				msg.edit("💰").then((msg)=>{
-					msg.edit("😯");	
-				});
-			});
-		});
-		if (coin === 0){
-			message.channel.send("Tails!");
-		}else{
-			message.channel.send("Heads!");
-		}
-	}
-
-	//Astronomy picture of the day
-	if (command === "apod"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.apod){
-			AstronomyPictureoftheDay(message);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//Not working yet
-	if (command === "marsweather"){
-		//GetMarsWeatherData(message);
-		message.channel.send("This command is currently not working :(");
-	}
-
-	if (command === "numtrivia"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.numTrivia){
-			NumbersTrivia(message);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "exchangerates"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.exchangeRates){
-			let rate = "";
-			if (args[0]){
-				rate = args[0].toUpperCase();
-			}else{
-				rate = "GBP";
-			}
-			ExchangeRates(message,rate);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "advice"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.advice){
-			Advice(message);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "today"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.today){
-			if (args[0]){
-				let allowedInputs = ["events","births","deaths"];
-				if (allowedInputs.indexOf(args[0]) >= 0){
-					TodayInHistory(message,args[0]);
-				}else{
-					message.channel.send("That type doesnt exist!");
+				if (args.length < 2){
+					message.reply("Please enter the valid terms!");
+					}else{
+				getBlackwakeStats(message,args);
 				}
 			}else{
-				message.channel.send("You need to give the type!");
+				message.reply("That command is currently disabled!");
 			}
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "jeanie"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.jeanie){
-			jeanieAPI(message,args);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	if (command === "bacon"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.bacon){
-			BaconIpsum(message);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//Random Chuck norris
-	if (command === "chuck"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.chuck){
-			chuckNorrisAPI(message);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
-	//Look up meaning for a word
-	if (command === "dictionary"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.dictionary){
-			wordsAPI(message,args);
-		}else{
-			message.reply("That command is currently disabled!");
-		}
+			break;
+    	default:
+    		break;
 	}
 
 	//Mute + unmute for mods
@@ -4033,40 +4264,6 @@ bot.on("message", async message => {
 
 	}
 
-	//restarts the bot
-	if (command === "restart"){
-		if (message.author.id === config.ownerId){
-			await message.channel.send("Restarting....");
-			process.exit();
-		}
-	}
-	
-	if (command === "underground"){
-		if (message.guild.id === "341261290607607818"){
-			underground(message);
-		}
-		else{
-			message.reply("Im sorry, your too much of a normie to use this command.");
-		}
-	}
-
-	//VERY DANGEROUS, GIVE ACCESS TO WITH CAUTION
-	//Allows you to run code through a single command
-	if (command === "do"){
-		if (message.author.id === config.ownerId){
-			try{
-				let code = args.join(" ");
-				let evaled = eval(code);
-				if (typeof evaled !== "string"){
-       				evaled = require("util").inspect(evaled);
-				}
-				message.channel.send(clean(evaled), {code:"xl"});
-    		} catch (err) {
-      			message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
-    		}
-		}
-	}
-
 	if (command === "payday2"){
 		TrackingCommand = true;
 		if (adjustableConfig.apis.payday2){
@@ -4171,22 +4368,6 @@ bot.on("message", async message => {
 		}
 	}
 
-	if (command === "blackwake"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.blackwake){
-			if (!args){
-				message.reply("Please enter the valid terms!");
-			}else
-			if (args.length < 2){
-				message.reply("Please enter the valid terms!");
-			}else{
-				getBlackwakeStats(message,args);
-			}
-		}else{
-			message.reply("That command is currently disabled!");
-		}
-	}
-
 	//If command is being tracked, update table
 	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
 		var conCheckIfInTable = mysql.createConnection({
@@ -4224,148 +4405,16 @@ bot.on("message", async message => {
 	customCommands(message,command);
 	permanentCommands(message,command);
 
-	if (command === "createcommand"){
-		if (message.member.roles.cache.has("615214073843548163")){
-			createCustomCommands(message,args);
-			message.reply("Your command is ready to go!");
-		}else{
-			message.reply("You do not have permission to use this!");
-		}
-	}
-
-	if (command === "deletecommand"){
-		if (message.member.roles.cache.has("615214073843548163")){
-			deleteCustomCommands(message,args[0]);
-			message.reply("Command deleted!");
-		}else{
-			message.reply("You do not have permission to use this!");
-		}
-	}
-
-	//Reaction Role Commands
-	if (command === "createrole"){
-		if (args.length > 2){
-			message.channel.send("Please use the following format:\n `;createrole <emoji> <role ping>`");
-		}else{
-			if (message.member.roles.cache.has("665939545371574283")){
-				if (args[0].indexOf(":") !== -1){
-					createReactionRole(message,args[0].split(":")[1],args[1].slice(3,args[1].length - 1));
-				}else{
-					createReactionRole(message,args[0],args[1].slice(3,args[1].length - 1));
-				}
-			}else{
-				message.reply("You don't have permission to use this command!");
-			}
-		}
-	}
-	if (command === "deleterole"){
-		if (args.length > 1){
-			message.channel.send("Please use the following format:\n `;deleterole <emoji>`");
-		}else{
-			if (message.member.roles.cache.has("665939545371574283")){
-				if (args[0].indexOf(":") !== -1){
-					deleteReactionRole(message,args[0].split(":")[1]);
-				}else{
-					deleteReactionRole(message,args[0]);
-				}
-			}else{
-				message.reply("You don't have permission to use this command!");
-			}
-		}
-	}
-
-	//Economy System
-	if (command === "purchase"){
-		if (args[0] && args.length < 2){
-			purchaseItem(message.author.id,args[0],message);
-		}else{
-			message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
-		}
-	}
-
-	if (command === "search"){
-		if (args){
-			searchForItem(args,message);
-		}else{
-			message.channel.send("Please enter the correct format:\n`;search` `Item Name`");
-		}
-	}
-
-	if (command === "sell"){
-		if (args[0] && args.length < 2){
-			sellItem(message.author.id,args[0],message);
-		}else{
-			message.channel.send("Please enter the correct format:\n`;sell` `Item Name`");
-		}
-	}
-
-	if (command === "inventory"){
-		if (args.length < 1){
-			listInventory(message.author.id,message);
-		}else{
-			message.channel.send("Please enter the correct format:\n`;inventory`");
-		}
-	}
-
-	if (command === "giftcoins"){
-		if (args.length < 3){
-			let user = getUserFromMention(args[0]);
-			giftUserCoins(message.author.id,user.id,args[1],message);
-			user = null;
-		}else{
-			message.channel.send("Please enter the correct format:\n`;giftCoins` `@userToGiftTo` `amount`");
-		}
-	}
-
-	//Income Methods
-	if (command === "gamble"){
-		if (args[0] && (args.length === 1)){
-			gambleMoney(args[0],message);
-		}else{
-			message.channel.send("Please use the correct format! `;gamble` `amount`");
-		}
-	}
-
-	if (command === "beg"){
-		let num = getRandomInt(300);
-		if (num == 243){
-			let amount = getRandomInt(20);
-			giveUserMoney(parseFloat(amount).toFixed(2) * 1);
-			message.channel.send(`Considering how desperate you are, I think I can spare you ${amount}GC, consider yourself lucky.`);
-		}else{
-			let file = fs.readFileSync('./datafile.json').toString();
-			file = JSON.parse(file);
-			let p = getRandomInt(file.responses.beg.length);
-			message.channel.send(file.repsonses.beg[p]);
-		}
-	}
-
-	if (command === "quiz"){
-		if (cooldowns.quiz.allowed){
-			quizQuestions(message);
-		}else{
-			message.channel.send(`Please wait, this command is currently on a ${parseInt(cooldowns.quiz.timeoutLength / 1000)}sec cooldown.`);
-		}
-	}
-
-	//Archiving Tickets
-	//if (command === ""){}
-
-	/////ADMIN CONFIG AREA
-	if (command === "config"){
-		if (message.member.roles.cache.has("665939545371574283")){
-			if (args.length > 2){
-				message.reply("Please ensure you enter the correct number of arguments!");
-			}else{
-				updateDBConfig(message,args);
-			}
-		}else{
-			message.reply("You don't have permission to use this!");
-			message.react("690144528312696969");
-		}
-	}
-
 	return;
+	}catch(e){
+		console.log("###########################################################");
+		console.log("##################### START OF ERROR ######################");
+		console.log("###########################################################");
+		console.log(e);
+		console.log("###########################################################");
+		console.log("##################### END OF ERROR ########################");
+		console.log("###########################################################");
+	}
 });
 
 //Pure Logging of events
