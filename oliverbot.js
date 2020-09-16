@@ -4417,165 +4417,174 @@ bot.on("message", async message => {
 	}
 });
 
-//Pure Logging of events
-bot.on('raw', async event => {
-	if (["CHANNEL_CREATE","CHANNEL_DELETE","CHANNEL_PINS_UPDATE","GUILD_BAN_ADD","GUILD_BAN_REMOVE","GUILD_BAN_REMOVE","GUILD_MEMBER_REMOVE","GUILD_ROLE_CREATE","GUILD_ROLE_DELETE","MESSAGE_REACTION_ADD","MESSAGE_REACTION_REMOVE","MESSAGE_DELETE"].indexOf(event.t) === -1){
-		return;
-	}else
-    if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
-        return; 
-    }	
-	if (event.t === "CHANNEL_CREATE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let channel = bot.channels.cache.get(event.d.id);
-		if (channel.type !== 'dm'){
-			let CCembed = new Discord.MessageEmbed()
-				.setColor(0x013220)
-				.setTitle("Channel Created")
-				.addField("Info:",`Name: ${event.d.name}\n<#${event.d.id}>`)
-				.setTimestamp();
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(CCembed);
-		}else{
-			return;
-		}
-	}else
-	if (event.t === "CHANNEL_DELETE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		if (event.d.type === 0){ //text
-			let Cembed = new Discord.MessageEmbed()
-  				.setTitle("Text Channel Deleted")
-  				.setColor(0x013220)
-  				.setTimestamp()
-  				.addField(`Name:`,`${event.d.name}`,true)
-  				.addField(`ID:`,`${event.d.id}`,true)
- 				.setTimestamp();
-    		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(Cembed);
-    		Cembed = null;
-		}
-		else if (event.d.type === 2){ //voice
-    		let Cembed = new Discord.MessageEmbed()
-  				.setTitle("Voice Channel Deleted")
-  				.setColor(0x013220)
-  				.setTimestamp()
-  				.addField(`Name:`,`${channel.name}`,true)
-  				.addField(`ID:`,`${channel.id}`,true)
- 				.setTimestamp();
-    		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(Cembed);
-    		Cembed = null;
-		}
-		else if (event.d.type === 4){ //category
-    		let Cembed = new Discord.MessageEmbed()
-  				.setTitle("Category Deleted")
-  				.setColor(0x013220)
-  				.setTimestamp()
-  				.addField(`Name:`,`${channel.name}`,true)
-  				.addField(`ID:`,`${channel.id}`,true)
- 				.setTimestamp();
-    		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(Cembed);
-    		Cembed = null;
-		}
-		else{
-			console.log("Channel Deleted");
-			console.log(channel);
-		}
-	}else
-	if (event.t === "CHANNEL_PINS_UPDATE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let pinsEmbed = new Discord.MessageEmbed()
-			.setTitle(`Message Pinned`)
-			.setDescription(`Channel: <#${event.d.channel_id}>\nID: ${event.d.channel_id}`);
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(pinsEmbed);
-	}else
-	if (event.t === "GUILD_BAN_ADD"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first());
-  		if (entry.createdTimestamp > (Date.now() - 5000)){
-  			let embed = new Discord.MessageEmbed()
-						.setColor('#0099ff')
-						.setTitle("User Banned")
-						.addField("User",`${entry.target}`)
-						.addField("Executor",`${entry.executor}`)
-						.addField("Reason",`${entry.reason}`)
-						.setThumbnail(`${entry.target.displayAvatarURL}`)
-						.setTimestamp();
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(embed);
-		}
-		entry = null;
-	}else
-	if (event.t === "GUILD_BAN_REMOVE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first());
-  		let embed = new Discord.MessageEmbed()
-			.setColor('#0099ff')
-			.setTitle("User UnBanned")
-			.addField("User",`${entry.target}`)
-			.addField("Executor",`${entry.executor}`)
-			.setThumbnail(`${entry.target.displayAvatarURL}`)
-			.setTimestamp();
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(embed);
-	}else
-	if (event.t === "GUILD_MEMBER_REMOVE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		try{
-			let entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_KICK'}).then(audit => audit.entries.first());
+async function manageRawEmbeds(event){
+
+	if (event.d.guild_id !== config.serverInfo.serverId) return;
+
+	let rawEmbed = new Discord.MessageEmbed()
+		.setTimestamp();
+
+	let embedColours = {
+		"channels" : 0x013220,
+		"bans" : "#0099ff",
+		"roles" : "#FFFF00"
+	}
+
+	let entry;
+
+	switch (event.t){
+		case "CHANNEL_CREATE":
+			let createChannel = bot.channels.cache.get(event.d.id);
+			if (event.d.type !== 'dm'){
+
+				rawEmbed.setColor(embedColours.channels)
+					.setTitle("Channel Created")
+					.addField("Info:",`Name: ${event.d.name}\n<#${event.d.id}>`);
+			}
+			break;
+		case "CHANNEL_DELETE":
+			rawEmbed.setColor(embedColours.channels)
+				.addField(`Name:`,`${event.d.name}`,true)
+  				.addField(`ID:`,`${event.d.id}`,true);
+
+			switch (event.d.type){
+				case 0:
+  					rawEmbed.setTitle("Text Channel Deleted");
+ 					break;
+ 				case 2:
+ 					rawEmbed.setTitle("Voice Channel Deleted");
+ 					break;
+ 				case 4:
+ 					rawEmbed.setTitle("Category Deleted");
+ 					break;
+ 				default:
+ 					rawEmbed.setTitle("Text Channel Deleted");
+ 					break;
+			}
+
+			break;
+		case "CHANNEL_PINS_UPDATE":
+			rawEmbed.setTitle(`Message Pinned`)
+				.setDescription(`Channel: <#${event.d.channel_id}>\nID: ${event.d.channel_id}`);
+			break;
+		case "GUILD_BAN_ADD":
+			entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first());
 			if (entry.createdTimestamp > (Date.now() - 5000)){
-				let embed = new Discord.MessageEmbed()
-					.setColor('#0099ff')
-					.setTitle("User Kicked")
+				rawEmbed.setColor(embedColours.bans)
+					.setTitle("User Banned")
 					.addField("User",`${entry.target}`)
 					.addField("Executor",`${entry.executor}`)
 					.addField("Reason",`${entry.reason}`)
-					.setThumbnail(`${entry.target.displayAvatarURL}`)
-					.setTimestamp();
-				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(embed);
+					.setThumbnail(`${entry.target.displayAvatarURL}`);
 			}
-		}catch(e){
-			console.log("Someone left :(");
-		}
-	}else
-	if (event.t === "GUILD_ROLE_CREATE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let roleCreateEmbed = new Discord.MessageEmbed()
-			.setTitle("Role Created")
-			.addField("Role:",`${event.d.role.name}\n<@&${event.d.role.id}>`)
-			.setTimestamp();
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(roleCreateEmbed);
-	}else
-	if (event.t === "GUILD_ROLE_DELETE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first());
-		if (entry.createdTimestamp > (Date.now() - 5000)){
-			let roleDeleteEmbed = new Discord.MessageEmbed()
-				.setTitle("Role Deleted")
-				.setDescription(`${entry.changes[0].old}\nby: ${entry.executor}`)
-				.setTimestamp();
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(roleDeleteEmbed);
-		}
-	}else
-	if (event.t === "MESSAGE_REACTION_ADD"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-		reactionRoles.forEach(roleInfo => {
-			if (event.d.emoji.name === roleInfo.EmojiName){ //ECO
-				let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-				member.roles.add(role);
+			break;
+		case "GUILD_BAN_REMOVE":
+			entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first());
+			rawEmbed.setColor(embedColours.bans)
+				.setTitle("User Unbanned")
+				.addField("User",`${entry.target}`)
+				.addField("Executor",`${entry.executor}`)
+				.setThumbnail(`${entry.target.displayAvatarURL}`);
+			break;
+		case "GUILD_MEMBER_REMOVE":
+			try{
+				entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_KICK'}).then(audit => audit.entries.first());
+				if (entry.createdTimestamp > (Date.now() - 5000)){
+					rawEmbed.setColor(embedColours.bans)
+						.setTitle("User Kicked")
+						.addField("User",`${entry.target}`)
+						.addField("Executor",`${entry.executor}`)
+						.addField("Reason",`${entry.reason}`)
+						.setThumbnail(`${entry.target.displayAvatarURL}`);
+				}
+			}catch(e){
+				console.log("Someone left :(");
 			}
-		});
-	}else
-	if (event.t === "MESSAGE_REACTION_REMOVE"){
-		if (event.d.guild_id !== config.serverInfo.serverId) return;
-		let member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-		reactionRoles.forEach(roleInfo => {
-			if (event.d.emoji.name === roleInfo.EmojiName){ //ECO
-				let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-				member.roles.remove(role);
+			break;
+		case "GUILD_ROLE_CREATE":
+			rawEmbed.setTitle("Role Created")
+				.setColor(embedColours.roles)
+				.addField("Role:",`${event.d.role.name}\n<@&${event.d.role.id}>`);
+			break;
+		case "GUILD_ROLE_DELETE":
+			entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first());
+			if (entry.createdTimestamp > (Date.now() - 5000)){
+				rawEmbed.setTitle("Role Deleted")
+					.setColor(embedColours.roles)
+					.setDescription(`${entry.changes[0].old}\nby: ${entry.executor}`);
 			}
-		});
-	}else{
-		return;
+			break;
+		default:
+			break;
 	}
-	event = undefined;
-	delete event;
+
+	bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+	return;
+}
+
+//Pure Logging of events
+bot.on('raw', async event => {
+	if (event.d){
+	if (event.d.guild_id){
+	if (event.d.guild_id !== config.serverInfo.serverId) return;
+	let member;
+
+	switch (event.t){
+		case "CHANNEL_CREATE":
+			manageRawEmbeds(event);
+			break;
+		case "CHANNEL_DELETE":
+			manageRawEmbeds(event);
+			break;
+		case "CHANNEL_PINS_UPDATE":
+			manageRawEmbeds(event);
+			break;
+		case "GUILD_BAN_ADD":
+			manageRawEmbeds(event);
+			break;
+		case "GUILD_BAN_REMOVE":
+			manageRawEmbeds(event);
+			break;
+		case "GUILD_MEMBER_REMOVE":
+			manageRawEmbeds(event);
+			break;
+		case "GUILD_ROLE_CREATE":
+			manageRawEmbeds(event);
+			break;
+		case "GUILD_ROLE_DELETE":
+			manageRawEmbeds(event);
+			break;
+		case "MESSAGE_REACTION_ADD":
+			if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+        		break;; 
+    		}
+			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
+			reactionRoles.forEach(roleInfo => {
+				if (event.d.emoji.name === roleInfo.EmojiName){ 
+					let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
+					member.roles.add(role);
+				}
+			});
+			break;
+		case "MESSAGE_REACTION_REMOVE":
+			if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+        		break;; 
+    		}
+			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
+			reactionRoles.forEach(roleInfo => {
+				if (event.d.emoji.name === roleInfo.EmojiName){ 
+					let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
+					member.roles.remove(role);
+				}
+			});
+			break;
+		default:
+			break;
+	}
+
+	}
+	}
+
 	return;
 });
 
@@ -4606,8 +4615,7 @@ bot.on("messageDelete", function(message){
 		.setFooter(`From: ${message.channel}`)
 		.setTimestamp();
     bot.channels.cache.get("732318686186045440").send(msgDeleteEmbed);
-    message = null;
+    return;
 });
-
 
 bot.login(config.token);
