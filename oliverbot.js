@@ -1760,6 +1760,8 @@ async function getBlackwakeStats(message,args){
 
 			if (response.includes("500 Internal Server Error")){
 				message.channel.send("Steam API error, code 500");
+			}else if (response.includes("Unknown problem determining WebApi request destination.")) {
+				message.channel.send("Please ensure you have entered the correct terms! Terms can be found using `;help` `blackwake`.\nThe format is as followed:\n`;blackwake` `term` `steamID64`");
 			}else if(response[0] == '<') {
 				console.log("BW RESPONSE ISSUE");
 				console.log(response);
@@ -1983,10 +1985,15 @@ async function getBlackwakeStats(message,args){
 						});
 					});
 				}else{
-					message.reply("Please enter a valid option! You can find valid options by using `;help bwstats`.");
+					message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
 				}
 			}
-		}).catch(message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:"));
+		}).catch(err => {
+			if (err) {
+				console.error(err);
+				message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:");
+			};
+		});//.catch(message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:"));
 
 	}else{
 		message.reply("This command is currently on cooldown due to steam API limitations, try again soon!");
@@ -3954,7 +3961,7 @@ bot.on("message", async message => {
         	break;
         case "help":
         	TrackingCommand = true;
-			let supportedQueries = ["listcommands","list","memegen","random","apod","marsweather","rankcard","translate","exchangerates","today","urban","quote","yodish","dad","8ball","bwstats","payday2","trump"];
+			let supportedQueries = ["listcommands","list","memegen","random","apod","marsweather","rankcard","translate","exchangerates","today","urban","quote","yodish","dad","8ball","blackwake","payday2","trump"];
 			if (args[0]){
 				let term = args[0].toLowerCase();
 			switch (term){
@@ -4016,7 +4023,7 @@ bot.on("message", async message => {
 					message.channel.send("What can i help you with?");
 					message.react("🤔");
 					break;
-				case "bwstats":
+				case "blackwake":
 					message.channel.send("There are several actions for the blackwake command, currently the supported options are: `overview` `weaponstats` `shipstats` `maintenance` `shipweaponry`\nNote: requires your profile to be set to public!");
 					break;
 				case "payday2":
