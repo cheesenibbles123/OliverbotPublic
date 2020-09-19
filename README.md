@@ -6,7 +6,7 @@ I didnt upload the node-modules file to go with this as it contains too many fil
 
 There are likley lots of malpractises in here and in general don't expect everything to work, some stuff is **work-in-progress**, and upgrading to discordjs v12 fucked with a lot of stuff.
 
-Incase the title of the files wasn't clear enough, the included config and datafile are simply templates containing the layout that should be used for them. A database is not included, however it should be fairly simple to identify the columns used based on the code.
+Incase the title of the files wasn't clear enough, the included config and datafile are simply templates containing the layout that should be used for them. ***A database is not included***, however it should be fairly simple to identify the columns used based on the code. For reference i used a **Mysql** database
 
 # Additional Info
 
