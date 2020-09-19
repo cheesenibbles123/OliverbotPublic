@@ -84,18 +84,22 @@ function LoadDataFromDatabase(){
 	return;
 }
 
+//WIP TO ALLOW ECONOMY TIMED EVENTS (MAYBE?)
 function scheduleDbEvent(type,time,reason,query,affectedUserID){
+	//Establish database connection information
 	var scheduleEventCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
 		password : mysqlLoginData.password,
 		database : mysqlLoginData.database
 	});
+	//Connect to the DB
 	scheduleEventCon.connect(err => {
 		if(err) console.log(err);
 	});
+	//Main Query
 	scheduleEventCon.query(`SELECT COUNT(*) FROM eventcounts`, (err,length) =>{
-		if (err) konsole(err);
+		if (err) console.log(err);
 		if (type === "oneUse"){
 			scheduleEventCon.query(`CREATE EVENT ${length + 1} on SCHEDULE at CURRENT_TIMESTAMP + INTERVAL ${time} DO ${query}`);
 		}else if (type === "repeating"){
@@ -152,6 +156,7 @@ function loadConfigFromDB(){
 			for (i=0;i<rows.length;i++){
 
 				if (rows[i].category === 'reactions'){
+					//Determines if the data for the specific reaction type is a bool or int, for example some are singular true/false events, some are a X in Y chance event
 					if (rows[i].boolInt === 'bool'){
 						adjustableConfig.reactions[`${rows[i].name}`] = checkIfBool(rows[i].currentval);
 					}else{
@@ -203,6 +208,7 @@ function checkIfBool(toCheck){
 	return val;
 }
 
+//Ones that can be created and deleted by select individuals
 function loadCustomCommandsFromDB(){
 	customCommandList = [];
 	var loadCustCon = mysql.createConnection({
@@ -229,6 +235,7 @@ function loadCustomCommandsFromDB(){
 	return;
 }
 
+//Ones that the owner makes, and thus only the owner can remove
 function loadPermanentCommandsFromDB(){
 	miniCommands = [];
 	var loadCustCon = mysql.createConnection({
@@ -455,7 +462,7 @@ async function updateDBConfig(message,args){
 }
 
 //Custom Commands
-
+//Ones that can be created and deleted by select individuals
 function customCommands(message,command){
 	if (customCommandList.length < 1){return;}
 	else{
@@ -467,6 +474,7 @@ function customCommands(message,command){
 	}
 	return;
 }
+//Ones that the owner makes, and thus only the owner can remove
 function permanentCommands(message,command){
 	if (miniCommands.length < 1){return;}
 	else{
@@ -729,32 +737,36 @@ function levelchecker(msg,reqlvl){
 function randomgif(message,content){
 	let yay = getRandomInt(5);
 	if ( yay === 1){
-		if (content.includes("roll")){
-			message.channel.send("https://makeagif.com/gif/2-person-forward-roll-race-vrEaaK");
-		}else
-		if (content.includes("jump")){
-			message.channel.send("https://giphy.com/gifs/filmeditor-will-ferrell-elf-l2YWvhSnfdWR8nRBe");
-		}else
-		if (content.includes("wave")){
-			message.channel.send("https://giphy.com/gifs/elf-TDWwXnAZbp0xW");
-		}else
-		if (content.includes("happy")){
-			message.channel.send("https://giphy.com/gifs/butterfly-penguins-otnqsqqzmsw7K");
-		}else
-		if (content.includes("excited")){
-			message.channel.send("https://giphy.com/gifs/happy-car-home-rdma0nDFZMR32");
-		}else
-		if (content.includes("ritual")){
-			message.channel.send("https://giphy.com/gifs/woohoo-R8e3MbbggNBjq");
-		}else
-		if (content.includes("alien")){
-			message.channel.send("https://giphy.com/gifs/alien-area-51-stormarea51-WqEmD7ycGVIzzNMxya");
-		}else
-		if (content.includes("ree")){
-			message.channel.send("https://giphy.com/gifs/justin-g-mad-u-camron-xTcnSOEKegBnYhGahW");
-		}else 
-		if (content.includes("no way")){
-			message.channel.send("https://giphy.com/gifs/6OpusTwW1csaQ");
+		switch(true){
+			case (content.includes("roll")):
+				message.channel.send("https://makeagif.com/gif/2-person-forward-roll-race-vrEaaK");
+			break;
+			case (content.includes("jump")):
+				message.channel.send("https://giphy.com/gifs/filmeditor-will-ferrell-elf-l2YWvhSnfdWR8nRBe");
+				break;
+			case (content.includes("wave")):
+				message.channel.send("https://giphy.com/gifs/elf-TDWwXnAZbp0xW");
+				break;
+			case (content.includes("happy")):
+				message.channel.send("https://giphy.com/gifs/butterfly-penguins-otnqsqqzmsw7K");
+				break;
+			case (content.includes("excited")):
+				message.channel.send("https://giphy.com/gifs/happy-car-home-rdma0nDFZMR32");
+				break;
+			case (content.includes("ritual")):
+				message.channel.send("https://giphy.com/gifs/woohoo-R8e3MbbggNBjq");
+				break;
+			case (content.includes("alien")):
+				message.channel.send("https://giphy.com/gifs/alien-area-51-stormarea51-WqEmD7ycGVIzzNMxya");
+				break;
+			case (content.includes("ree")):
+				message.channel.send("https://giphy.com/gifs/justin-g-mad-u-camron-xTcnSOEKegBnYhGahW");
+				break;
+			case (content.includes("no way")):
+				message.channel.send("https://giphy.com/gifs/6OpusTwW1csaQ");
+				break;
+			default:
+				break;
 		}
 	}
 	return;
@@ -956,44 +968,48 @@ function randomresponse(message,content,serverid){
 }
 
 function randompirateshit(msg,content){
-	if (content.includes("yarr")){
-		msg.channel.send("Yarr");
-	}else
-	if (content.includes("pirates") || content.includes("pirate")){
-		msg.channel.send("Ahoy, Me Hearties!");
-	}else
-	if (content.includes("hello")){
-		msg.channel.send("Ahoy, Matey!");
-	}else
-	if (content.includes("enemy") || content.includes("enemies")){
-		let num = getRandomInt(2);
-		if (num === 0){
-			msg.channel.send("All Hand Hoy!");
-		}else
-		if (num === 1){
-			msg.channel.send("Bloody Buccaneers!");
-		}else{
-			msg.channel.send("Lets Get us Those Dubloons!");
-		}
-		return;
-	}else
-	if (content.includes("storm")){
-		msg.channel.send("A storm ye say? Batten Down The Hatches!");
-	}else
-	if (content.includes("treasure")){
-		msg.channel.send("Now ye ain't hiding da booty from us now are ye?");
-	}else
-	if (content.includes("run")){
-		msg.channel.send("I want me a Clap O' Thunder!");
-	}else
-	if (content.includes("traitor")){
-		msg.channel.send("There be a traitor? Cleave Him to the Brisket.");
-	}else
-	if (content.includes("sword")){
-		msg.channel.send("Me fav sword's me Cutlass");
-	}else
-	if (content.includes("loot")){
-		msg.channel.send("What rewards we be having?");
+
+	switch(true){
+		case (content.includes("yarr")):
+			msg.channel.send("Yarr");
+			break;
+		case (content.includes("pirates") || content.includes("pirate")):
+			msg.channel.send("Ahoy, Me Hearties!");
+			break;
+		case (content.includes("hello")):
+			msg.channel.send("Ahoy, Matey!");
+			break;
+		case (content.includes("enemy") || content.includes("enemies")):
+			let num = getRandomInt(2);
+			if (num === 0){
+				msg.channel.send("All Hand Hoy!");
+			}else
+			if (num === 1){
+				msg.channel.send("Bloody Buccaneers!");
+			}else{
+				msg.channel.send("Lets Get us Those Dubloons!");
+			}
+			break;
+		case (content.includes("storm")):
+			msg.channel.send("A storm ye say? Batten Down The Hatches!");
+			break;
+		case (content.includes("treasure")):
+			msg.channel.send("Now ye ain't hiding da booty from us now are ye?");
+			break;
+		case (content.includes("run")):
+			msg.channel.send("I want me a Clap O' Thunder!");
+			break;
+		case (content.includes("traitor")):
+			msg.channel.send("There be a traitor? Cleave Him to the Brisket.");
+			break;
+		case (content.includes("sword")):
+			msg.channel.send("Me fav sword's me Cutlass");
+			break;
+		case (content.includes("loot")):
+			msg.channel.send("What rewards we be having?");
+			break;
+		default:
+			break;
 	}
 
 	return;
@@ -1216,17 +1232,21 @@ function AstronomyPictureoftheDay(message){
 }
 
 function ISSLocation(){
-	fetch("http://api.open-notify.org/iss-now.json").then(res => res.json()).then(response => {
-		let date = new Date(response.timestamp * 1000);
-		date = date.toString().replace(/T/g," ");
-		date = date.replace(/Z/g,"");
-		let ISSembed = new Discord.MessageEmbed()
-					.setTitle("ISS Location")
-					.addField("Data:",`LAT: ${response.iss_position.latitude}\nLON: ${response.iss_position.longitude}`)
-					.setFooter(`Date: ${date}`)
-					.setTimestamp();
-		bot.channels.cache.get("641373050281132034").messages.fetch("668646281752739851").then(msg => { msg.edit(ISSembed);});
-	});
+	try {
+		fetch("http://api.open-notify.org/iss-now.json").then(res => res.json()).then(response => {
+			let date = new Date(response.timestamp * 1000);
+			date = date.toString().replace(/T/g," ");
+			date = date.replace(/Z/g,"");
+			let ISSembed = new Discord.MessageEmbed()
+						.setTitle("ISS Location")
+						.addField("Data:",`LAT: ${response.iss_position.latitude}\nLON: ${response.iss_position.longitude}`)
+						.setFooter(`Date: ${date}`)
+						.setTimestamp();
+			bot.channels.cache.get("641373050281132034").messages.fetch("668646281752739851").then(msg => { msg.edit(ISSembed);});
+		});
+	}catch(e){
+		console.log(e);
+	}
 	return;
 }
 
@@ -1397,27 +1417,32 @@ function Status(){
 	let file = fs.readFileSync("./datafile.json").toString();
 	file = JSON.parse(file);
 	let a = getRandomInt(4);
-	if (a === 0){
-		let b = getRandomInt(file.status.PLAYING.length+1);
-		bot.user.setActivity(`${file.status.PLAYING[b]}`);
-	}else
-	if (a === 1){
-		let b = getRandomInt(file.status.WATCHING.length+1);
-		bot.user.setActivity(`${file.status.WATCHING[b]}`,{
-			type : "WATCHING"
-		});
-	}else
-	if (a === 2){
-		let b = getRandomInt(file.status.STREAMING.length+1);
-		bot.user.setActivity(`${file.status.STREAMING[b]}`,{
-			type: "STREAMING"
-		});
-	}else
-	if (a === 3){
-		let b = getRandomInt(file.status.LISTENING.length+1);
-		bot.user.setActivity(`${file.status.LISTENING[b]}`,{
-			type: "LISTENING"
-		});
+	let b;
+	switch (a){
+		case 0:
+			b = getRandomInt(file.status.PLAYING.length+1);
+			bot.user.setActivity(`${file.status.PLAYING[b]}`);
+			break;
+		case 1:
+			b = getRandomInt(file.status.WATCHING.length+1);
+			bot.user.setActivity(`${file.status.WATCHING[b]}`,{
+				type : "WATCHING"
+			});
+			break;
+		case 2:
+			b = getRandomInt(file.status.STREAMING.length+1);
+			bot.user.setActivity(`${file.status.STREAMING[b]}`,{
+				type: "STREAMING"
+			});
+			break;
+		case 3:
+			b = getRandomInt(file.status.LISTENING.length+1);
+			bot.user.setActivity(`${file.status.LISTENING[b]}`,{
+				type: "LISTENING"
+			});
+			brea;
+		default:
+			break;
 	}
 	return;
 }
@@ -1607,7 +1632,7 @@ function wordsAPI(message,args){
 	if (args.length > 1){
 		message.channel.send("The API only works with one word at a time :(");
 	}else
-	if(args.lgenth === 0){
+	if (args.length === 0){
 		message.channel.send("Please enter a word to look up.");
 	}else{
 		fetch(`https://wordsapiv1.p.mashape.com/words/${args[0]}/definitions`).then(resp => resp.json()).then(response => {
@@ -1735,6 +1760,11 @@ async function getBlackwakeStats(message,args){
 
 			if (response.includes("500 Internal Server Error")){
 				message.channel.send("Steam API error, code 500");
+			}else if(response[0] == '<') {
+				console.log("BW RESPONSE ISSUE");
+				console.log(response);
+				console.log("END OF RESPONSE");
+				message.channel.send("Error - Please ping @Archie so he checks the console in time!");
 			}else{
 
 				response = JSON.parse(response);
@@ -2130,6 +2160,7 @@ function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type){
 // }
 
 function displayBotInfo(){
+	try{
 	//emojis
 	bot.channels.cache.get("692403714048131185").messages.fetch("692403984836853862").then(msg => {
 		msg.edit("```js\n" + `Main:\n1. randomReactions: ${adjustableConfig.reactions.randomReactions}\n2. chanceofRandomReactions: 1 in ${adjustableConfig.reactions.chanceofRandomReactions}\n3. gtSpecific: ${adjustableConfig.reactions.gtSpecific}\n4. giraffeReactions: ${adjustableConfig.reactions.giraffeReactions}\n5. smirks: ${adjustableConfig.reactions.smirks}\n6. reactionMenu: ${adjustableConfig.reactions.reactionMenu}` + "```");
@@ -2146,6 +2177,9 @@ function displayBotInfo(){
 	bot.channels.cache.get("692403714048131185").messages.fetch("692419941248270407").then(msg => {
 		msg.edit("```\nTo edit the config:\n Command = config, first argument is the command name, second is true/false/number\nA few Examples:\n - ;config memegen true\n - ;config nWordFilter true\n - ;config chanceofRandomReactions 27\n```");
 	});
+	}catch(e){
+		console.log(e);
+	}
 	return;
 }
 
@@ -2845,10 +2879,6 @@ function gambleMoney(amount,message){
 	return;
 }
 
-function konsole(stuff){
-	console.log(stuff);
-}
-
 //WIP
 function customizeShip(ID,args,message){
 	var conCustomShip = mysql.createConnection({
@@ -2938,11 +2968,12 @@ async function textQuizQuestions(message,item){
 	});
 }
 
+//Will be moved over to switch case when implemented
 function specificQuiz(message,type){
 	if (type === "flags"){}else if (type === "blackwake"){}else if (type === "science"){}else if (type === "sports"){}else if (type === "geography"){}else if (type === "show/music"){}else if (type === "music"){}else if (type === "tech"){}else {}
 }
 
-function work(message){
+function economyWork(message){
 	var workCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -3112,6 +3143,7 @@ bot.on("message", async message => {
 
 	//dont respond to bots
 	if (message.author.bot) return;
+	if (message.channel.type === "dm") return;
 
 	//this situation specific, if running your own just remove
 	if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
@@ -3166,7 +3198,7 @@ bot.on("message", async message => {
 		else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
 			message.delete();
 			message.channel.send(message.author+" Please dont use that language!");
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: "+message.author);
+			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
 		}
 	}
 
@@ -3250,6 +3282,10 @@ bot.on("message", async message => {
 		message.react("452064991688916995");
 	}
 
+	let TrackingCommand = false;
+	let member;
+	let awnser;
+
 	//Ping Oliverbot
 	if (message.content.startsWith("<@!556545106468012052>")){
 		TrackingCommand = true;
@@ -3312,8 +3348,6 @@ bot.on("message", async message => {
 	command = command.toLowerCase();
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
-
-	let TrackingCommand = false;
 
 	//MEMEZ
 	switch (command){
@@ -3586,6 +3620,10 @@ bot.on("message", async message => {
 			}else{
 				loadFromDatafile(command,"",message);
 			}
+			break;
+		case "work":
+			//economyWork(message);
+			message.channel.send("Not Yet Active.");
 			break;
 		case "config":
 			if (message.member.roles.cache.has("665939545371574283")){
@@ -4012,79 +4050,81 @@ bot.on("message", async message => {
 				message.reply("That command is currently disabled!");
 			}
 			break;
+		case "mute":
+			if (serverid === config.serverInfo.roles.serverModerator && adjustableConfig.misc.moderatorCommands){
+				let muteMember = message.guild.members.find('id',message.mentions.users.first().id);
+				try{
+					let muteAwnser = rolecheckformutes(muteMember, message);
+					if (muteAwnser){
+						message.channel.send("You can't use this command.");
+					}else{
+						mute(muteMember,message);
+						bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+muteMember+" has been muted by "+message.member.user.username+".");
+					}
+				}catch(e){
+					console.log(e);
+					message.channel.send("error, please check you pinged an individual");
+				}
+			}
+			break;
+		case "unmute":
+			if (serverid === config.serverInfo.roles.serverModerator && adjustableConfig.misc.moderatorCommands){
+				let unmuteMember = message.guild.members.find('id',message.mentions.users.first().id);
+				try{
+					let unmuteAwnser = rolecheckformutes(unmuteMember, message);
+					if (awnser){
+						message.channel.send("You can't use this command.");
+					}else{
+						unmute(unmuteMember,message);
+						bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+unmuteMember+" has been unmuted by "+message.member.user.username+".");
+					}
+				}catch(e){
+					console.log(e);
+					message.channel.send("Error, please check you pinged an individual.");
+				}
+			}
+			break;
+		case "tempmute":
+			if (serverid === config.serverInfo.serverId && adjustableConfig.misc.moderatorCommands){
+				let tempmuteMember = message.guild.members.find('id',message.mentions.users.first().id);
+				if (tempmuteMember.roles.has(config.serverInfo.roles.serverModerator)){
+					try{
+						let tempmuteAwnser = rolecheckformutes(tempmuteMember, message);
+						if (tempmuteAwnser){
+							message.channel.send("You can't mute someone higher than, or at your current role.");
+						}else{
+							let tempmuteGo = false;
+							if (typeof args[1] === "undefined"){
+								time = 86400000;
+								tempmuteGo = true;
+							}else{
+								try{
+									time = parseInt(args[1]);
+									tempmuteGo = true;
+								}catch(e){
+									message.channel.send("Please enter a correct number of hours.");
+								}
+							}
+							if (tempmuteGo){
+								let delayTemp = (parseInt(args[1])*1000*60*60);
+								mute(tempmuteMember,message);
+								bot.channels.cache.get("512331083493277706").send("User: "+tempmuteMember+" has been temporarily muted for "+time+" hour(s) by "+message.member.user.username+".\n"
+																	+"Reason: "+(args.slice(2)).join(" "));
+								setTimeout(() => {
+									unmute(tempmuteMember,message)
+								}, delay);
+							}
+						}
+					}catch(e){
+						message.channel.send("Error, please check you pinged an individual/ used the command correctly.");
+					}
+				}else{
+					message.channel.send("You cannot use this command");
+				}	
+			}
+			break;
     	default:
     		break;
-	}
-
-	//Mute + unmute for mods
-	if (command === "mute" && serverid === config.serverInfo.roles.serverModerator && adjustableConfig.misc.moderatorCommands){
-		let member = message.guild.members.find('id',message.mentions.users.first().id);
-		try{
-			let awnser = rolecheckformutes(member, message);
-			if (awnser){
-				message.channel.send("You can't use this command.");
-			}else{
-				mute(member,message);
-				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+" has been muted by "+message.member.user.username+".");
-			}
-		}catch(e){
-			console.log(e);
-			message.channel.send("error, please check you pinged an individual");
-		}
-	}
-
-	if (command === "unmute" && serverid === "401924028627025920" && adjustableConfig.misc.moderatorCommands){
-		let member = message.guild.members.find('id',message.mentions.users.first().id);
-		try{
-			let awnser = rolecheckformutes(member, message);
-			if (awnser){
-				message.channel.send("You can't use this command.");
-			}else{
-				unmute(member,message);
-				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+" has been unmuted by "+message.member.user.username+".");
-			}
-		}catch(e){
-			console.log(e);
-			message.channel.send("Error, please check you pinged an individual.");
-		}
-	}
-
-	if (command === "tempmute" && serverid === config.serverInfo.serverId && adjustableConfig.misc.moderatorCommands){
-		let member = message.guild.members.find('id',message.mentions.users.first().id);
-		if (member.roles.has(config.serverInfo.roles.serverModerator)){
-			try{
-				let awnser = rolecheckformutes(member, message);
-				if (awnser){
-					message.channel.send("You can't mute someone higher than, or at your current role.");
-				}else{
-					let go = false;
-					if (typeof args[1] === "undefined"){
-						time = 86400000;
-						go = true;
-					}else{
-						try{
-							time = parseInt(args[1]);
-							go = true;
-						}catch(e){
-							message.channel.send("Please enter a correct number of hours.");
-						}
-					}
-					if (go){
-						let delay = (parseInt(args[1])*1000*60*60);
-						mute(member,message);
-						bot.channels.cache.get("512331083493277706").send("User: "+member+" has been temporarily muted for "+time+" hour(s) by "+message.member.user.username+".\n"
-																	+"Reason: "+(args.slice(2)).join(" "));
-						setTimeout(() => {
-							unmute(member,message)
-						}, delay);
-					}
-				}
-			}catch(e){
-				message.channel.send("Error, please check you pinged an individual/ used the command correctly.");
-			}
-		}else{
-			message.channel.send("You cannot use this command");
-		}	
 	}
 
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){ // if moderator
@@ -4430,6 +4470,7 @@ async function manageRawEmbeds(event){
 		"roles" : "#FFFF00"
 	}
 
+	let flag = true;
 	let entry;
 
 	switch (event.t){
@@ -4499,6 +4540,7 @@ async function manageRawEmbeds(event){
 				}
 			}catch(e){
 				console.log("Someone left :(");
+				flag = false;
 			}
 			break;
 		case "GUILD_ROLE_CREATE":
@@ -4515,10 +4557,17 @@ async function manageRawEmbeds(event){
 			}
 			break;
 		default:
+			console.log("EVENT START");
+			console.log(event);
+			console.log("EVENT END");
+			rawEmbed.setTitle(event.t)
+				.setDescription(event.d.toString());
 			break;
 	}
 
-	bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+	if (flag){
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+	}
 	return;
 }
 
@@ -4531,10 +4580,14 @@ bot.on('raw', async event => {
 
 	switch (event.t){
 		case "CHANNEL_CREATE":
-			manageRawEmbeds(event);
+			if (event.d.type !== 'dm'){
+				manageRawEmbeds(event);
+			}
 			break;
 		case "CHANNEL_DELETE":
-			manageRawEmbeds(event);
+			if (event.d.type !== 'dm'){
+				manageRawEmbeds(event);
+			}
 			break;
 		case "CHANNEL_PINS_UPDATE":
 			manageRawEmbeds(event);
