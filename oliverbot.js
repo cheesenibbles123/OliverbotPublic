@@ -4119,6 +4119,16 @@ bot.on("message", async message => {
 				case "trump":
 					message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
 					break;
+				case "userinfo":
+					if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+						message.channel.send("Displays information about a user.");
+					}
+					break;
+				case "channelinfo":
+					if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+						message.channel.send("Displays information about the currently viewed channel.");
+					}
+					break;
 				default:
 					message.reply("That command currently either has no help section or is detailed in the commands list.");
 					message.react("448435180286509066");
