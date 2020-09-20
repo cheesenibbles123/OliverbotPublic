@@ -1468,18 +1468,44 @@ function getUserFromMention(mention) {
 }
 
 function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar){
-	let embed = new Discord.MessageEmbed()
-		.setTitle("User Info")
-   		.setColor(0x008000)
-   		.addField(`User:`,`<@${userID}>`)
-   		.addField(`ID:`,`${userID}`,true)
-   		.addField(`Account created at:`,`${userCreatedAt}`,true)
-   		.addField(`Joined the server at:`,`${userJoinedAt}`,true)
-   		.setThumbnail(`${avatar}`)
-   		.addField(`Details:`,`Server Deafened: ${serverDeaf}\nServer Muted: ${serverMute}`)
-   		.addField(`Avatar`,`[Link](${avatar})`)
-   		.setTimestamp();
-  	message.channel.send(embed);
+
+	var con = mysql.createConnection({
+		host : mysqlLoginData.host,
+		user : mysqlLoginData.user,
+		password : mysqlLoginData.password,
+		database : mysqlLoginData.database,
+	});
+
+	con.connect(err => {
+		if(err) console.log(err);
+	});
+
+	let message_count;
+	con.query(`SELECT * FROM xp WHERE id = '${userID}'`, (err,rows) => {
+		if (rows.length < 1){
+			message_count = 0;
+		}else{
+			message_count = rows[0].message_count;
+		}
+		let embed = new Discord.MessageEmbed()
+			.setTitle("User Info")
+   			.setColor(0x008000)
+   			.addField(`User:`,`<@${userID}>`)
+   			.addField(`ID:`,`${userID}`,true)
+   			.addField(`Account created at:`,`${userCreatedAt}`,true)
+   			.addField(`Joined the server at:`,`${userJoinedAt}`,true)
+   			.setThumbnail(`${avatar}`)
+   			.addField(`Details:`,`Server Deafened: ${serverDeaf}\nServer Muted: ${serverMute}\nMessages Sent: ${message_count}`)
+   			.addField(`Avatar`,`[Link](${avatar})`)
+   			.setTimestamp();
+  		message.channel.send(embed);
+	});
+
+	setTimeout(function(){
+		con.destroy();
+		con = null;
+	},3000);
+
   	return;
 }
 
@@ -3104,7 +3130,7 @@ function listTheCommands(message){
    		}
 }
 
-function getUserInformation(message){
+function getUserInformation(message,args){
 	let userInformation;
 	let userID;
 	let userCreatedAt;
@@ -3287,7 +3313,7 @@ bot.on("message", async message => {
 				if(err) console.log(err);
 				let sql;
 				if(rows.length < 1){
-					sql = `INSERT INTO xp (id,username,xp,level,canget) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${genXp()}, 0, '"n"')`;
+					sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${genXp()}, 0, '"n"', '1')`;
 					con.query(sql);
 				} else {
 					let eligible = rows[0].canget;
@@ -3299,10 +3325,20 @@ bot.on("message", async message => {
 							level = level+1;
 							newxp = 0;
 						}
-						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"' WHERE id = '${message.author.id}'`;
+						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
 						con.query(sql);
 						giveUserMoney(0.2,message.author.id);
+					}else{
+						con.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
 					}
+				}
+			});
+
+			con.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+				if (rows.length < 1){
+					con.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+				}else{
+					con.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
 				}
 			});
 
@@ -4283,20 +4319,7 @@ bot.on("message", async message => {
 			break;
 		case "channelinfo":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-				let channelinfo = new Discord.MessageEmbed()
-							.setColor('#0099ff')
-							.setTitle(`${message.channel.name}`)
-							.setAuthor(`Channel Info`)
-							.addField('Type', `${message.channel.type}`,true)
-							.addField('Created', `${message.channel.createdAt}`,true)
-							.addField('Amount of people that can view', `${message.channel.members.size} / ${message.guild.members.size}`,true)
-							.addField('Nsfw', `-${message.channel.nsfw}`,true)
-							.addField('Category', `-${message.channel.parent}`,true)
-							.addField('Last Pin', `-${message.channel.lastPinAt}`,true)
-							.addField('Topic', `-${message.channel.topic}`,true)
-							.addField('Currently being typed in', `${message.channel.typing}`,true)
-							.setTimestamp();
-				message.channel.send(channelinfo);
+				getChannelInformation(message);
 			}else{
 				lackingPermissions(message);
 			}
@@ -4334,7 +4357,7 @@ bot.on("message", async message => {
 			break;
 		case "userinfo":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
-				getUserInformation(message);
+				getUserInformation(message,args);
 			}else{
 				lackingPermissions(message);
 			}
@@ -4397,107 +4420,155 @@ bot.on("message", async message => {
 	}
 });
 
+function getChannelInformation(message){
+	var con = mysql.createConnection({
+		host : mysqlLoginData.host,
+		user : mysqlLoginData.user,
+		password : mysqlLoginData.password,
+		database : mysqlLoginData.database,
+	});
+
+	con.connect(err => {
+		if(err) console.log(err);
+	});
+
+	con.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+		let message_count;
+		if (rows.length < 1){
+			message_count = 0;
+		}else{
+			message_count = rows[0].message_count;
+		}
+
+		let guild = bot.guilds.cache.get(message.guild.id);
+
+		let channelinfo = new Discord.MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle(`${message.channel.name}`)
+			.setAuthor(`Channel Info`)
+			.addField('Type', `${message.channel.type}`,true)
+			.addField('Created', `${message.channel.createdAt}`,true)
+			.addField('Amount of people that can view', `${message.channel.members.size} / ${guild.members.cache.size}`,true)
+			.addField('Nsfw', `-${message.channel.nsfw}`,true)
+			.addField('Category', `-${message.channel.parent}`,true)
+			.addField('Last Pin', `-${message.channel.lastPinAt}`,true)
+			.addField('Topic', `-${message.channel.topic}`,true)
+			.addField('Currently being typed in', `${message.channel.typing}`,true)
+			.addField('Messages Sent', `${message_count}`,true)
+			.setTimestamp();
+		message.channel.send(channelinfo);
+	});
+
+	setTimeout(function(){
+		con.destroy();
+		con = null;
+	},3000);
+	
+	return;
+}
+
 function getPayday2Information(message){
 	if (adjustableConfig.apis.payday2){
-			if (isAllowed){
-				if (args[0]){
-					if (args[0] === "overview"){
-						fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=218620&steamid=${args[1]}`).then(resp => resp.json()).then(response => {
-							let achievements = response.playerstats.achievements;
-							let stats = response.playerstats.stats;
+		if (isAllowed){
+			if (args[0]){
+				if (args[0] === "overview"){
+					fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=218620&steamid=${args[1]}`).then(resp => resp.json()).then(response => {
+						let achievements = response.playerstats.achievements;
+						let stats = response.playerstats.stats;
 
-							let unassignedUsed = true;
-							let unassignedKills = true;
+						let unassignedUsed = true;
+						let unassignedKills = true;
 					
-							let mostKills = {};
-							let totalKills = 0;
-							let faveWeapon = {};
+						let mostKills = {};
+						let totalKills = 0;
+						let faveWeapon = {};
 					
-							let infamyLevel = {};
-							let playerLevel = 0;
+						let infamyLevel = {};
+						let playerLevel = 0;
 
-							let successHeists = 0;
-							let totalHeists = 0;
+						let successHeists = 0;
+						let totalHeists = 0;
 
-							let gageCoins = 0;
-							for (i=0;i<stats.length;i++){
+						let gageCoins = 0;
+						for (i=0;i<stats.length;i++){
 
-								//Fave Weapon
-								if (stats[i].name.indexOf("weapon_used") !== -1){
-									if (unassignedUsed){
+							//Fave Weapon
+							if (stats[i].name.indexOf("weapon_used") !== -1){
+								if (unassignedUsed){
+									faveWeapon = stats[i];
+									unassignedUsed = false;
+								}else{
+									if (faveWeapon.value < stats[i].value){
 										faveWeapon = stats[i];
-										unassignedUsed = false;
-									}else{
-										if (faveWeapon.value < stats[i].value){
-											faveWeapon = stats[i];
-										}
 									}
 								}
+							}
 
-								//Most Kills + Total Kills
-								if (stats[i].name.indexOf("weapon_kills") !== -1){
-									totalKills = totalKills + stats[i].value;
-									if (unassignedKills){
+							//Most Kills + Total Kills
+							if (stats[i].name.indexOf("weapon_kills") !== -1){
+								totalKills = totalKills + stats[i].value;
+								if (unassignedKills){
+									mostKills = stats[i];
+									unassignedKills = false;
+								}else{
+									if (mostKills.value < stats[i].value){
 										mostKills = stats[i];
-										unassignedKills = false;
-									}else{
-										if (mostKills.value < stats[i].value){
-											mostKills = stats[i];
-										}
 									}
 								}
+							}
 
-								//Infamy Level
-								if (stats[i].name.indexOf("player_rank") !== -1){
-									if (stats[i].value === 1){
-										infamyLevel = stats[i];
-									}
+							//Infamy Level
+							if (stats[i].name.indexOf("player_rank") !== -1){
+								if (stats[i].value === 1){
+									infamyLevel = stats[i];
 								}
+							}
 
-								//Player Level
-								if (stats[i].name === "player_level"){
-									playerLevel = stats[i].value;
-								}
+							//Player Level
+							if (stats[i].name === "player_level"){
+								playerLevel = stats[i].value;
+							}
 
-								//Heist ratio
-								if (stats[i].name === "heist_failed"){
-									totalHeists = totalHeists + stats[i].value;
-								}
-								if (stats[i].name === "heist_success"){
-									successHeists = successHeists + stats[i].value;
-									totalHeists = totalHeists + stats[i].value;
-								}	
-
-								if (stats[i].name === "player_coins"){
-									gageCoins = stats[i].value;
-								}
+							//Heist ratio
+							if (stats[i].name === "heist_failed"){
+								totalHeists = totalHeists + stats[i].value;
+							}
+							if (stats[i].name === "heist_success"){
+								successHeists = successHeists + stats[i].value;
+								totalHeists = totalHeists + stats[i].value;
 							}	
 
-							let OverviewEmbed = new Discord.MessageEmbed()
-								.setColor('#0099ff')
-								.setTitle(`${response.playerstats.gameName}`)
-								.addField("Achievements",`${achievements.length} / 1160`,true)
-								.addField("Weapon Stats",`Favourite Weapon: ${faveWeapon.name.slice(12).replace(/_/," ")} - used ${faveWeapon.value} time(s)\nMost Kills: ${mostKills.name.slice(13).replace(/_/," ")} - ${mostKills.value} kills\nTotal Kills: ${totalKills}`,true)
-								.addField("Player stats",`Level: (${convertToRoman(parseInt(infamyLevel.name.slice(12)))}) ${playerLevel}\nHeisting Performance: ${successHeists}/${totalHeists}\nGage coins: ${gageCoins}`,true)
-								.setTimestamp();
-							message.channel.send(OverviewEmbed);
-						});
-						isAllowed = false;
-						setTimeout(function(){
-							isAllowed = true;
-						},3000);
-					}else{
-						message.reply("Please enter a valid argument!\nCurrent valid arguments are: `overview STEAMID`");
-					}
+							if (stats[i].name === "player_coins"){
+								gageCoins = stats[i].value;
+							}
+						}	
+
+						let OverviewEmbed = new Discord.MessageEmbed()
+							.setColor('#0099ff')
+							.setTitle(`${response.playerstats.gameName}`)
+							.addField("Achievements",`${achievements.length} / 1160`,true)
+							.addField("Weapon Stats",`Favourite Weapon: ${faveWeapon.name.slice(12).replace(/_/," ")} - used ${faveWeapon.value} time(s)\nMost Kills: ${mostKills.name.slice(13).replace(/_/," ")} - ${mostKills.value} kills\nTotal Kills: ${totalKills}`,true)
+							.addField("Player stats",`Level: (${convertToRoman(parseInt(infamyLevel.name.slice(12)))}) ${playerLevel}\nHeisting Performance: ${successHeists}/${totalHeists}\nGage coins: ${gageCoins}`,true)
+							.setTimestamp();
+						message.channel.send(OverviewEmbed);
+					});
+					isAllowed = false;
+					setTimeout(function(){
+						isAllowed = true;
+					},3000);
 				}else{
-					message.reply("Please enter an argument!");
+					message.reply("Please enter a valid argument!\nCurrent valid arguments are: `overview STEAMID`");
 				}
 			}else{
-				message.reply("This command is currently on cooldown due to steam API limitations, try again soon!");
+				message.reply("Please enter an argument!");
 			}
 		}else{
-			message.reply("That command is currently disabled!");
+			message.reply("This command is currently on cooldown due to steam API limitations, try again soon!");
 		}
+	}else{
+		message.reply("That command is currently disabled!");
+	}
+	return;
 }
 
 function lackingPermissions(message){
