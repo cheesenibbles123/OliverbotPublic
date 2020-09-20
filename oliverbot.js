@@ -1812,21 +1812,31 @@ async function getBlackwakeStats(message,args){
 						}
 						allWeaponStats.push(stats[i]);
 					}
-			
-					if (stats[i].name === "acc_kills"){
-						kills = stats[i].value;
-					}
-
-					if (stats[i].name === "acc_deaths"){
-						deaths = stats[i].value;
-					}
-
-					if (stats[i].name === "acc_capWins"){
-						captainWins = stats[i].value;
-					}
-
-					if (stats[i].name === "acc_capLose"){
-						captainLosses = stats[i].value;
+					
+					switch (stats[i].name){
+						case "acc_kills":
+							kills = stats[i].value;
+							break;
+						case "acc_deaths":
+							deaths = stats[i].value;
+							break;
+						case "acc_capWins":
+							captainWins = stats[i].value;
+							break;
+						case "acc_capLose":
+							captainLosses = stats[i].value;
+							break;
+						case "stat_score":
+							score = stats[i].value;
+							break;
+						case "stat_rating":
+							rating = stats[i].value;
+							break;
+						case "stat_score_gs":
+							statScoreGs = stats[i].value;
+							break;
+						default:
+							break;
 					}
 
 					if (ships.indexOf(stats[i].name) !== -1){
@@ -1841,151 +1851,144 @@ async function getBlackwakeStats(message,args){
 						shipWeaponryStats.push(stats[i]);
 					}
 
-					if (stats[i].name === "stat_score"){
-						score = stats[i].value;
-					}
-
-					if (stats[i].name === "stat_score_gs"){
-						statScoreGs = stats[i].value;
-					}
-
-					if (stats[i].name === "stat_rating"){
-						rating = stats[i].value;
-					}
-
 				}
-				if (args[0] === "overview"){
-					let achieves = "";
-					if (JSON.stringify(response).includes("achievements")){
-						achieves = response.playerstats.achievements.length.toString();
-					}else{
-						achieves = "NA";
-					}
-					let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nAchievements: ${achieves}/39`;
-					if (statScoreGs != 0){
-						playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
-					}
-					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-						response2 = response2.response.games;
-						for (i=0;i<response2.length;i++){
-							if (parseInt(response2[i].appid) === 420290){
-								playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
-							}
-						}	
+
+				let BwShipsEmbed;
+				switch (args[0]){
+					case "overview":
+						let achieves = "";
+						if (JSON.stringify(response).includes("achievements")){
+							achieves = response.playerstats.achievements.length.toString();
+						}else{
+							achieves = "NA";
+						}
+						let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nAchievements: ${achieves}/39`;
+						if (statScoreGs != 0){
+							playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
+						}
+						fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
+							response2 = response2.response.games;
+							for (i=0;i<response2.length;i++){
+								if (parseInt(response2[i].appid) === 420290){
+									playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
+								}
+							}	
+							let BwMaintainStats = new Discord.MessageEmbed()
+								.setTitle(`${args[1]}`)
+								.addField(`General`,`${playerStatsCombined}`,true)
+								.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}`,true)
+								.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true)
+								.setTimestamp();
+							message.channel.send(BwMaintainStats);				
+						});
+						break;
+					case "weaponstats":
+						let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
+						let BwWeaponsEmbed = new Discord.MessageEmbed()
+							.setTitle(`${args[1]}`)
+							.setDescription(WeaponStats)
+							.setTimestamp();;
+						message.channel.send(BwWeaponsEmbed);
+						setSteamApiNotAllowed();
+						break;
+					case "shipstats":
+						let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins");
+						let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
+						BwShipsEmbed = new Discord.MessageEmbed()
+							.setTitle(`${args[1]}`)
+							.addField("Ships",`${ShipStats}`,true)
+							.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true)
+							.setTimestamp();;
+						message.channel.send(BwShipsEmbed);
+						setSteamApiNotAllowed();
+						break;
+					case "shipweaponry":
+						let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills");
+						BwShipsEmbed = new Discord.MessageEmbed()
+							.setTitle(`${args[1]}`)
+							.setDescription(`${shipWeap}`)
+							.setTimestamp();
+						message.channel.send(BwShipsEmbed);
+						setSteamApiNotAllowed();
+						break;
+					case "maintenance":
+						let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
 						let BwMaintainStats = new Discord.MessageEmbed()
 							.setTitle(`${args[1]}`)
-							.addField(`General`,`${playerStatsCombined}`,true)
-							.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}`,true)
-							.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true)
+							.setDescription(maintainStats)
 							.setTimestamp();
-						message.channel.send(BwMaintainStats);				
-					});
-				}else
-				if (args[0] === "weaponstats"){
-					let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
-					let BwWeaponsEmbed = new Discord.MessageEmbed()
-						.setTitle(`${args[1]}`)
-						.setDescription(WeaponStats)
-						.setTimestamp();;
-					message.channel.send(BwWeaponsEmbed);
-					setSteamApiNotAllowed();
-				}else
-				if (args[0] === "shipstats"){
-					let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins");
-					let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
-					let BwShipsEmbed = new Discord.MessageEmbed()
-						.setTitle(`${args[1]}`)
-						.addField("Ships",`${ShipStats}`,true)
-						.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true)
-						.setTimestamp();;
-					message.channel.send(BwShipsEmbed);
-					setSteamApiNotAllowed();
-				}else
-				if (args[0] === "shipweaponry"){
-					let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills");
-					let BwShipsEmbed = new Discord.MessageEmbed()
-						.setTitle(`${args[1]}`)
-						.setDescription(`${shipWeap}`)
-						.setTimestamp();
-					message.channel.send(BwShipsEmbed);
-					setSteamApiNotAllowed();
-				}else if(args[0] === "maintenance"){
-					let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
-					let BwMaintainStats = new Discord.MessageEmbed()
-						.setTitle(`${args[1]}`)
-						.setDescription(maintainStats)
-						.setTimestamp();
-					message.channel.send(BwMaintainStats);
-					setSteamApiNotAllowed();
-				}else if(args[0] === "compare"){
-					let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-					if (statScoreGs != 0){
-						playerStatsCombinedP1 = playerStatsCombinedP1 +`\nScore Gs: ${statScoreGs}`;
-					}
-					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-						response2 = response2.response.games;
-						for (i=0;i<response2.length;i++){
-							if (parseInt(response2[i].appid) === 420290){
-								playerStatsCombinedP1 = playerStatsCombinedP1 + `\n${(response2[i].playtime_forever)/60}hrs`;
-							}
+						message.channel.send(BwMaintainStats);
+						setSteamApiNotAllowed();
+						break;
+					case "compare":
+						let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
+						if (statScoreGs != 0){
+							playerStatsCombinedP1 = playerStatsCombinedP1 +`\nScore Gs: ${statScoreGs}`;
 						}
-						fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[2]}`).then(resp=>resp.json()).then(response => {
-							stats = response.playerstats.stats;
-							for (i=0;i<stats.length;i++){
-
-								if (stats[i].name === "acc_kills") {
-								    kills = stats[i].value;
+						fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
+							response2 = response2.response.games;
+							for (i=0;i<response2.length;i++){
+								if (parseInt(response2[i].appid) === 420290){
+									playerStatsCombinedP1 = playerStatsCombinedP1 + `\n${(response2[i].playtime_forever)/60}hrs`;
 								}
-
-								if (stats[i].name === "acc_deaths") {
-								    deaths = stats[i].value;
-								}
-
-								if (stats[i].name === "acc_capWins") {
-								    captainWins = stats[i].value;
-								}
-
-								if (stats[i].name === "acc_capLose") {
-								    captainLosses = stats[i].value;
-								}
-
-								if (stats[i].name === "stat_score") {
-								    score = stats[i].value;
-								}
-
-								if (stats[i].name === "stat_score_gs") {
-								    statScoreGs = stats[i].value;
-								}
-
-								if (stats[i].name === "stat_rating") {
-								    rating = stats[i].value;
-								}
-
 							}
+							fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[2]}`).then(resp=>resp.json()).then(response => {
+								stats = response.playerstats.stats;
+								for (i=0;i<stats.length;i++){
 
-							let playerStatsCombinedP2 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-							if (statScoreGs != 0){
-								playerStatsCombinedP2 = playerStatsCombinedP2 +`\nScore Gs: ${statScoreGs}`;
-							}
-							fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[2]}`).then(resp => resp.json()).then(response2 =>{
-								response2 = response2.response.games;
-								for (i=0;i<response2.length;i++){
-									if (parseInt(response2[i].appid) === 420290){
-										playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
+									switch (stats[i].name){
+										case "acc_kills":
+											kills = stats[i].value;
+											break;
+										case "acc_deaths":
+											deaths = stats[i].value;
+											break;
+										case "acc_capWins":
+											captainWins = stats[i].value;
+											break;
+										case "acc_capLose":
+											captainLosses = stats[i].value;
+											break;
+										case "stat_score":
+											score = stats[i].value;
+											break;
+										case "stat_score_gs":
+											statScoreGs = stats[i].value;
+											break;
+										case "stat_rating":
+											rating = stats[i].value;
+											break;
+										default:
+											break;
 									}
+
 								}
-							let bwComparisonStats = new Discord.MessageEmbed()
-								.setTitle(`${args[1]} VS ${args[2]}`)
-								.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
-								.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true)
-								.setTimestamp();
-							message.channel.send(bwComparisonStats);
-							setSteamApiNotAllowed();
+
+								let playerStatsCombinedP2 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
+								if (statScoreGs != 0){
+									playerStatsCombinedP2 = playerStatsCombinedP2 +`\nScore Gs: ${statScoreGs}`;
+								}
+								fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[2]}`).then(resp => resp.json()).then(response2 =>{
+									response2 = response2.response.games;
+									for (i=0;i<response2.length;i++){
+										if (parseInt(response2[i].appid) === 420290){
+											playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
+										}
+									}
+									let bwComparisonStats = new Discord.MessageEmbed()
+										.setTitle(`${args[1]} VS ${args[2]}`)
+										.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
+										.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true)
+										.setTimestamp();
+									message.channel.send(bwComparisonStats);
+									setSteamApiNotAllowed();
+								});
 							});
 						});
-					});
-				}else{
-					message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
+						break;
+					default:
+						message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
+						break;
 				}
 			}
 		}).catch(err => {
@@ -3101,6 +3104,54 @@ function listTheCommands(message){
    		}
 }
 
+function getUserInformation(message){
+	let userInformation;
+	let userID;
+	let userCreatedAt;
+	let userJoinedAt;
+	let avatar;
+	let serverDeaf;
+	let serverMute;
+
+	if (typeof args[0] !== undefined && args.length < 1){
+		userInformation = message.guild.members.cache.get(message.author.id);	
+		userID = userInformation.user.id;
+
+		let usertimestamp = (new Date(userInformation.user.createdTimestamp)).toString().split(" ");
+		userCreatedAt = `${usertimestamp[2]}/${usertimestamp[1]}/${usertimestamp[3]}\n${usertimestamp[4]} CEST`;
+
+		let temp = (new Date(userInformation.joinedTimestamp)).toString().split(" ");
+		userJoinedAt = `${temp[2]}/${temp[1]}/${temp[3]}\n${temp [4]} CEST`;
+
+		avatar = userInformation.user.displayAvatarURL();
+
+		serverDeaf = userInformation.serverDeaf;
+		serverMute = userInformation.serverMute;
+
+		displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
+
+	}else{
+		if (!message.mentions.users.size) {
+			message.reply('You need to ping member to get their info!');
+		}else{
+			userInformation = bot.guilds.cache.get(message.guild.id).cache.members.get(getUserFromMention(args[0]).id);	
+			userID = userInformation.user.id;
+			let usertimestamp = (new Date(userInformation.user.createdTimestamp)).toString().split(" ");
+			userCreatedAt = `${usertimestamp[2]}/${usertimestamp[1]}/${usertimestamp[3]}\n${usertimestamp[4]} CEST`;
+
+			let temp = (new Date(userInformation.joinedTimestamp)).toString().split(" ");
+			userJoinedAt = `${temp[2]}/${temp[1]}/${temp[3]}\n${temp [4]} CEST`;
+
+			avatar = userInformation.user.displayAvatarURL;
+
+			serverDeaf = userInformation.serverDeaf;
+			serverMute = userInformation.serverMute;
+
+			displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
+		}
+	}
+}
+
 
 bot.on("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
@@ -3111,35 +3162,32 @@ bot.on("ready", () => {
 	setInterval(() =>{
 		displayBotInfo();
 	}, 6000);
-
 	setInterval(() =>{
 		update7DTDlistNew();
 	}, 25000);
-
-	updateleaderboard();
-
-	//updateMClist();
-	getSteamGroupData();
-
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);
-	// setInterval(() =>{
-	// 	GetAllGamesBeingPlayed(config.serverInfo.serverId);
-	// }, 20000);
+	setInterval(() =>{
+		ISSLocation();
+	}, 10000);
+	setInterval(() =>{
+		displayRichestUsers();
+	}, 3600000);
+
+	updateShopWindow();
 	LoadDataFromDatabase();
+	updateleaderboard();
+	getSteamGroupData();
+
 
 	//setInterval(() =>{
 	//	BwServerStatus();
 	//}, 3000);
-	setInterval(() =>{
-		ISSLocation();
-	}, 10000);
-
-	setInterval(() =>{
-		displayRichestUsers();
-	}, 3600000);
-	updateShopWindow();
+	// setInterval(() =>{
+	// 	GetAllGamesBeingPlayed(config.serverInfo.serverId);
+	// }, 20000);
+	//updateMClist();
 	return;
 });
 
@@ -3289,6 +3337,7 @@ bot.on("message", async message => {
 		message.react("452064991688916995");
 	}
 
+	//Pre declaration for usage in the switch case below
 	let TrackingCommand = false;
 	let member;
 	let awnser;
@@ -3356,7 +3405,7 @@ bot.on("message", async message => {
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
 
-	//MEMEZ
+	//main command block
 	switch (command){
 		case "delete-administrators":
 			TrackingCommand = true;
@@ -3640,7 +3689,7 @@ bot.on("message", async message => {
 					updateDBConfig(message,args);
 				}
 			}else{
-				message.reply("You don't have permission to use this!");
+				lackingPermissions(message);
 				message.react("690144528312696969");
 			}
 			break;
@@ -3656,6 +3705,8 @@ bot.on("message", async message => {
     			} catch (err) {
       				message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     			}
+			}else{
+				lackingPermissions(message);
 			}
 			break;
 		case "coinflip":
@@ -4072,6 +4123,8 @@ bot.on("message", async message => {
 					console.log(e);
 					message.channel.send("error, please check you pinged an individual");
 				}
+			}else{
+				lackingPermissions(message);
 			}
 			break;
 		case "unmute":
@@ -4089,6 +4142,8 @@ bot.on("message", async message => {
 					console.log(e);
 					message.channel.send("Error, please check you pinged an individual.");
 				}
+			}else{
+				lackingPermissions(message);
 			}
 			break;
 		case "tempmute":
@@ -4128,172 +4183,107 @@ bot.on("message", async message => {
 				}else{
 					message.channel.send("You cannot use this command");
 				}	
+			}else{
+				lackingPermissions(message);
 			}
 			break;
-    	default:
-    		break;
-	}
+		case "botinfo":
+			// If owner or admin
+			if (message.author.id === config.ownerId || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				let totalSeconds = (bot.uptime / 1000);
+				let days = Math.floor(totalSeconds / 86400);
+				let hours = Math.floor(totalSeconds / 3600);
+				totalSeconds %= 3600;
+				let minutes = Math.floor(totalSeconds / 60);
+				let seconds = (totalSeconds % 60).toString();
+				seconds = seconds.slice(0,seconds.indexOf(".") + 3);
 
-	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){ // if moderator
-		if (command === "warn"){
-			let member = message.guild.members.find('id',message.mentions.users.first().id);
-			try{
-				member.send("Warning: "+(args.slice(1)).join(" ")+", You have been warned");
-			}catch(e){
-				message.reply("This isnt working currently.");
-			}
-		}
-		if (command === "totalusers"){
-			message.channel.send(message.guild.members.filter(member => !member.user.bot).size);
-		}
-		if (command === "userinfo"){
+				hours -= days * 24;
+				let uptime = `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
 
-			let userInformation;
-			let userID;
-			let userCreatedAt;
-			let userJoinedAt;
-			let avatar;
-			let serverDeaf;
-			let serverMute;
+				let used = process.memoryUsage();
+				let ramusage = (parseInt(used.rss) * (10**-6) ).toString();
+				ramusage = ramusage.slice(0,ramusage.indexOf(".") + 3);
 
-			if (typeof args[0] !== undefined && args.length < 1){
-				userInformation = message.guild.members.cache.get(message.author.id);	
-
-				userID = userInformation.user.id;
-
-				let usertimestamp = (new Date(userInformation.user.createdTimestamp)).toString().split(" ");
-				userCreatedAt = `${usertimestamp[2]}/${usertimestamp[1]}/${usertimestamp[3]}\n${usertimestamp[4]} CEST`;
-
-				let temp = (new Date(userInformation.joinedTimestamp)).toString().split(" ");
-				userJoinedAt = `${temp[2]}/${temp[1]}/${temp[3]}\n${temp [4]} CEST`;
-
-				avatar = userInformation.user.displayAvatarURL();
-
-				serverDeaf = userInformation.serverDeaf;
-				serverMute = userInformation.serverMute;
-
-				displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
-
-			}else{
-				if (!message.mentions.users.size) {
-					message.reply('You need to ping member to get their info!');
-				}else{
-					userInformation = bot.guilds.cache.get(message.guild.id).cache.members.get(getUserFromMention(args[0]).id);	
-
-					userID = userInformation.user.id;
-
-					let usertimestamp = (new Date(userInformation.user.createdTimestamp)).toString().split(" ");
-					userCreatedAt = `${usertimestamp[2]}/${usertimestamp[1]}/${usertimestamp[3]}\n${usertimestamp[4]} CEST`;
-
-					let temp = (new Date(userInformation.joinedTimestamp)).toString().split(" ");
-					userJoinedAt = `${temp[2]}/${temp[1]}/${temp[3]}\n${temp [4]} CEST`;
-
-					avatar = userInformation.user.displayAvatarURL;
-
-					serverDeaf = userInformation.serverDeaf;
-					serverMute = userInformation.serverMute;
-
-					displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
+				let memoryInformation = "";
+				for (let key in used) {
+				  memoryInformation = memoryInformation + `${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB\n`;
 				}
-			}
-		}
-		if (command === "savequote"){
-			if (typeof args[0] !== null && Number.isInteger(parseInt(args[0]))){
-				saveQuote(message.channel,args[0]);
-				message.reply("Done!");
+				if (memoryInformation.length < 1)
+				{
+					memoryInformation = "N/A";
+				}
+
+				let botInfo = new Discord.MessageEmbed()
+					.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${isPlaying}`)
+					.setTimestamp();
+
+				if (args[0] === "adv"){
+					botInfo.addField("Memory Information", `${memoryInformation}`);
+				}
+
+				message.channel.send(botInfo);
 			}else{
-				message.reply("Please make sure you have entered the correct message ID :)");
-			}
-		}
-	}
-
-	if (command === "botinfo" && (message.author.id === config.ownerId || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator))){ // if archie or admin
-			let totalSeconds = (bot.uptime / 1000);
-			let days = Math.floor(totalSeconds / 86400);
-			let hours = Math.floor(totalSeconds / 3600);
-			totalSeconds %= 3600;
-			let minutes = Math.floor(totalSeconds / 60);
-			let seconds = (totalSeconds % 60).toString();
-			seconds = seconds.slice(0,seconds.indexOf(".") + 3);
-
-			hours -= days * 24;
-			let uptime = `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
-
-			let used = process.memoryUsage();
-			let ramusage = (parseInt(used.rss) * (10**-6) ).toString();
-			ramusage = ramusage.slice(0,ramusage.indexOf(".") + 3);
-
-			let memoryInformation = "";
-			for (let key in used) {
-			  memoryInformation = memoryInformation + `${key} ${Math.round(used[key] / 1024 / 1024 * 100) / 100} MB\n`;
-			}
-			if (memoryInformation.length < 1)
-			{
-				memoryInformation = "N/A";
+				lackingPermissions(message);
 			}
 
-			let botInfo = new Discord.MessageEmbed()
-				.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${isPlaying}`)
-				.setTimestamp();
-
-			if (args[0] === "adv"){
-				botInfo.addField("Memory Information", `${memoryInformation}`);
-			}
-
-			message.channel.send(botInfo);
-	}
-
-
-	if (message.member.roles.cache.has("665939545371574283")){  // if admin
-		if (command === "ban"){
-			if (typeof args[0] === "string"){
-				try{
-					let member = message.guild.members.find('id',message.mentions.users.first().id);
-					if (member.roles.has(config.serverInfo.roles.serverAdministrator)){
-						message.channel.send("You can't ban an admin!");
-					}else{
-						message.guild.members.ban(member);
-						bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+", has been banned. Reason: "+(args.slice(2)).join(" ")+"\n"
-																	+"Banned by: "+message.member.user.username+".");
+			break;
+		case "ban":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				if (typeof args[0] === "string"){
+					try{
+						let member = message.guild.members.find('id',message.mentions.users.first().id);
+						if (member.roles.has(config.serverInfo.roles.serverAdministrator)){
+							message.channel.send("You can't ban an admin!");
+						}else{
+							message.guild.members.ban(member);
+							bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+", has been banned. Reason: "+(args.slice(2)).join(" ")+"\n"
+																		+"Banned by: "+message.member.user.username+".");
+						}
+					}catch(e){
+						message.channel.send("Please enter a correct member.");
 					}
-				}catch(e){
-					message.channel.send("Please enter a correct member.");
+				}else{
+					message.channel.send("Please enter a User.");
 				}
 			}else{
-				message.channel.send("Please enter a User.");
+				lackingPermissions(message);
 			}
-		}	
-		//Gets info about server command is sent in
-		if (command === "serverinfo"){
-			let features = "";
-			if (!(message.guild.features.length > 0)){
-				features = "-";
+			break;
+		case "serverinfo":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				let features = "";
+				if (!(message.guild.features.length > 0)){
+					features = "-";
+				}else{
+					features = message.guild.features.join(", ");
+				}
+				let booster_role = message.guild.members.filter(m => m.roles.has(config.serverInfo.roles.serverbooster));
+				let serverinfo = new Discord.MessageEmbed()
+									.setColor('#00008b')
+									.setTitle(`${message.guild.name}`)
+									.setDescription(`Server Information`)	
+									.addField('Basic', `Owner: ${message.guild.owner}\nDescription: ${message.guild.description}\nCreated on: ${message.guild.createdAt}\nAcronym: ${message.guild.nameAcronym}\nRegion: ${message.guild.region}\nID: ${message.guild.id}`)
+									.addField('Total Members', `Real People: ${message.guild.members.filter(member => !member.user.bot).size}\nBots: ${message.guild.members.filter(member => member.user.bot).size}`)
+									.addField('Additional Info', `Number of Roles:\nNumber of Bans:\nMFA Level Required:\nNumber of Webhooks:\nDefault Message Notifications:`,true)
+									.addField('-----', `${message.guild.roles.size}\n${await message.guild.fetchBans().then(result => {return result.size})}\n${message.guild.mfaLevel}\n${await message.guild.fetchWebhooks().then(result => {return result.size})}\n${message.guild.defaultMessageNotifications}`,true)
+									.addField('Nitro', `Boosters: ${booster_role.size}\nLevel: ${message.guild.premiumTier}\nVanity URL: ${message.guild.vanityURLCode}`,)
+									.addField('Number of Channels', `Categories: ${message.guild.channels.filter(channel => channel.type === "category").size}\nText: ${message.guild.channels.filter(channel => channel.type === "text").size}\nVoice: ${message.guild.channels.filter(channel => channel.type === "voice").size}`,true)
+									.addField('Verification', `Level: ${message.guild.verificationLevel}\nStatus: ${message.guild.verified}`,true)
+									.addField('Emoji Count', `${message.guild.emojis.size}`,true)
+									.addField('Explicit content filter level', `${message.guild.explicitContentFilter}`,true)
+									.addField('Features', `${features}`)
+									.addField('AFK', `Channel: ${message.guild.afkChannel}\nTimeout: ${message.guild.afkTimeout}sec`,true)
+									.setImage(`${message.guild.iconURL}`)
+									.setTimestamp();
+				message.channel.send(serverinfo);
 			}else{
-				features = message.guild.features.join(", ");
+				lackingPermissions(message);
 			}
-			let booster_role = message.guild.members.filter(m => m.roles.has(config.serverInfo.roles.serverbooster));
-			let serverinfo = new Discord.MessageEmbed()
-								.setColor('#00008b')
-								.setTitle(`${message.guild.name}`)
-								.setDescription(`Server Information`)	
-								.addField('Basic', `Owner: ${message.guild.owner}\nDescription: ${message.guild.description}\nCreated on: ${message.guild.createdAt}\nAcronym: ${message.guild.nameAcronym}\nRegion: ${message.guild.region}\nID: ${message.guild.id}`)
-								.addField('Total Members', `Real People: ${message.guild.members.filter(member => !member.user.bot).size}\nBots: ${message.guild.members.filter(member => member.user.bot).size}`)
-								.addField('Additional Info', `Number of Roles:\nNumber of Bans:\nMFA Level Required:\nNumber of Webhooks:\nDefault Message Notifications:`,true)
-								.addField('-----', `${message.guild.roles.size}\n${await message.guild.fetchBans().then(result => {return result.size})}\n${message.guild.mfaLevel}\n${await message.guild.fetchWebhooks().then(result => {return result.size})}\n${message.guild.defaultMessageNotifications}`,true)
-								.addField('Nitro', `Boosters: ${booster_role.size}\nLevel: ${message.guild.premiumTier}\nVanity URL: ${message.guild.vanityURLCode}`,)
-								.addField('Number of Channels', `Categories: ${message.guild.channels.filter(channel => channel.type === "category").size}\nText: ${message.guild.channels.filter(channel => channel.type === "text").size}\nVoice: ${message.guild.channels.filter(channel => channel.type === "voice").size}`,true)
-								.addField('Verification', `Level: ${message.guild.verificationLevel}\nStatus: ${message.guild.verified}`,true)
-								.addField('Emoji Count', `${message.guild.emojis.size}`,true)
-								.addField('Explicit content filter level', `${message.guild.explicitContentFilter}`,true)
-								.addField('Features', `${features}`)
-								.addField('AFK', `Channel: ${message.guild.afkChannel}\nTimeout: ${message.guild.afkTimeout}sec`,true)
-								.setImage(`${message.guild.iconURL}`)
-								.setTimestamp();
-			message.channel.send(serverinfo);
-		}
-		//Gets info about channel commmand is sent in
-		if (command === "channelinfo"){
-			let channelinfo = new Discord.MessageEmbed()
+			break;
+		case "channelinfo":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				let channelinfo = new Discord.MessageEmbed()
 							.setColor('#0099ff')
 							.setTitle(`${message.channel.name}`)
 							.setAuthor(`Channel Info`)
@@ -4306,14 +4296,109 @@ bot.on("message", async message => {
 							.addField('Topic', `-${message.channel.topic}`,true)
 							.addField('Currently being typed in', `${message.channel.typing}`,true)
 							.setTimestamp();
-			message.channel.send(channelinfo);
-		}
-
+				message.channel.send(channelinfo);
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "warn":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+				let member = message.guild.members.find('id',message.mentions.users.first().id);
+				try{
+					member.send("Warning: "+(args.slice(1)).join(" ")+", You have been warned");
+				}catch(e){
+					message.reply("This isnt working currently.");
+				}
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "totalusers":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+				message.channel.send(message.guild.members.filter(member => !member.user.bot).size);
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "savequote":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+				if (typeof args[0] !== null && Number.isInteger(parseInt(args[0]))){
+					saveQuote(message.channel,args[0]);
+					message.reply("Done!");
+				}else{
+					message.reply("Please make sure you have entered the correct message ID :)");
+				}
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "userinfo":
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
+				getUserInformation(message);
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "payday2":
+			TrackingCommand = true;
+			getPayday2Information(message);
+			break;
+    	default:
+    		message.react("🤔");
+    		break;
 	}
 
-	if (command === "payday2"){
-		TrackingCommand = true;
-		if (adjustableConfig.apis.payday2){
+	//If command is being tracked, update table
+	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
+		var conCheckIfInTable = mysql.createConnection({
+			host : mysqlLoginData.host,
+			user : mysqlLoginData.user,
+			password : mysqlLoginData.password,
+			database : mysqlLoginData.database,
+		});
+			
+		conCheckIfInTable.connect(err => {
+			if(err) console.log(err);
+		});
+
+		conCheckIfInTable.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
+			if(err) console.log(err);
+			let sql;
+			if(rows.length < 1){
+				sql = `INSERT INTO commandUsageOliverBot (command,TimesUsed) VALUES ('${command}',1)`;
+				conCheckIfInTable.query(sql);
+			} else {
+				let used = parseInt(rows[0].TimesUsed) + 1;
+				sql = `UPDATE commandUsageOliverBot SET TimesUsed = ${used} WHERE command = '${command}'`;
+				conCheckIfInTable.query(sql);
+			}
+		});
+
+		setTimeout(function(){
+			conCheckIfInTable.end();
+			conCheckIfInTable = null;
+		},3000);
+		TrackingCommand = false;
+	}
+
+	/////Custom Commands
+	customCommands(message,command);
+	permanentCommands(message,command);
+
+	return;
+	}catch(e){
+		console.log("###########################################################");
+		console.log("##################### START OF ERROR ######################");
+		console.log("###########################################################");
+		console.log(e);
+		console.log("###########################################################");
+		console.log("##################### END OF ERROR ########################");
+		console.log("###########################################################");
+	}
+});
+
+function getPayday2Information(message){
+	if (adjustableConfig.apis.payday2){
 			if (isAllowed){
 				if (args[0]){
 					if (args[0] === "overview"){
@@ -4413,56 +4498,15 @@ bot.on("message", async message => {
 		}else{
 			message.reply("That command is currently disabled!");
 		}
-	}
+}
 
-	//If command is being tracked, update table
-	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
-		var conCheckIfInTable = mysql.createConnection({
-			host : mysqlLoginData.host,
-			user : mysqlLoginData.user,
-			password : mysqlLoginData.password,
-			database : mysqlLoginData.database,
-		});
-			
-		conCheckIfInTable.connect(err => {
-			if(err) console.log(err);
-		});
-
-		conCheckIfInTable.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
-			if(err) console.log(err);
-			let sql;
-			if(rows.length < 1){
-				sql = `INSERT INTO commandUsageOliverBot (command,TimesUsed) VALUES ('${command}',1)`;
-				conCheckIfInTable.query(sql);
-			} else {
-				let used = parseInt(rows[0].TimesUsed) + 1;
-				sql = `UPDATE commandUsageOliverBot SET TimesUsed = ${used} WHERE command = '${command}'`;
-				conCheckIfInTable.query(sql);
-			}
-		});
-
-		setTimeout(function(){
-			conCheckIfInTable.end();
-			conCheckIfInTable = null;
-		},3000);
-		TrackingCommand = false;
-	}
-
-	/////Custom Commands
-	customCommands(message,command);
-	permanentCommands(message,command);
-
+function lackingPermissions(message){
+	let lackingEmbed = new Discord.MessageEmbed()
+		.setDescription("You do not have the right permissions to use this!")
+		.setTimestamp();
+	message.channel.send(lackingEmbed);
 	return;
-	}catch(e){
-		console.log("###########################################################");
-		console.log("##################### START OF ERROR ######################");
-		console.log("###########################################################");
-		console.log(e);
-		console.log("###########################################################");
-		console.log("##################### END OF ERROR ########################");
-		console.log("###########################################################");
-	}
-});
+}
 
 async function manageRawEmbeds(event){
 
