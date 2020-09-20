@@ -4544,6 +4544,8 @@ async function manageRawEmbeds(event){
 						.addField("Executor",`${entry.executor}`)
 						.addField("Reason",`${entry.reason}`)
 						.setThumbnail(`${entry.target.displayAvatarURL}`);
+				}else{
+					flag = false;
 				}
 			}catch(e){
 				console.log("Someone left :(");
