@@ -3160,7 +3160,7 @@ function getUserInformation(message,args){
 		if (!message.mentions.users.size) {
 			message.reply('You need to ping member to get their info!');
 		}else{
-			userInformation = bot.guilds.cache.get(message.guild.id).cache.members.get(getUserFromMention(args[0]).id);	
+			userInformation = bot.guilds.cache.get(message.guild.id).members.cache.get(getUserFromMention(args[0]).id);	
 			userID = userInformation.user.id;
 			let usertimestamp = (new Date(userInformation.user.createdTimestamp)).toString().split(" ");
 			userCreatedAt = `${usertimestamp[2]}/${usertimestamp[1]}/${usertimestamp[3]}\n${usertimestamp[4]} CEST`;
@@ -3168,7 +3168,7 @@ function getUserInformation(message,args){
 			let temp = (new Date(userInformation.joinedTimestamp)).toString().split(" ");
 			userJoinedAt = `${temp[2]}/${temp[1]}/${temp[3]}\n${temp [4]} CEST`;
 
-			avatar = userInformation.user.displayAvatarURL;
+			avatar = userInformation.user.displayAvatarURL();
 
 			serverDeaf = userInformation.serverDeaf;
 			serverMute = userInformation.serverMute;
