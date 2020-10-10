@@ -3647,7 +3647,7 @@ bot.on("message", async message => {
 			}
 			break;
 		case "refreshroles":
-			if (message.member.roles.cache.has("665939545371574283")){
+			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
 				displayReactionRoles();
 			}else{
 				message.reply("You don't have permission to use this command!");
