@@ -279,10 +279,11 @@ function loadReactionRolesFromDB(){
 		}
 		else{
 			for (i=0;i<rows.length;i++){
-				reactionRoles.push( {"EmojiName" : rows[i].emojiName, "RoleID" : rows[i].RoleID} );
+				reactionRoles.push( {"EmojiName" : rows[i].emojiName, "EmojiID" : rows[i].emojiID, "EmojiType" : rows[i].emojiType, "RoleID" : rows[i].RoleID} );
 			}
 		}
 	});
+	displayReactionRoles();
 	loadReactCon.end();
 	loadReactCon = null;
 	return;
@@ -369,8 +370,8 @@ function loadFromDatafile(commandUsed,data,message){
 			message.channel.send(file.Responses.dance[p]);
 			break;
 		case "beg":
-			p = getRandomInt(file.responses.beg.length);
-			message.channel.send(file.repsonses.beg[p]);
+			p = getRandomInt(file.Responses.beg.length);
+			message.channel.send(file.Responses.beg[p]);
 			break;
 		case "dad":
 			message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
@@ -533,7 +534,7 @@ async function deleteCustomCommands(message,args){
 
 //Reaction Roles
 
-async function createReactionRole(message,name,roleID){
+async function createReactionRole(message,name,emojiID,emojiType,roleID){
 	var reactionRolesCon = mysql.createConnection({
 		host : mysqlLoginData.host,
 		user : mysqlLoginData.user,
@@ -543,8 +544,8 @@ async function createReactionRole(message,name,roleID){
 	reactionRolesCon.connect(err => {
 		if(err) console.log(err);
 	});
-	console.log(`insert into reactionRoles values ('${name}' , '${roleID}' )`);
-	reactionRolesCon.query(`insert into reactionRoles values ('${name}' , '${roleID}' )`);
+	console.log(`insert into reactionRoles values ('${name}' , '${emojiID}' , '${emojiType}' , '${roleID}' )`);
+	reactionRolesCon.query(`insert into reactionRoles values ('${name}' , '${emojiID}' , '${emojiType}' , '${roleID}' )`);
 	await reactionRolesCon.end();
 	setTimeout(function(){
 		reactionRolesCon = null;
@@ -1291,7 +1292,7 @@ function ExchangeRates(message,currency){
 function Advice(message){
 	fetch(`https://api.adviceslip.com/advice`).then(res => res.json()).then(response => {
 		let Advice = new Discord.MessageEmbed()
-			.addField("",`${response.slip.advice} ID:${response.slip.slip_id}`);
+			.setDescription(`${response.slip.advice} ID:${response.slip.id}`);
 		message.channel.send(Advice);
 	});
 	return;
@@ -1440,7 +1441,7 @@ function Status(){
 			bot.user.setActivity(`${file.status.LISTENING[b]}`,{
 				type: "LISTENING"
 			});
-			brea;
+			break;
 		default:
 			break;
 	}
@@ -1467,7 +1468,7 @@ function getUserFromMention(mention) {
 	return bot.users.cache.get(id);
 }
 
-function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar){
+function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar,user){
 
 	var con = mysql.createConnection({
 		host : mysqlLoginData.host,
@@ -1487,17 +1488,33 @@ function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,se
 		}else{
 			message_count = rows[0].message_count;
 		}
+		let nitroInfo = "Nitro Tier: ";
+		if (user.premium_type === 1){
+			nitroInfo += "Classic";
+		}else if (user.premium_type === 20){
+			nitroInfo += "Full";
+		}else{
+			nitroInfo += "N/A";
+		}
 		let embed = new Discord.MessageEmbed()
 			.setTitle("User Info")
    			.setColor(0x008000)
+   			.setThumbnail(`${avatar}`)
    			.addField(`User:`,`<@${userID}>`)
    			.addField(`ID:`,`${userID}`,true)
    			.addField(`Account created at:`,`${userCreatedAt}`,true)
    			.addField(`Joined the server at:`,`${userJoinedAt}`,true)
-   			.setThumbnail(`${avatar}`)
-   			.addField(`Details:`,`Server Deafened: ${serverDeaf}\nServer Muted: ${serverMute}\nMessages Sent: ${message_count}`)
+   			.addField(`Server Details:`,`Server Deafened: ${serverDeaf}\nServer Muted: ${serverMute}\nMessages Sent: ${message_count}`,true)
+   			.addField(`Nitro info`,`${nitroInfo}`,true)
    			.addField(`Avatar`,`[Link](${avatar})`)
    			.setTimestamp();
+
+   		console.log("FLAGS");
+   		console.log(user.flags);
+   		console.log("PUBLIC FLAGS");
+   		console.log(user.public_flags);
+   		console.log("USER");
+   		console.log(user);
   		message.channel.send(embed);
 	});
 
@@ -1614,17 +1631,6 @@ function RandomUselessFactAPI(message){
 	return;
 }
 
-function jeanieAPI(message,args){
-	let content = encodeURIComponent(args.join(" "));
-	fetch(`http://ask.pannous.com/api?input=${content}&locale=en`).then(resp => resp.json()).then(response => {
-		let jeanieEmbed = new Discord.MessageEmbed()
-			.setDescription("-",`${response.output[0].actions.say.text}`)
-			.setFooter(`Response time: ${response.output[0].responseTime}ms`)
-		message.channel.send(jeanieEmbed);
-	});
-	return;
-}
-
 function BaconIpsum(message){
 	let opt = getRandomInt(2);
 	let content = "";
@@ -1676,13 +1682,14 @@ function wordsAPI(message,args){
 	}
 	return;
 }
+
 function saveQuote(channel,id){
 	try{
 	bot.channels.cache.get(channel.id).messages.fetch(id).then(message => {
 		let Quote = new Discord.MessageEmbed()
 			.setTitle(`${message.author.username}`)
 			.setDescription(`${message.content}`)
-			.setThumbnail(message.author.displayAvatarURL)
+			.setThumbnail(message.author.displayAvatarURL())
 			.setFooter(`Sent in: #${channel.name} `)
 			.setTimestamp();
 		let hasNotAddedImage = true;
@@ -1707,7 +1714,7 @@ function saveQuoteAutomatic(message){
 		let AutoQuote = new Discord.MessageEmbed()
 			.setTitle(`${message.author.username}`)
 			.setDescription(`${message.content}`)
-			.setThumbnail(message.author.displayAvatarURL)
+			.setThumbnail(message.author.displayAvatarURL())
 			.setFooter(`Sent in: #${message.channel.name} `)
 			.setTimestamp();
 		let hasNotAddedImage = true;
@@ -2207,7 +2214,7 @@ function displayBotInfo(){
 	});
 	//apis
 	bot.channels.cache.get("692403714048131185").messages.fetch("692403988426915941").then(msg => {
-		msg.edit("```js\n" + `API Commands/features:\n1. checkNudity: ${adjustableConfig.apis.checkNudity}\n2. inspire: ${adjustableConfig.apis.inspire}\n3. translate: ${adjustableConfig.apis.translate}\n4. urban: ${adjustableConfig.apis.urban}\n5. yodish: ${adjustableConfig.apis.yodish}\n6. randomUselessFactAPI: ${adjustableConfig.apis.randomUselessFactAPI}\n7. memegen: ${adjustableConfig.apis.memegen}\n8. apod: ${adjustableConfig.apis.apod}\n9. numTrivia: ${adjustableConfig.apis.numTrivia}\n10. exchangeRates: ${adjustableConfig.apis.exchangeRates}\n11. advice: ${adjustableConfig.apis.advice}\n12. today: ${adjustableConfig.apis.today}\n13. jeanie: ${adjustableConfig.apis.jeanie}\n14. bacon: ${adjustableConfig.apis.bacon}\n15. chuck: ${adjustableConfig.apis.chuck}\n16. dictionary: ${adjustableConfig.apis.dictionary}\n17. payday2: ${adjustableConfig.apis.payday2}\n18. blackwake: ${adjustableConfig.apis.blackwake}` + "```");
+		msg.edit("```js\n" + `API Commands/features:\n1. checkNudity: ${adjustableConfig.apis.checkNudity}\n2. inspire: ${adjustableConfig.apis.inspire}\n3. translate: ${adjustableConfig.apis.translate}\n4. urban: ${adjustableConfig.apis.urban}\n5. yodish: ${adjustableConfig.apis.yodish}\n6. randomUselessFactAPI: ${adjustableConfig.apis.randomUselessFactAPI}\n7. memegen: ${adjustableConfig.apis.memegen}\n8. apod: ${adjustableConfig.apis.apod}\n9. numTrivia: ${adjustableConfig.apis.numTrivia}\n10. exchangeRates: ${adjustableConfig.apis.exchangeRates}\n11. advice: ${adjustableConfig.apis.advice}\n12. today: ${adjustableConfig.apis.today}\n14. bacon: ${adjustableConfig.apis.bacon}\n15. chuck: ${adjustableConfig.apis.chuck}\n16. dictionary: ${adjustableConfig.apis.dictionary}\n17. payday2: ${adjustableConfig.apis.payday2}\n18. blackwake: ${adjustableConfig.apis.blackwake}` + "```");
 	});
 	//tooltip
 	bot.channels.cache.get("692403714048131185").messages.fetch("692419941248270407").then(msg => {
@@ -2285,32 +2292,38 @@ function updateShopWindow(){
 		let megaShips = "";
 		let swivelTypes = "";
 		let cannons = "";
+		let income = "";
 		for (i=0;i<rows.length;i++){
 			let itemInfo = JSON.parse(rows[i].info);
 			switch(itemInfo.type){
 				case "megaShips":
-					megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "smallShips":
-					smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "largeShips":
-					bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
+					bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "primary":
-					primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "secondary":
-					secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "melee":
-					melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "swivelType":
-					swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "cannons":
-					cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
+					cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+					break;
+				case "income":
+					income = income + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+					break;
+				default:
 					break;
 			}
 			//if (itemInfo.type === "megaShips"){
@@ -2332,7 +2345,8 @@ function updateShopWindow(){
 			//}
 		}
 		setTimeout(function(){
-			newShopListing.addField("Melee",`${melee}`,true)
+			newShopListing.addField("Income", `.${income}`)
+				.addField("Melee",`${melee}`,true)
 				.addField("Secondary",`${secondary}`,true)
 				.addField("Primary",`${primary}`,true)
 				.addField("Small Ships",`${smallShips}`,true)
@@ -2864,10 +2878,10 @@ function gambleMoney(amount,message){
 		}else{
 			let result = getRandomInt(30);
 			switch(true){
-				case result < 15:
+				case result < 20:
 					income = -0.7;
 					break;
-				case result < 23:
+				case result < 24:
 					income = 1;
 					break;
 				case result < 26:
@@ -3019,6 +3033,8 @@ function economyWork(message){
 
 	workCon.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
 		let result = getRandomInt(30);
+		let workingEmbed = new Discord.MessageEmbed().setTimestamp();
+		workingEmbed.setTitle("Result");
 
 		if (rows.length != 0 && rows.length < 2)
 		{
@@ -3037,15 +3053,16 @@ function economyWork(message){
 					}
 				}
 				giveUserMoney(income, message.author.id);
-
-				message.channel.send(`You have earnt: ${income}GC!`);
+				workingEmbed.setDescription(`You have earnt: ${income}GC!`);
 
 			}else
 			{
-				if ( (parseInt(rows[0].lastWorked) + 86400) < (new Date().getTime()) )
+				if ( (parseInt(rows[0].lastWorked) + 86400000) < (new Date().getTime()) )
 				{
 					let income = 10;
-
+					console.log(rows[0].lastWorked);
+					console.log(parseInt(rows[0].lastWorked) + 86400000);
+					console.log(new Date().getTime());
 					if (rows[0].inventory.indexOf('income') != 0)
 					{
 						for (var incomeMethod in rows[0].inventory.income)
@@ -3054,17 +3071,48 @@ function economyWork(message){
 						}
 					}
 
+
 					giveUserMoney(income, message.author.id);
-					message.channel.send(`You have earnt: ${income}GC!`);
+					workCon.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+					workingEmbed.setDescription(`You have earnt: ${income}GC!`);
 				}
 				else
 				{
-					let time = ( parseInt(rows[0].lastWorked) + 86400 - parseInt(new Date().getTime()) );
+					let days = [
+ 				 		'Sun',
+ 				 		'Mon',
+				 		'Tue',
+ 						'Wed',
+ 				 		'Thu',
+ 				 		'Fri',
+ 				 		'Sat'
+					]
 
-					message.channel.send(`You cannot work yet! You must wait until ${(Math.trunc( ( (time - time%60) /60) /60) ) %24}h ${((time - time%60)/60)%60}m ${time%60}s`);
+					let time = new Date().getTime() + 86400000;
+					let date = new Date(time);
+					let hrs = date.getHours();
+					if (parseInt(hrs) < 10)
+					{
+						hrs = '0' + hrs;
+					}
+					let min = date.getMinutes();
+					if (parseInt(min) < 10)
+					{
+						min = '0' + min;
+					}
+					let sec = date.getSeconds();
+					if (parseInt(sec) < 10)
+					{
+						sec = '0' + sec;
+					}
+					let finalDate = `${days[date.getDay()]} ${hrs} : ${min} : ${sec}`;
+					workingEmbed.setDescription(`You cannot work yet! You must wait until ${finalDate} CEST`);
 				}
 			}
+		}else{
+			workingEmbed.setDescription("Something went wrong, please notify Archie");
 		}
+		message.channel.send(workingEmbed);
 	});
 
 	setTimeout(function(){
@@ -3089,7 +3137,7 @@ function listTheCommands(message){
    			.addField(`Misc Commands`,` - Nerds\n - Hangover\n - Russia\n - Ew\n - Dog\n - Cat\n - Art\n - Dance\n - Playdie\n - Rolldie\n - Rollcustom\n - Coinflip\n - Dad\n - Nootnoot\n - Urban\n - Today`,true)
    			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish`,true)
    			.addField(`Music Commands`,` - PlayAudio\n - RandomSong`,true)
-   			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates\n - Jeanie`,true)
+   			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates`,true)
    			.setTimestamp();
    		message.author.send(embed);
 
@@ -3154,7 +3202,7 @@ function getUserInformation(message,args){
 		serverDeaf = userInformation.serverDeaf;
 		serverMute = userInformation.serverMute;
 
-		displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
+		displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar,userInformation.user);
 
 	}else{
 		if (!message.mentions.users.size) {
@@ -3173,11 +3221,83 @@ function getUserInformation(message,args){
 			serverDeaf = userInformation.serverDeaf;
 			serverMute = userInformation.serverMute;
 
-			displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar);
+			displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar,userInformation.user);
 		}
 	}
 }
 
+function displayReactionRoles(){
+	var reactionRolesCon = mysql.createConnection({
+		host : mysqlLoginData.host,
+		user : mysqlLoginData.user,
+		password : mysqlLoginData.password,
+		database : "oliverbotConfigs",
+	});
+
+	reactionRolesCon.query('SELECT * FROM reactionRoleMessages', (err,rows) => {
+		if (rows.length == 0)
+		{
+			return;
+		}
+		let characterCount = 0; // Amount of characters in each message, as discord has a 2000 character limit
+		let msgCount = 0; // Amount of reaction role messages
+		let finalMsg = ""; // Final message to be used
+		let newMsgs = [];
+
+		reactionRoles.forEach(roleInfo => {
+			if (finalMsg.length > 1800){
+				if (msgCount >= rows.length)
+				{
+					bot.channels.cache.get(rows[0].channelID).send("temp").then(msg => {
+						editMsg(finalMsg, rows[0].channelID, msg.id);
+						newMsgs.append(msg.id);
+						finalMsg = "";
+					});
+				}
+				editMsg(finalMsg, rows[0].channelID, rows[msgCount].messageID);
+				msgCount += 1;
+				finalMsg = "";
+			}else{
+				if (roleInfo.EmojiType == "unicode")
+				{
+					finalMsg += `${roleInfo.EmojiName}` + " `:` " + `<@&${roleInfo.RoleID}>\n`; // Unicode type just has default icon as raw unicode
+				}else
+				{
+					finalMsg += `<:${roleInfo.EmojiName}:${roleInfo.EmojiID}>` + " `:` " + `<@&${roleInfo.RoleID}>\n`; // Custom emoji's must be displayed with ID
+				}
+			}
+		});
+
+		//Display final message
+		if (finalMsg != "")
+		{
+			editMsg(finalMsg, rows[0].channelID, rows[msgCount].messageID);
+		}
+
+		if (newMsgs.length >= 1)
+		{
+			for (let i = 0; i < newMsgs.length; i++)
+			{
+				reactionRolesCon.query(`INSERT INTO reactionRoleMessages VALUES (${rows[0].channelID} ${newMsgs[i]})`);
+			}
+		}
+
+	});
+
+	setTimeout(function(){
+		reactionRolesCon.destroy();
+	},3000);
+	return;
+}
+
+function editMsg(contents,channelID,msgID)
+{
+	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
+		msg.edit(contents);
+	});
+}
+
+allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147"];
 
 bot.on("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
@@ -3185,9 +3305,9 @@ bot.on("ready", () => {
 	setInterval(() =>{
 		Status();
 	}, 30000000);
-	setInterval(() =>{
-		displayBotInfo();
-	}, 6000);
+	//setInterval(() =>{
+	//	displayBotInfo();
+	//}, 6000);
 	setInterval(() =>{
 		update7DTDlistNew();
 	}, 25000);
@@ -3217,6 +3337,8 @@ bot.on("ready", () => {
 	return;
 });
 
+let memeHarry = true;
+
 bot.on("message", async message => {
 
 
@@ -3225,9 +3347,18 @@ bot.on("message", async message => {
 	//dont respond to bots
 	if (message.author.bot) return;
 	if (message.channel.type === "dm") return;
+	if (allowChannels.indexOf(message.channel.id) === -1)
+	{
+		return;
+	}
 
 	//this situation specific, if running your own just remove
 	if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
+
+	if (message.author.id === "319612875834654730" && message.content.toLowerCase() === "money" && memeHarry)
+	{
+		message.channel.send("No");
+	}
 
 	if (adjustableConfig.reactions.randomReactions){
 		let num = getRandomInt(adjustableConfig.reactions.chanceofRandomReactions);
@@ -3628,9 +3759,11 @@ bot.on("message", async message => {
 			}else{
 				if (message.member.roles.cache.has("665939545371574283")){
 					if (args[0].indexOf(":") !== -1){
-						createReactionRole(message,args[0].split(":")[1],args[1].slice(3,args[1].length - 1));
+						let emojiID = args[0].split(":")[2].toString();
+						emojiID = emojiID.slice(0, emojiID.length - 1);
+						createReactionRole(message,args[0].split(":")[1], emojiID ,"NA",args[1].slice(3,args[1].length - 1));
 					}else{
-						createReactionRole(message,args[0],args[1].slice(3,args[1].length - 1));
+						createReactionRole(message,args[0],"NA","unicode",args[1].slice(3,args[1].length - 1));
 					}
 				}else{
 					message.reply("You don't have permission to use this command!");
@@ -3650,6 +3783,13 @@ bot.on("message", async message => {
 				}else{
 					message.reply("You don't have permission to use this command!");
 				}
+			}
+			break;
+		case "refreshroles":
+			if (message.member.roles.cache.has("665939545371574283")){
+				displayReactionRoles();
+			}else{
+				message.reply("You don't have permission to use this command!");
 			}
 			break;
 		case "purchase":
@@ -3714,8 +3854,8 @@ bot.on("message", async message => {
 			}
 			break;
 		case "work":
-			//economyWork(message);
-			message.channel.send("Not Yet Active.");
+			economyWork(message);
+			//message.channel.send("Not Yet Active.");
 			break;
 		case "config":
 			if (message.member.roles.cache.has("665939545371574283")){
@@ -3774,14 +3914,6 @@ bot.on("message", async message => {
 				}else{
 					message.channel.send("You need to give the type!");
 				}
-			}else{
-				message.reply("That command is currently disabled!");
-			}
-			break;
-		case "jeanie":
-			TrackingCommand = true;
-			if (adjustableConfig.apis.jeanie){
-				jeanieAPI(message,args);
 			}else{
 				message.reply("That command is currently disabled!");
 			}
@@ -3921,7 +4053,7 @@ bot.on("message", async message => {
 						.setTitle("Now Playing")
 						.setColor('#add8e6')
 						.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
-						.setThumbnail(`${message.author.displayAvatarURL}`)
+						.setThumbnail(`${message.author.displayAvatarURL()}`)
 						.setTimestamp();
 					message.channel.send(embed).then(msg => {
 						setTimeout(function(){
@@ -4336,11 +4468,12 @@ bot.on("message", async message => {
 			break;
 		case "warn":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
-				let member = message.guild.members.find('id',message.mentions.users.first().id);
+				let member = getUserFromMention(args[0]);
 				try{
-					member.send("Warning: "+(args.slice(1)).join(" ")+", You have been warned");
+					member.send(`Warning from ${message.guild.name}:\n${(args.slice(1)).join(" ")}.\nYou have been warned.`).catch(() => message.channel.send("This user does not have open DMs."));
+					bot.channels.cache.get(config.channels.loggingChannel).send(`User <@${member.id}> has been warned for:\n${args.slice(1).join(" ")}`);
 				}catch(e){
-					message.reply("This isnt working currently.");
+					message.reply("This isnt working currently. Tell archie to go look at the logs.");
 				}
 			}else{
 				lackingPermissions(message);
@@ -4348,7 +4481,7 @@ bot.on("message", async message => {
 			break;
 		case "totalusers":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
-				message.channel.send(message.guild.members.filter(member => !member.user.bot).size);
+				message.channel.send(message.guild.members.cache.filter(member => !member.user.bot).size);
 			}else{
 				lackingPermissions(message);
 			}
@@ -4374,7 +4507,7 @@ bot.on("message", async message => {
 			break;
 		case "payday2":
 			TrackingCommand = true;
-			getPayday2Information(message);
+			getPayday2Information(message,args);
 			break;
     	default:
     		message.react("🤔");
@@ -4477,7 +4610,7 @@ function getChannelInformation(message){
 	return;
 }
 
-function getPayday2Information(message){
+function getPayday2Information(message, args){
 	if (adjustableConfig.apis.payday2){
 		if (isAllowed){
 			if (args[0]){
@@ -4597,9 +4730,9 @@ async function manageRawEmbeds(event){
 		.setTimestamp();
 
 	let embedColours = {
-		"channels" : 0x013220,
-		"bans" : "#0099ff",
-		"roles" : "#FFFF00"
+		"channels" : config.embedColours.channels,
+		"bans" : config.embedColours.bans,
+		"roles" : config.embedColours.roles
 	}
 
 	let flag = true;
@@ -4648,7 +4781,7 @@ async function manageRawEmbeds(event){
 					.addField("User",`${entry.target}`)
 					.addField("Executor",`${entry.executor}`)
 					.addField("Reason",`${entry.reason}`)
-					.setThumbnail(`${entry.target.displayAvatarURL}`);
+					.setThumbnail(`${entry.target.displayAvatarUR()}`);
 			}
 			break;
 		case "GUILD_BAN_REMOVE":
@@ -4657,7 +4790,7 @@ async function manageRawEmbeds(event){
 				.setTitle("User Unbanned")
 				.addField("User",`${entry.target}`)
 				.addField("Executor",`${entry.executor}`)
-				.setThumbnail(`${entry.target.displayAvatarURL}`);
+				.setThumbnail(`${entry.target.displayAvatarURL()}`);
 			break;
 		case "GUILD_MEMBER_REMOVE":
 			try{
@@ -4668,7 +4801,7 @@ async function manageRawEmbeds(event){
 						.addField("User",`${entry.target}`)
 						.addField("Executor",`${entry.executor}`)
 						.addField("Reason",`${entry.reason}`)
-						.setThumbnail(`${entry.target.displayAvatarURL}`);
+						.setThumbnail(`${entry.target.displayAvatarURL()}`);
 				}else{
 					flag = false;
 				}
@@ -4701,6 +4834,29 @@ async function manageRawEmbeds(event){
 
 	if (flag){
 		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+	}
+	return;
+}
+
+async function manageJoinReaction(event){
+	if (event.d.emoji.name === config.serverInfo.emojiNames.initialJoinReactionConfirmation){
+		member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
+		let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(config.serverInfo.roles.defaultRole);
+		member.roles.add(role);
+	}else{
+		bot.channels.cache.get(config.serverInfo.channels.initialJoinReactionConfirmation).messages.fetch(config.serverInfo.messages.initialJoinReactionConfirmation).then( msg => {
+			let userReactions = msg.reactions.cache.filter(reaction => reaction.users.cache.has(event.d.user_id));
+			try {
+				for (let reaction of userReactions.values()) {
+					if (reaction._emoji.name !== config.serverInfo.emojiNames.initialJoinReactionConfirmation)
+					{
+						reaction.users.remove(event.d.user_id);
+					}
+				}
+			} catch (error) {
+				console.error('Failed to remove reactions.');
+			}
+		});
 	}
 	return;
 }
@@ -4742,6 +4898,9 @@ bot.on('raw', async event => {
 			manageRawEmbeds(event);
 			break;
 		case "MESSAGE_REACTION_ADD":
+			if (event.d.channel_id === "762401591180525608"){
+				manageJoinReaction(event);
+			}
 			if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
         		break;; 
     		}
@@ -4791,7 +4950,9 @@ bot.on('raw', async event => {
 // 	}
 // });
 
+
 bot.on('error', console.error);
+//bot.on('debug', console.log)
 bot.on("warn", (e) => console.warn(e));
 
 bot.on("messageDelete", function(message){
