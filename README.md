@@ -14,7 +14,7 @@ Incase the title of the files wasn't clear enough, the included config and dataf
  - Please note idk wtf im doing with github.
  - Adding comments to the code to help readability (I'll get round to it some day)
  - [Website link](http://www.archiesbots.com/index.html)
- - Release version: 1.4.7
+ - Release version: 1.6.0
 
 **Dependencies:**
  - @discordjs/opus: ^0.3.2
