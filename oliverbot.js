@@ -19,7 +19,7 @@ var cooldowns = {
 	"steamApi" : true,
 	"quiz" : {
 		"allowed" : true,
-		"timeoutLength" : 60000
+		"timeoutLength" : 120000
 	}
 };
 
@@ -44,6 +44,22 @@ const mysqlLoginData = {
 	"password":config.databaseInfo.password,
 	"database":config.databaseInfo.database,
 };
+
+var mainDatabaseConnectionPool = mysql.createPool({
+	connectionLimit : 10,
+	host : mysqlLoginData.host,
+	user : mysqlLoginData.user,
+	password : mysqlLoginData.password,
+	database : mysqlLoginData.database
+});
+
+var configurationDatabaseConnectionPool = mysql.createPool({
+	connectionLimit : 10,
+	host : mysqlLoginData.host,
+	user : mysqlLoginData.user,
+	password : mysqlLoginData.password,
+	database : "oliverbotConfigs"
+});
 
 // const userActivitiesLimits = {
 // 	"Name" : 30
@@ -84,46 +100,9 @@ function LoadDataFromDatabase(){
 	return;
 }
 
-//WIP TO ALLOW ECONOMY TIMED EVENTS (MAYBE?)
-function scheduleDbEvent(type,time,reason,query,affectedUserID){
-	//Establish database connection information
-	var scheduleEventCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database
-	});
-	//Connect to the DB
-	scheduleEventCon.connect(err => {
-		if(err) console.log(err);
-	});
-	//Main Query
-	scheduleEventCon.query(`SELECT COUNT(*) FROM eventcounts`, (err,length) =>{
-		if (err) console.log(err);
-		if (type === "oneUse"){
-			scheduleEventCon.query(`CREATE EVENT ${length + 1} on SCHEDULE at CURRENT_TIMESTAMP + INTERVAL ${time} DO ${query}`);
-		}else if (type === "repeating"){
-			scheduleEventCon.query(`CREATE EVENT ${length + 1} on SCHEDULE at CURRENT_TIMESTAMP + INTERVAL ${time} ON COMPLETETION PRESERVE DO ${query}`);
-		}
-		scheduleEventCon.query(`INSERT INTO eventcounts (number,reason,type,userAffectedID) values ('${length + 1}','${reason}','${type}','${affectedUserID}`);
-	});
-	scheduleEventCon.end();
-	scheduleEventCon = null;
-	return;
-}
-
 //Loading Data
 function loadXpDataFromDB(){
-	var loadCustCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	loadCustCon.connect(err => {
-		if(err) console.log(err);
-	});
-	loadCustCon.query(`SELECT * FROM xpGainData`, (err,rows) =>{
+	configurationDatabaseConnectionPool.query(`SELECT * FROM xpGainData`, (err,rows,fields) =>{
 		if (rows.length < 1){
 			return;
 		}
@@ -133,23 +112,11 @@ function loadXpDataFromDB(){
 			}
 		}
 	});
-	loadCustCon.end();
-	loadCustCon = null;
 	return;
 }
 
 function loadConfigFromDB(){
-	var setupCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	setupCon.connect(err => {
-		if(err) console.log(err);
-	});
-
-	setupCon.query(`SELECT * FROM config`, (err,rows) => {
+	configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows,fields) => {
 		if (rows.length < 1){
 			console.log("------ERROR LOADING CONFIG------");
 		}else{
@@ -195,8 +162,6 @@ function loadConfigFromDB(){
 			}
 		}
 	});
-	setupCon.end();
-	setupCon = null;
 	return;
 }
 
@@ -211,16 +176,7 @@ function checkIfBool(toCheck){
 //Ones that can be created and deleted by select individuals
 function loadCustomCommandsFromDB(){
 	customCommandList = [];
-	var loadCustCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	loadCustCon.connect(err => {
-		if(err) console.log(err);
-	});
-	loadCustCon.query(`SELECT * FROM CustomCommands`, (err,rows) =>{
+	configurationDatabaseConnectionPool.query(`SELECT * FROM CustomCommands`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
 		}
@@ -230,24 +186,13 @@ function loadCustomCommandsFromDB(){
 			}
 		}
 	});
-	loadCustCon.end();
-	loadCustCon = null;
 	return;
 }
 
 //Ones that the owner makes, and thus only the owner can remove
 function loadPermanentCommandsFromDB(){
 	miniCommands = [];
-	var loadCustCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	loadCustCon.connect(err => {
-		if(err) console.log(err);
-	});
-	loadCustCon.query(`SELECT * FROM permanentCommands`, (err,rows) =>{
+	configurationDatabaseConnectionPool.query(`SELECT * FROM permanentCommands`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
 		}
@@ -257,23 +202,12 @@ function loadPermanentCommandsFromDB(){
 			}
 		}
 	});
-	loadCustCon.end();
-	loadCustCon = null;
 	return;
 }
 
 function loadReactionRolesFromDB(){
 	reactionRoles = [];
-	var loadReactCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	loadReactCon.connect(err => {
-		if(err) console.log(err);
-	});
-	loadReactCon.query(`SELECT * FROM reactionRoles`, (err,rows) =>{
+	configurationDatabaseConnectionPool.query(`SELECT * FROM reactionRoles`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
 		}
@@ -284,8 +218,6 @@ function loadReactionRolesFromDB(){
 		}
 	});
 	displayReactionRoles();
-	loadReactCon.end();
-	loadReactCon = null;
 	return;
 }
 
@@ -399,21 +331,11 @@ function loadFromDatafile(commandUsed,data,message){
 //Altering Config
 
 async function updateDBConfig(message,args){
-	var alterConfigCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-
-	alterConfigCon.connect(err => {
-		if(err) console.log(err);
-	});
 
 	let commandName = args[0];
 	let newValue = args[1];
 
-	await alterConfigCon.query(`SELECT * FROM config`, (err,rows) =>{
+	await configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows, fields) =>{
 		let notFound = true;
 		let type;
 		for (i=0;i<rows.length;i++){
@@ -440,7 +362,7 @@ async function updateDBConfig(message,args){
 			}
 
 			if (correctInput){
-				alterConfigCon.query(`update config set currentval='${newValue}' where name='${commandName}'`, (err) => {
+				configurationDatabaseConnectionPool.query(`update config set currentval='${newValue}' where name='${commandName}'`, (err) => {
 					if (err){
 						message.channel.send("ERROR, please check you entered the correct information!");
 						console.log("An ERROR has occured with updating the config!\n" + err);
@@ -451,11 +373,6 @@ async function updateDBConfig(message,args){
 			}
 		}
 	});
-
-	setTimeout(function(){
-		alterConfigCon.end();
-		alterConfigCon = null;
-	},3000);
 
 	loadConfigFromDB();
 
@@ -489,21 +406,10 @@ function permanentCommands(message,command){
 }
 
 async function createCustomCommands(message,args){
-	var customCommand = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	customCommand.connect(err => {
-		if(err) console.log(err);
-	});
-	customCommand.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
-	await customCommand.end();
+	configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
 	setTimeout(function(){
-		customCommand = null;
 		loadCustomCommandsFromDB();
-	},900);
+	}, 1000);
 	return;
 }
 
@@ -514,63 +420,25 @@ async function deleteCustomCommands(message,args){
 	}else{
 		commandToDelete = args;
 	}
-	var deletecustomCommand = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	deletecustomCommand.connect(err => {
-		if(err) console.log(err);
-	});
-	deletecustomCommand.query(`delete from CustomCommands where command='${commandToDelete}'`);
-	await deletecustomCommand.end();
+	configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
 	setTimeout(function(){
-		deletecustomCommand = null;
 		loadCustomCommandsFromDB();
-	},900);
+	}, 1000);
 	return;
 }
 
 //Reaction Roles
 
 async function createReactionRole(message,name,emojiID,emojiType,roleID){
-	var reactionRolesCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	reactionRolesCon.connect(err => {
-		if(err) console.log(err);
-	});
-	console.log(`insert into reactionRoles values ('${name}' , '${emojiID}' , '${emojiType}' , '${roleID}' )`);
-	reactionRolesCon.query(`insert into reactionRoles values ('${name}' , '${emojiID}' , '${emojiType}' , '${roleID}' )`);
-	await reactionRolesCon.end();
-	setTimeout(function(){
-		reactionRolesCon = null;
-		loadReactionRolesFromDB();
-	},900);
+	configurationDatabaseConnectionPool.query(`insert into reactionRoles values ('${name}' , '${emojiID}' , '${emojiType}' , '${roleID}' )`);
+	loadReactionRolesFromDB();
 	message.channel.send("Role added!");
 	return;
 }
 
 async function deleteReactionRole(message,name){
-	var reactionRolesCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-	reactionRolesCon.connect(err => {
-		if(err) console.log(err);
-	});
-	reactionRolesCon.query(`delete from reactionRoles where emojiName='${name}'`);
-	await reactionRolesCon.end();
-	setTimeout(function(){
-		reactionRolesCon = null;
-		loadReactionRolesFromDB();
-	},900);
+	configurationDatabaseConnectionPool.query(`delete from reactionRoles where emojiName='${name}'`);
+	loadReactionRolesFromDB();
 	message.channel.send("Role removed!");
 	return;
 }
@@ -580,17 +448,7 @@ async function deleteReactionRole(message,name){
 function updateleaderboard(msg){
 	let delay = 30000;
 	setInterval(function(){
-		var con = mysql.createConnection({
-			host : mysqlLoginData.host,
-			user : mysqlLoginData.user,
-			password : mysqlLoginData.password,
-			database : mysqlLoginData.database,
-		});
-
-		con.connect(err => {
-			if(err) console.log(err);
-		});
-		con.query(`SELECT * FROM xp order by level desc, xp desc limit 31`, (err,rows) =>{
+		mainDatabaseConnectionPool.query(`SELECT * FROM xp order by level desc, xp desc limit 31`, (err,rows,fields) =>{
 			let length = 0;
 			if (rows.length<leaderboardlimits.listsizelimit){
 				length = rows.length;
@@ -642,7 +500,6 @@ function updateleaderboard(msg){
 			finalmsg = finalmsg+"```";
 			bot.channels.cache.get(config.serverInfo.channels.xpLeaderboard).messages.fetch(config.serverInfo.messages.xpLeaderboard).then(msg => {msg.edit(finalmsg);});
 		});
-		con.end();
 	},delay);
 }
 
@@ -711,26 +568,14 @@ function getRandomBetweenInt(min, max) {
 };
 //////////////////////////////////////////////////////////////level check
 function levelchecker(msg,reqlvl){
-	var lvlcon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	lvlcon.connect(err => {
-		if(err) console.log(err);
-	});
-	let response = true
-	lvlcon.query(`SELECT * FROM xp WHERE id='${msg.author.id}'`, (err,rows) => {
+	let response = true;
+	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id='${msg.author.id}'`, (err,rows) => {
 		if (rows.length < 1){
 			response = false;
 		}else if (parseInt(rows[0].level) < reqlvl){
 			response = false;
 		}
 	});
-	lvlcon.end()
-	lvlcon = null;
 	return response;
 }
 
@@ -741,7 +586,7 @@ function randomgif(message,content){
 		switch(true){
 			case (content.includes("roll")):
 				message.channel.send("https://makeagif.com/gif/2-person-forward-roll-race-vrEaaK");
-			break;
+				break;
 			case (content.includes("jump")):
 				message.channel.send("https://giphy.com/gifs/filmeditor-will-ferrell-elf-l2YWvhSnfdWR8nRBe");
 				break;
@@ -1020,18 +865,7 @@ function randompirateshit(msg,content){
 
 function rankcardCreation(message){
 
-	var conCheckRankcard = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conCheckRankcard.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conCheckRankcard.query(`SELECT * FROM inventoryGT WHERE ID = '${message.author.id}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${message.author.id}'`, (err,rows) => {
 		if(err) console.log(err);
 		if(rows.length < 1){
 			createDefaultRankCard(message);
@@ -1057,28 +891,12 @@ function rankcardCreation(message){
 		}
 	});
 
-	setTimeout(function(){
-		conCheckRankcard.destroy();
-		conCheckRankcard = null;
-	},3000);
-
 	return;
 }
 
 function createDefaultRankCard(message){
 
-	var conDefaultRankcard = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conDefaultRankcard.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conDefaultRankcard.query(`SELECT * FROM xp WHERE id = '${message.author.id}'` , (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
 		let level;
@@ -1090,7 +908,7 @@ function createDefaultRankCard(message){
 
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-		conDefaultRankcard.query(`SELECT * FROM inventoryGT WHERE ID = ${message.author.id}`, (err,rows) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${message.author.id}`, (err,rows) => {
 			let rankcard = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setTitle(`${message.member.user.username}`)
@@ -1106,25 +924,11 @@ function createDefaultRankCard(message){
 		});
 	});
 
-	setTimeout(function(){
-		conDefaultRankcard.destroy();
-		conDefaultRankcard = null;
-	},3000);
+	return;
 }
 
 async function createRankCanvas(channel,member,ship, ID){
-	var conCustomCanvas = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conCustomCanvas.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conCustomCanvas.query(`SELECT * FROM xp WHERE id = '${ID}'` , (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${ID}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
 		let level;
@@ -1136,7 +940,7 @@ async function createRankCanvas(channel,member,ship, ID){
 
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-		conCustomCanvas.query(`SELECT * FROM inventoryGT WHERE ID = ${ID}`, (err,rows) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${ID}`, (err,rows) => {
 			if (rows.length > 0 ){
 				creatingCanvas(channel, member, ship, level, rnxp, xpneeded, rows[0].giraffeCoins);
 			}else{
@@ -1145,10 +949,6 @@ async function createRankCanvas(channel,member,ship, ID){
 		});
 	});
 
-	setTimeout(function(){
-		conCustomCanvas.destroy();
-		conCustomCanvas = null;
-	},3000);
 	return;
 }
 
@@ -1470,19 +1270,8 @@ function getUserFromMention(mention) {
 
 function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,serverMute,avatar,user){
 
-	var con = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	con.connect(err => {
-		if(err) console.log(err);
-	});
-
 	let message_count;
-	con.query(`SELECT * FROM xp WHERE id = '${userID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${userID}'`, (err,rows) => {
 		if (rows.length < 1){
 			message_count = 0;
 		}else{
@@ -1518,13 +1307,10 @@ function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,se
   		message.channel.send(embed);
 	});
 
-	setTimeout(function(){
-		con.destroy();
-		con = null;
-	},3000);
-
   	return;
 }
+/////////
+//Do command
 
 function clean(text) {
   	if (typeof(text) === "string"){
@@ -1534,6 +1320,51 @@ function clean(text) {
   		return text;
   	}
 }
+
+function runDatabaseCommand(message,database,query){
+
+	mainDatabaseConnectionPool.query(query, (err,rows) => {
+		if (err){
+			message.channel.send(err);
+		}
+		else{
+			let count = 0;
+			let responseMsg = "```\n";
+			let hasNotSent = true;
+			for (let i = 0; i < rows.length; i++){
+				if (responseMsg.length >= 1500){
+					message.channel.send(responseMsg + "```");
+					message.channel.send(`Covers: ${count} / ${rows.length} rows.`);
+					hasNotSent = false;
+					break;
+				}else
+				{
+					for (var key of Object.keys(rows[i]))
+					{
+						if (rows[i].hasOwnProperty(key)){
+							if (count < rows.length - 1)
+							{
+								responseMsg += `${rows[i][key]}, `;
+							}else{
+								responseMsg += `${rows[i][key]}`;
+							}
+						}
+					}
+					responseMsg += "\n";
+					count += 1;
+				}
+			}
+
+			if (hasNotSent){
+				message.channel.send(responseMsg);
+			}
+		}
+	});
+
+	return;
+}
+
+/////////
 
 async function playAudio(message,args,voiceChannel){
 	isPlaying = true;
@@ -1786,6 +1617,26 @@ function getSteamGroupData(){
 	return;
 }
 
+function scoreAdjustPrestige(score, prestige){
+	score -= prestige * 172873;
+	if (prestige != 10)
+	{
+		score = Mathf.Min(score, 172873);
+	}
+	return score;
+}
+
+function levelProgress(score, prestige){
+	score = scoreAdjustPrestige(score, prestige);
+	for (let i = 0; i < 1000; i++)
+	{
+		if (score <= i * i * 72)
+		{
+			return i;
+		}
+	}
+}
+
 async function getBlackwakeStats(message,args){
 	if (isAllowed){
 
@@ -1830,6 +1681,7 @@ async function getBlackwakeStats(message,args){
 				let score = 0;
 				let rating = 0;
 				let statScoreGs = 0;
+				let prestige = 0;
 
 				for (i=0;i<stats.length;i++){
 
@@ -1868,6 +1720,8 @@ async function getBlackwakeStats(message,args){
 						case "stat_score_gs":
 							statScoreGs = stats[i].value;
 							break;
+						case "stat_pres":
+							prestige = stats[i].value;
 						default:
 							break;
 					}
@@ -1895,7 +1749,10 @@ async function getBlackwakeStats(message,args){
 						}else{
 							achieves = "NA";
 						}
-						let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nAchievements: ${achieves}/39`;
+
+						let level = levelProgress(score, prestige);
+
+						let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nLevel: (${prestige}) ${level}\nAchievements: ${achieves}/39`;
 						if (statScoreGs != 0){
 							playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
 						}
@@ -2070,6 +1927,138 @@ function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type){
 	return returnMsg;
 }
 
+// //GETTING ALL GAMES PEOPLE ARE PLAYING
+// function GetAllGamesBeingPlayed(guildID){
+// 	let guildPresences = bot.guilds.get(guildID).presences.array();
+// 	let games = [];
+// 	let counts = [];
+// 	let Stati = [0,0,0,0];
+// 	guildPresences.forEach(element => {
+// 		if (element !== null ){
+// 			if (element.game !== null){
+// 				if (element.game.name !== "Custom Status" && element.game.name !== "Twitch"){
+// 					if (games.indexOf(element.game.name !== -1)){
+// 						let index = games.indexOf(element.game.name);
+// 						counts[index] = counts[index] + 1;
+// 					}else{
+// 						games.push(element.game.name);
+// 						counts.push(1);
+// 					}
+// 				}
+// 			}
+// 			if (typeof element.status !== null && typeof element.status !== undefined){
+// 				if (element.status === "online"){
+// 					Stati[0] = Stati[0] + 1;
+// 				}else
+// 				if (element.status === "idle"){
+// 					Stati[1] = Stati[1] + 1;
+// 				}else{
+// 					Stati[2] = Stati[2] + 1;
+// 				}
+// 			}
+// 		}
+// 	});
+// 	let sortedLists = SortGamesBeingPlayed(games,counts);
+// 	games = sortedLists[0];
+// 	counts = sortedLists[1];
+// 	let final = `Online: ${Stati[0]} idle: ${Stati[1]} dnd: ${Stati[2]}\nCurrent User Activities:\n` + "```\n";
+// 	let final2 = "```";
+// 	let final3 = "```";
+// 	let final4 = "```";
+// 	for (i=0;i<games.length;i++){
+// 		if (final.length < 1900){
+// 			final = final + `${games[i]} - ${counts[i]}\n`;
+// 		}else
+// 		if (final2.length < 1900){
+// 			final2 = final2 + `${games[i]} - ${counts[i]}\n`;
+// 		}else
+// 		if (final3.length < 1900){
+// 			final3 = final3 + `${games[i]} - ${counts[i]}\n`;
+// 		}else
+// 		if (final4.length < 1900){
+// 			final4 = final4 + `${games[i]} - ${counts[i]}\n`;
+// 		}
+// 	}
+// 	bot.channels.cache.get("692072102886637619").messages.fetch("692072288547373117").then(msg => {
+// 		if (final.length < 6){
+// 			msg.edit(final +"-```");
+// 		}else{
+// 			msg.edit(final + "```");
+// 		}
+// 	});
+// 	bot.channels.cache.get("692072102886637619").messages.fetch("692072290879406140").then(msg => {
+// 		if (final2.length < 6){
+// 			msg.edit(final2 +"-```");
+// 		}else{
+// 			msg.edit(final2 + "```");
+// 		}
+// 	});
+// 	bot.channels.cache.get("692072102886637619").messages.fetch("692072292607590513").then(msg => {
+// 		if (final3.length < 6){
+// 			msg.edit(final3 +"-```");
+// 		}else{
+// 			msg.edit(final3 + "```");
+// 		}
+// 	});
+// 	bot.channels.cache.get("692072102886637619").messages.fetch("692084228803788861").then(msg => {
+// 		if (final4.length < 6){
+// 			msg.edit(final4 +"-```");
+// 		}else{
+// 			msg.edit(final4 + "```");
+// 		}
+// 	});
+// 	return;
+// }
+
+// function SortGamesBeingPlayed(games,counts){
+// 	games = ApplyCharacterLimits(games);
+// 	for (i=0;i<counts.length;i++){
+// 		for (s=0;s<counts.length;s++){
+// 			if (counts[i] > counts[s]){
+// 				let temp = games[i];
+// 				games[s] = games[i];
+// 				games[i] = temp;
+
+// 				let counttemp = counts[s];
+// 				counts[s] = counts[i];
+// 				counts[i] = counttemp;
+// 			}else{
+// 				if (counts[i] === counts[s]){
+// 					let templist = [];
+// 					templist.push(games[i]);
+// 					templist.push(games[s]);
+// 					let templist2 = templist;
+// 					templist2.sort();
+
+// 					if (templist2 !== templist){
+// 						let temp = games[i];
+// 						games[s] = games[i];
+// 						games[i] = temp;
+
+// 						let counttemp = counts[s];
+// 						counts[s] = counts[i];
+// 						counts[i] = counttemp;
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return [games,counts];
+// }
+
+// function ApplyCharacterLimits(games){
+// 	for (i=0;i<games.length;i++){
+// 		if (games[i].length > userActivitiesLimits.Name){
+// 			games[i] = games[i].slice(0,userActivitiesLimits.Name)
+// 		}else
+// 		if (games[i].length < userActivitiesLimits.Name){
+// 			let x = userActivitiesLimits.Name - games[i].length;
+// 			games[i] = games[i] + new Array(x + 1).join(' ');
+// 		}
+// 	}
+// 	return games;
+// }
+
 function displayBotInfo(){
 	try{
 	//emojis
@@ -2139,28 +2128,30 @@ function getRandomStartupIdea(message){
 //economy
 
 function updateShopWindow(){
-	var conShopWindow = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
+	mainDatabaseConnectionPool.query(`SELECT * FROM shop`, (err,rows) => {
+		let newShopListing = new Discord.MessageEmbed().setTitle("Shop Channel");
 
-	conShopWindow.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conShopWindow.query(`SELECT * FROM shop`, (err,rows) => {
-		let newShopListing = new Discord.MessageEmbed().setTitle("Shop Window");
 		let melee = "";
 		let secondary = "";
 		let primary = "";
+
 		let smallShips = "";
 		let bigShips = "";
 		let megaShips = "";
+
 		let swivelTypes = "";
 		let cannons = "";
-		let income = "";
+
+		let incomeSmall = "";
+		let incomeMed = "";
+		let incomeLarge = "";
+
+		let birds = "";
+		let Reptiles = "";
+		let Mammals = "";
+
+		let basicMaterials = "";
+		let advancedMaterials = "";
 		for (i=0;i<rows.length;i++){
 			let itemInfo = JSON.parse(rows[i].info);
 			switch(itemInfo.type){
@@ -2189,68 +2180,163 @@ function updateShopWindow(){
 					cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
 					break;
 				case "income":
-					income = income + `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+					switch(itemInfo.size)
+					{
+						case "Small":
+							incomeSmall += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n"
+							break;
+						case "Medium":
+							incomeMed += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n"
+							break;
+						case "Large":
+							incomeLarge += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n"
+							break;
+						default:
+							break;
+					}
+					break;
+				case "pet":
+					switch(itemInfo.petType)
+					{
+						case "Bird":
+							birds += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+							break;
+						case "Reptile":
+							Reptiles += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+							break;
+						case "Mammal":
+							Mammals += `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+							break;
+						default:
+							break;
+					}
+					break;
+				case "constructionResources":
+					switch (itemInfo.materialType)
+					{
+						case "basicMaterial":
+							basicMaterials +=  `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+							break;
+						case "advancedMaterial":
+							advancedMaterials +=  `${itemInfo.name}` + " - `" + `${rows[i].name}` + "`\n";
+							break;
+						default:
+							break;
+					}
 					break;
 				default:
 					break;
 			}
-			//if (itemInfo.type === "megaShips"){
-			//	megaShips = megaShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "smallShips"){
-			//	smallShips = smallShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "largeShips"){
-			//	bigShips = bigShips + `${itemInfo.name} - ${itemInfo.crew}crew\n` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "primary"){
-			//	primary = primary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "secondary"){
-			//	secondary = secondary + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "melee"){
-			//	melee = melee + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "swivelType"){
-			//	swivelTypes = swivelTypes + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			//}else if(itemInfo.type === "cannons"){
-			//	cannons = cannons + `${itemInfo.name}` + " - `" + `${rows[i].name}` +"`\n";
-			//}
 		}
 		setTimeout(function(){
-			newShopListing.addField("Income", `.${income}`)
-				.addField("Melee",`${melee}`,true)
-				.addField("Secondary",`${secondary}`,true)
-				.addField("Primary",`${primary}`,true)
-				.addField("Small Ships",`${smallShips}`,true)
-				.addField("Large Ships",`${bigShips}`,true)
-				.addField("Mega Ships",`${megaShips}`,true)
-				.addField("Swivel Cannons",`${swivelTypes}`,true)
-				.addField("Main Cannons",`${cannons}`,true)
-				.addField("Info","For more indepth info for a given item use:\n;search `itemToSearch`")
-				.setTimestamp();
-			bot.channels.cache.get(config.serverInfo.channels.economy.shopWindowChannel).messages.fetch(config.serverInfo.messages.economy.mainShopWindowMessage).then(msg => {
-				msg.edit(newShopListing);
+
+			configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
+
+				let shopWindowChannel = "";
+
+				let shopInformationMessage = "";
+				let shopIncomeMessage = "";
+				let shopWeaponsMessage = "";
+				let shopShipsMessage = "";
+				let shopPetsMessage = "";
+				let shopConstructionMessage = "";
+				let shopShipsArnamentMessage = "";
+
+				for (let s = 0; s < rows2.length; s++)
+				{
+					switch (rows2[s].name)
+					{
+						case "shopWindowChannel":
+							shopWindowChannel = rows2[s].channelID;
+							break;
+						case "shopInformationMessage":
+							shopInformationMessage = rows2[s].messageID;
+						case "shopIncomeMessage":
+							shopIncomeMessage = rows2[s].messageID;
+							break;
+						case "shopWeaponsMessage":
+							shopWeaponsMessage = rows2[s].messageID;
+							break;
+						case "shopShipsMessage":
+							shopShipsMessage = rows2[s].messageID;
+							break;
+						case "shopPetsMessage":
+							shopPetsMessage = rows2[s].messageID;
+							break;
+						case "shopShipsArnamentMessage":
+							shopShipsArnamentMessage = rows2[s].messageID;
+							break;
+						case "shopConstructionMessage":
+							shopConstructionMessage = rows2[s].messageID;
+							break;
+						default:
+							break;
+					}
+				}
+				setTimeout(function(){
+					let shopInfoEmbed = new Discord.MessageEmbed()
+						.setTitle("Shop Window")
+						.setDescription("Items that can be purchased are listed containers below in the following format:\n> Item Name - `ITEMID`\nNote: you do not need to make it a `code block`, you can simply type out the itemID")
+						.addField('Search', "To search for an item you search based off the `ITEMID` of the item you wish to search, for example:\n;search long9pounder",true)
+						.addField('Purchase', "To purchase an item, you purchase based off the `ITEMID` of the item you wish to purchase, for example:\n ;purchase jeanbart",true);
+					editMsg(shopInfoEmbed, shopWindowChannel, shopInformationMessage);
+
+					let shopIncomeEmbed = new Discord.MessageEmbed()
+						.setTitle("Income")
+						.addField('Small', `${incomeSmall}`,true)
+						.addField('Medium', `${incomeMed}`,true)
+						.addField('Large', `${incomeLarge}`,true);
+					editMsg(shopIncomeEmbed, shopWindowChannel, shopIncomeMessage);
+
+					let shopWeaponsEmbed = new Discord.MessageEmbed()
+						.setTitle("Weapons")
+						.addField('Primary', `${primary}`,true)
+						.addField('Secondary', `${secondary}`,true)
+						.addField('Melee', `${melee}`,true);
+					editMsg(shopWeaponsEmbed, shopWindowChannel, shopWeaponsMessage);
+
+					let shopShipsEmbed = new Discord.MessageEmbed()
+						.setTitle("Ships")
+						.addField('Small', `${smallShips}`,true)
+						.addField('Big', `${bigShips}`,true)
+						.addField('Mega', `${megaShips}`,true);
+					editMsg(shopShipsEmbed, shopWindowChannel, shopShipsMessage);
+
+					let shopShipsArnamentEmbed = new Discord.MessageEmbed()
+						.setTitle("Ship Arnament")
+						.addField('Swivels', `${swivelTypes}`,true)
+						.addField('Cannons', `${cannons}`,true);
+					editMsg(shopShipsArnamentEmbed, shopWindowChannel, shopShipsArnamentMessage);
+
+					let shopPetsEmbed = new Discord.MessageEmbed()
+						.setTitle("Pets")
+						.addField('Birds', `${birds}`,true)
+						.addField('Mammals', `${Mammals}`,true)
+						.addField('Reptiles', `${Reptiles}`,true);
+					editMsg(shopPetsEmbed, shopWindowChannel, shopPetsMessage);
+
+					let shopConstructionEmbed = new Discord.MessageEmbed()
+						.setTitle("Construction Materials")
+						.addField('Basic', `${basicMaterials}`,true)
+						.addField('Advanced', `${advancedMaterials}`,true);
+					editMsg(shopConstructionEmbed, shopWindowChannel, shopConstructionMessage);
+
+					return;
+				},9000);
 			});
+						
 		},6000);
 	});
 	
-	setTimeout(function(){
-		conShopWindow.destroy();
-		conShopWindow = null;
-		return;
-	},9000);
+	return;
 }
 
 function displayRichestUsers(){
-	var conRichestUsers = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
 
-	conRichestUsers.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conRichestUsers.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
-		let newRichest = "```The Richest Users!\nUsername            |Coins in Bank\n";
+	return;
+	
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
+		let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
 		let factor = 100;
 		for (i=0;i<30;i++){
 			let user = bot.users.cache.get(rows[i].ID);
@@ -2269,23 +2355,24 @@ function displayRichestUsers(){
 			}
 			let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
 			if (coins >= (1000000000 * factor)){
-				coins = (coins / (1000000000 * factor)) + "B";
+				coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
 			}else if (coins >= (1000000 * factor)){
-				coins = (coins / (1000000 * factor)) + "M";
+				coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
 			}else if (coins >= (1000 * factor)){
-				coins = (coins / (1000 * factor)) + "K";
+				coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
 			}else{
 				coins = coins / factor;
 			}
 			newRichest = newRichest + name +"|"+ coins +"\n";
 		}
-		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.richestUsersMessage).then(msg => {
-			msg.edit(newRichest + "```");
+		newRichest += "```";
+		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.richestUsers).then(msg => {
+			msg.edit(newRichest);
 		});
 	});
 
-	conRichestUsers.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
-		let newPoorest = "```The Poorest Users!\nUsername            |Coins in Bank\n";
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
+		let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
 		let factor = 100;
 		for (i=0;i<30;i++){
 			let user = bot.users.cache.get(rows[i].ID);
@@ -2304,39 +2391,26 @@ function displayRichestUsers(){
 			}
 			let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
 			if (coins >= (1000000000 * factor)){
-				coins = (coins / (1000000000 * factor)) + "B";
+				coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
 			}else if (coins >= (1000000 * factor)){
-				coins = (coins / (1000000 * factor)) + "M";
+				coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
 			}else if (coins >= (1000 * factor)){
-				coins = (coins / (1000 * factor)) + "K";
+				coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
 			}else{
 				coins = coins / factor;
 			}
 			newPoorest = newPoorest + name +"|"+ coins +"\n";
 		}
-		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.poorestUsersMessage).then(msg => {
-			msg.edit(newPoorest + "```");
+		newPoorest += "```";
+		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.poorestUsers).then(msg => {
+			msg.edit(newPoorest);
 		});
 	});
 	
-	setTimeout(function(){
-		conRichestUsers.destroy();
-		conRichestUsers = null;
-	},6000);
+	return;
 }
 function giveUserMoney(amount,ID){
-	var conUserMoney = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conUserMoney.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conUserMoney.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
 		if(rows.length < 1){
@@ -2344,38 +2418,23 @@ function giveUserMoney(amount,ID){
 		} else {
 			sql = `UPDATE inventoryGT SET giraffeCoins = '${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}' WHERE ID = '${ID}'`;
 		}
-		conUserMoney.query(sql);
+		mainDatabaseConnectionPool.query(sql);
 	});
 
-	setTimeout(function(){
-		conUserMoney.destroy();
-		conUserMoney = null;
-	},3000);
 	return;
 }
 
-function purchaseItem(ID,item,message){
+function purchaseItem(ID,item,message,args){
 
 	if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
 		message.channel.send("Please enter an appropriate search term!");
 	}
 
-	var conpurchase = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conpurchase.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conpurchase.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if (rows.length < 1){
 			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
 		}
-		conpurchase.query(`SELECT * FROM shop WHERE name='${item}'`, (err2, rows2) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM shop WHERE name='${item}'`, (err2, rows2) => {
 			if (rows2.length < 1){
 				message.channel.send( "Please make sure you entered the correct name!");
 			}else if(rows2.length > 1){
@@ -2389,18 +2448,36 @@ function purchaseItem(ID,item,message){
 				let inventory = JSON.parse(rows[0].inventory);
 				let itemInfo = JSON.parse(rows2[0].info);
 				let continueAnyway = true;
-				conpurchase.query(`SELECT * FROM shopTypeLimits WHERE type='${itemInfo.type}'`, (err,rows3) => {
+				mainDatabaseConnectionPool.query(`SELECT * FROM shopTypeLimits WHERE type='${itemInfo.type}'`, (err,rows3) => {
 					let counter = 0;
 					let maxCount = rows3[0].maxCount;
-					for (i=0; i< inventory.length ; i++){
-						if (inventory[i].name === rows2[0].name){
-							message.channel.send("You already own that item!");
+					if (itemInfo.type === "constructionResources")
+					{
+						resourceAmountPurchased = parseInt(args[1]);
+						if (isNaN)
+						{
+							message.channel.send("Please enter a valid amount!");
 							continueAnyway = false;
-						}else if(inventory[i].type === itemInfo.type){
-							counter = counter + 1;
-							if (counter >= maxCount){
-								message.channel.send("You already own an item of this type!");
+						}else
+						{
+							if ((rows2[0].value * resourceAmountPurchased) > parseFloat(rows[0].giraffeCoins))
+							{
+								message.channel.send(`You have insufficient coins to afford this item! You need another ${(rows2[0].value * resourceAmountPurchased) - rows[0].giraffeCoins}GC`);
 								continueAnyway = false;
+							}
+						}
+					}
+					for (i=0; i< inventory.length ; i++){
+						if (continueAnyway){
+							if (inventory[i].name === rows2[0].name){
+								message.channel.send("You already own that item!");
+								continueAnyway = false;
+							}else if(inventory[i].type === itemInfo.type){
+								counter = counter + 1;
+								if (counter >= maxCount){
+									message.channel.send("You already own an item of this type!");
+									continueAnyway = false;
+								}
 							}
 						}
 					}
@@ -2424,9 +2501,14 @@ function purchaseItem(ID,item,message){
 						if (itemInfo.customizable === "yes"){
 							customizable = true;
 						}
-						inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "customizable" : customizable, "value" : (rows2[0].value / 2), "properName" : itemInfo.name} );
-						conpurchase.query(`update inventoryGT set giraffeCoins='${rows[0].giraffeCoins - rows2[0].value}', inventory='${JSON.stringify(inventory)}' where ID = '${ID}'`);
-						conpurchase.query(`update shop set inStock = ${rows2[0].inStock - 1} where name='${item}'`);
+						if (itemInfo.type === "constructionResources")
+						{
+							inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "value" : (rows2[0].value / 2), "properName" : itemInfo.name, "amount" : amount} );
+						}else{
+							inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "customizable" : customizable, "value" : (rows2[0].value / 2), "properName" : itemInfo.name} );
+						}
+						mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${rows[0].giraffeCoins - rows2[0].value}', inventory='${JSON.stringify(inventory)}' where ID = '${ID}'`);
+						mainDatabaseConnectionPool.query(`update shop set inStock = ${rows2[0].inStock - 1} where name='${item}'`);
 						message.channel.send(fancyPurchaseEmbed);
 						if (parseInt(rows2[0].value) > 5000){
 							let logEmbed = new Discord.MessageEmbed()
@@ -2440,11 +2522,8 @@ function purchaseItem(ID,item,message){
 			}
 		});
 	});
-
-	setTimeout(function(){
-		conpurchase.destroy();
-		conpurchase = null;
-	},3000);
+	
+	return;
 }
 
 function searchForItem(item,message){
@@ -2452,22 +2531,12 @@ function searchForItem(item,message){
 		message.channel.send("Please enter an appropriate search term!");
 	}
 
-	var conSearch = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conSearch.connect(err => {
-		if(err) console.log(err);
-	});
 	if (Array.isArray(item)){
 		item = item.join(' ');
 	}
 	item = item.toLowerCase().replace(/ /g,"");
 
-	conSearch.query(`SELECT * FROM shop WHERE name LIKE '%${item}%'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM shop WHERE name LIKE '%${item}%'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
 		if(rows.length < 1){
@@ -2475,7 +2544,7 @@ function searchForItem(item,message){
 		} else if(rows.length > 1 && rows.length < 10){
 			let allNames = "Results:\n```\n";
 			for (i=0; i< rows.length; i++){
-				allNames = allnames + rows[i].name + "\n";
+				allNames = allNames + rows[i].name + "\n";
 			}
 			message.channel.send(allNames+"```");
 		}else if( rows.length >= 10){
@@ -2499,10 +2568,7 @@ function searchForItem(item,message){
 		}
 	});
 
-	setTimeout(function(){
-		conSearch.destroy();
-		conSearch = null;
-	},3000);
+	return;
 }
 
 function sellItem(ID,item,message){
@@ -2511,18 +2577,7 @@ function sellItem(ID,item,message){
 		message.channel.send("Please enter an appropriate search term!");
 	}
 
-	var conSellItem = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conSellItem.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conSellItem.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		if(rows.length < 1){
 			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
@@ -2543,13 +2598,13 @@ function sellItem(ID,item,message){
 			}
 
 			if (!notFound){
-				conSellItem.query(`select * from shop where name='${item}'`, (err,rows2) => {
+				mainDatabaseConnectionPool.query(`select * from shop where name='${item}'`, (err,rows2) => {
 					if(err) console.log(err);
 					if (JSON.stringify(inventory).includes("null")){
 						inventory = '[]';
 					}
-					conSellItem.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
-					conSellItem.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
+					mainDatabaseConnectionPool.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
 					let itemInfo = JSON.parse(rows2[0].info);
 					let sellEmbed = new Discord.MessageEmbed().setTitle("Item Sold").setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${message.author}`).setTimeStamp();
 					message.channel.send(sellEmbed);
@@ -2564,25 +2619,11 @@ function sellItem(ID,item,message){
 		}
 	});
 
-	setTimeout(function(){
-		conSellItem.destroy();
-		conSellItem = null;
-	},3000);
+	return;
 }
 
 async function listInventory(ID,message){
-	var conlistInventory = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conlistInventory.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conlistInventory.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 
 		if(rows.length === 0){
@@ -2608,10 +2649,7 @@ async function listInventory(ID,message){
 		}
 	});
 
-	setTimeout(function(){
-		conlistInventory.destroy();
-		conlistInventory = null;
-	},3000);
+	return;
 }
 
 function giftUserItem(gifterID,reciever,item,message){
@@ -2621,18 +2659,7 @@ function giftUserItem(gifterID,reciever,item,message){
 		message.channel.send("Please enter an appropriate item!");
 	}
 
-	var conGiftUser = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conGiftUser.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conGiftUser.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		if(rows.length < 1){
 			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
@@ -2652,13 +2679,13 @@ function giftUserItem(gifterID,reciever,item,message){
 			}
 
 			if (!notFound){
-				conSellItem.query(`select * from shop where name='${item}'`, (err,rows2) => {
+				mainDatabaseConnectionPool.query(`select * from shop where name='${item}'`, (err,rows2) => {
 					if(err) console.log(err);
 					if (JSON.stringify(inventory).includes("null")){
 						inventory = '[]';
 					}
-					conSellItem.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
-					conSellItem.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
+					mainDatabaseConnectionPool.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
 					let itemInfo = JSON.parse(rows2[0].info);
 					message.channel.send(`Item: ${itemInfo.name} has been sold for ${worth}.`);
 					updateShopWindow();
@@ -2671,23 +2698,10 @@ function giftUserItem(gifterID,reciever,item,message){
 		}
 	});
 
-	setTimeout(function(){
-		conGiftUser.destroy();
-		conGiftUser = null;
-	},3000);
+	return;
 }
 
 function giftUserCoins(gifterID,recieverID,amount,message){
-	var conGiftUserCoins = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conGiftUserCoins.connect(err => {
-		if(err) console.log(err);
-	});
 
 	if (isNaN(amount)){
 		message.channel.send("Please enter a correct value!");
@@ -2697,7 +2711,7 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 		return;
 	}
 
-	conGiftUserCoins.query(`SELECT * FROM inventoryGT WHERE ID = '${gifterID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${gifterID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
 		if(rows.length < 1){
@@ -2705,15 +2719,15 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 		} else if(amount > (rows[0].giraffeCoins * 1)){
 			message.channel.send("You cannot gift money you do not have!");
 		}else{
-			conGiftUserCoins.query(`SELECT * FROM inventoryGT WHERE ID='${recieverID}'`, (err,rows2) => {
+			mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${recieverID}'`, (err,rows2) => {
 				let giftCoinsEmbed = new Discord.MessageEmbed().setTitle("User Gifted");
 				if (rows2.length < 1){
-					conGiftUserCoins.query(`INSERT INTO inventoryGT (ID,giraffeCoins,inventory) VALUES ('${recieverID}','${amount}','[]')`);
-					conGiftUserCoins.query(`update inventoryGT set giraffeCoins='${(rows[0].giraffeCoins * 1) - (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${gifterID}'`);
+					mainDatabaseConnectionPool.query(`INSERT INTO inventoryGT (ID,giraffeCoins,inventory) VALUES ('${recieverID}','${amount}','[]')`);
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(rows[0].giraffeCoins * 1) - (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${gifterID}'`);
 					giftCoinsEmbed.setDescription(`Added user <@${recieverID}> to the database\nGifted user: ${amount}GC from <@${gifterID}>`);
 				}else{
-					conGiftUserCoins.query(`update inventoryGT set giraffeCoins='${(rows2[0].giraffeCoins * 1) + (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${recieverID}'`);
-					conGiftUserCoins.query(`update inventoryGT set giraffeCoins='${(rows[0].giraffeCoins * 1) - (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${gifterID}'`);
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(rows2[0].giraffeCoins * 1) + (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${recieverID}'`);
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(rows[0].giraffeCoins * 1) - (parseFloat(amount).toFixed(2) * 1)}' WHERE ID='${gifterID}'`);
 					giftCoinsEmbed.setDescription(`<@${gifterID}> gifted user <@${recieverID}>, amount: ${amount}GC`);
 				}
 				message.channel.send(giftCoinsEmbed);
@@ -2722,21 +2736,11 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 		}
 	});
 
-	setTimeout(function(){
-		conGiftUserCoins.destroy();
-		conGiftUserCoins = null;
-	},3000);
 	return;
 }
 
 function gambleMoney(amount,message){
-	var conGamble = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-	conGamble.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
 		if (isNaN(amount)){
 			message.channel.send("Please enter a correct value!");
 		}else if (amount > parseFloat(rows[0].giraffeCoins)){
@@ -2762,25 +2766,14 @@ function gambleMoney(amount,message){
 					income = 2;
 					break;
 			}
-			//if (result < 15){
-			//	income = -0.7;
-			//}else if (result < 23){
-			//	income = 1;
-			//}else if (result < 26){
-			//	income = 1.2;
-			//}else if (result < 28){
-			//	income = 1.4;
-			//}else if (result < 30){
-			//	income = 2;
-			//}
 			if ((income * amount) !== amount){
-				conGamble.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
-					conGamble.query(`update inventoryGT set giraffeCoins='${(((rows[0].giraffeCoins * 100) + (((income * amount) - amount) * 100)) / 100).toFixed(2)}' where ID='${message.author.id}'`);
+				mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(((rows[0].giraffeCoins * 100) + (((income * amount) - amount) * 100)) / 100).toFixed(2)}' where ID='${message.author.id}'`);
 				});
 			}
 			if (((income * amount) - amount).toFixed(2) < 0){
-				conGamble.query(`SELECT * FROM inventoryGT WHERE ID='thereserve'`, (err,rows) =>{
-					conGamble.query(`update inventoryGT set giraffeCoins='${Math.abs((((rows[0].giraffeCoins * 100) + ((income * amount) * 100)) / 100).toFixed(2))}' where ID='thereserve'`);
+				mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='thereserve'`, (err,rows) =>{
+					mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${Math.abs((((rows[0].giraffeCoins * 100) + ((income * amount) * 100)) / 100).toFixed(2))}' where ID='thereserve'`);
 				});
 			}
 			let gambleEmbed = new Discord.MessageEmbed()
@@ -2790,27 +2783,13 @@ function gambleMoney(amount,message){
 			message.channel.send(gambleEmbed);	
 		}
 	});
-	setTimeout(function(){
-		conGamble.destroy();
-		conGamble = null;
-	},3000);
+
 	return;
 }
 
 //WIP
 function customizeShip(ID,args,message){
-	var conCustomShip = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	conCustomShip.connect(err => {
-		if(err) console.log(err);
-	});
-
-	conCustomShip.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
 		if(rows.length < 1){
@@ -2842,81 +2821,102 @@ function customizeShip(ID,args,message){
 				}
 			}
 		}
-		conCustomShip.query(sql);
+		mainDatabaseConnectionPool.query(sql);
 	});
 
-	setTimeout(function(){
-		conCustomShip.destroy();
-		conCustomShip = null;
-	},3000);
+	return;
 }
 
 //Income Methods
 
-function quizQuestions(message){
-	let file = require("./datafile.json");
-	var item = file.quizQuestions[Math.floor(Math.random() * file.quizQuestions.length)];
-	if (item.format === "text"){
-		textQuizQuestions(message,item);
-	}
-	cooldowns.quiz.allowed = false;
-	setTimeout(function(){
-		cooldowns.quiz.allowed = true;
-	},cooldowns.quiz.timeoutLength);
+function checkQuizAllowances(message,args){
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT where ID='${message.author.id}'`, (err,rows,fields) => {
+
+		mainDatabaseConnectionPool.query("SELECT * FROM cooldowns WHERE name='quiz'", (err,rows2,fields) => {
+
+			if (args[0] === "income"){
+				if (rows[0].lastQuiz === null){
+
+					quizQuestions(message,true);
+					mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastQuiz='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+
+				}else if ((parseInt(rows[0].lastQuiz) + rows2[0].duration) < (new Date().getTime())){
+
+					quizQuestions(message,true);
+					mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastQuiz='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+
+				}else{
+					message.channel.send(`Please wait, your income on this command is currently on a ${parseInt(rows2[0].duration / 1000)}sec cooldown.`);
+				}
+			}else{
+				quizQuestions(message,false);
+			}
+
+		});
+
+	});
+
 	return;
 }
 
-async function textQuizQuestions(message,item){
-	var filter = response => {
-		return item.answers.some(answer => answer.toLowerCase() === response.content.toLowerCase());
+function quizQuestions(message,isGainingIncome){
+	mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
+		let num = getRandomInt(rows.length - 1);
+		if (rows[num].format === "text"){
+			textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+		}
+	});
+	return;
+}
+
+async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor,isGainingIncome){
+	let baseIncome = 5;
+	let filter = response => {
+		return (awnsers.indexOf(response.content.toLowerCase()) !== -1);
 	};
-	message.channel.send(item.question).then(() => {
-		message.channel.awaitMessages(filter, {max: 1, time: (30000 * item.timeFactor), errors: ['time']})
+	message.channel.send(question).then(() => {
+		message.channel.awaitMessages(filter, {max: 1, time: (30000 * timeFactor), errors: ['time']})
 			.then(collected => {
-				message.channel.send(`${collected.first().author} got the correct awnser and have earned themselves ${20 * item.worthFactor}GC!`);
-				giveUserMoney(20 * item.worthFactor, collected.first().author.id);
-				filter = undefined;
-				delete filter;
+				if (isGainingIncome){
+					message.channel.send(`${collected.first().author} got the correct awnser and have earned themselves ${baseIncome * worthFactor}GC!`);
+					giveUserMoney(baseIncome * worthFactor, collected.first().author.id);
+				}else{
+					message.channel.send(`${collected.first().author} got the correct awnser!`);
+				}
 			})
 			.catch(collected => {
 				message.channel.send('Sadly, right now, is not the moment we find out the answer to this question.');
-				filter = undefined;
-				delete filter;
 			});
 	});
 }
 
-//Will be moved over to switch case when implemented
+//Will be moved over to switch case when implemented 
 function specificQuiz(message,type){
 	if (type === "flags"){}else if (type === "blackwake"){}else if (type === "science"){}else if (type === "sports"){}else if (type === "geography"){}else if (type === "show/music"){}else if (type === "music"){}else if (type === "tech"){}else {}
 }
 
 function economyWork(message){
-	var workCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	workCon.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows,fields) =>{
 		let result = getRandomInt(30);
 		let workingEmbed = new Discord.MessageEmbed().setTimestamp();
+		let inv = JSON.parse(rows[0].inventory);
 		workingEmbed.setTitle("Result");
 
 		if (rows.length != 0 && rows.length < 2)
 		{
 			if (rows[0].lastWorked === null)
 			{
-				workCon.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+				mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
 				let income = 10;
 				if (rows[0].inventory.length)
 				{
-					if (rows[0].inventory.indexOf('income') != 0)
+					let count = 0;
+					for (let i = 0; i < inv.length; i++)
 					{
-						for (var incomeMethod in rows[0].inventory.income)
+						if (inv[i].type === 'income')
 						{
-							income += incomeMethod.income;
+							income += inv[i].value;
+							count += 1;
 						}
 					}
 				}
@@ -2928,20 +2928,15 @@ function economyWork(message){
 				if ( (parseInt(rows[0].lastWorked) + 86400000) < (new Date().getTime()) )
 				{
 					let income = 10;
-					console.log(rows[0].lastWorked);
-					console.log(parseInt(rows[0].lastWorked) + 86400000);
-					console.log(new Date().getTime());
-					if (rows[0].inventory.indexOf('income') != 0)
+					for (let i = 0; i < inv.length; i++)
 					{
-						for (var incomeMethod in rows[0].inventory.income)
+						if (inv[i].type === 'income')
 						{
-							income += incomeMethod.income;
+							income += inv[i].value;
 						}
 					}
-
-
 					giveUserMoney(income, message.author.id);
-					workCon.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+					mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
 					workingEmbed.setDescription(`You have earnt: ${income}GC!`);
 				}
 				else
@@ -2956,7 +2951,7 @@ function economyWork(message){
  				 		'Sat'
 					]
 
-					let time = new Date().getTime() + 86400000;
+					let time = new Date(parseInt(rows[0].lastWorked)).getTime() + 86400000;
 					let date = new Date(time);
 					let hrs = date.getHours();
 					if (parseInt(hrs) < 10)
@@ -2983,9 +2978,6 @@ function economyWork(message){
 		message.channel.send(workingEmbed);
 	});
 
-	setTimeout(function(){
-		workCon.destroy();
-	},3000);
 	return;
 }
 //Not yet complete
@@ -3095,15 +3087,8 @@ function getUserInformation(message,args){
 }
 
 function displayReactionRoles(){
-	var reactionRolesCon = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : "oliverbotConfigs",
-	});
-
-	reactionRolesCon.query('SELECT * FROM reactionRoleMessages', (err,rows) => {
-		if (rows.length == 0)
+	mainDatabaseConnectionPool.query('SELECT * FROM reactionRoleMessages', (err,rows, fields) => {
+		if (!rows)
 		{
 			return;
 		}
@@ -3146,23 +3131,31 @@ function displayReactionRoles(){
 		{
 			for (let i = 0; i < newMsgs.length; i++)
 			{
-				reactionRolesCon.query(`INSERT INTO reactionRoleMessages VALUES (${rows[0].channelID} ${newMsgs[i]})`);
+				mainDatabaseConnectionPool.query(`INSERT INTO reactionRoleMessages VALUES (${rows[0].channelID} ${newMsgs[i]})`);
 			}
 		}
 
 	});
 
-	setTimeout(function(){
-		reactionRolesCon.destroy();
-	},3000);
 	return;
 }
 
-function editMsg(contents,channelID,msgID)
-{
+function editMsg(contents,channelID,msgID){
 	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
 		msg.edit(contents);
 	});
+}
+
+function updateNWordCounter(message){
+	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}' AND serverID='${message.guidl.id}'`, (err,rows, fields) => {
+		if (rows.length === 0){
+			mainDatabaseConnectionPool.query(`INSERT INTO nWordCount VALUES ('${message.author.id}', '1', '${message.guild.id}')`);
+		}else{
+			mainDatabaseConnectionPool.query(`UPDATE nWordCount SET counter='${parseInt(rows[0].counter) + 1}' WHERE ID='${message.author.id}'`);
+		}
+	});
+
+	return;
 }
 
 allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147"];
@@ -3204,6 +3197,7 @@ bot.on("ready", () => {
 	//updateMClist();
 	return;
 });
+
 
 bot.on("message", async message => {
 
@@ -3273,6 +3267,8 @@ bot.on("message", async message => {
 			message.channel.send(message.author+" Please dont use that language!");
 			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
 		}
+		updateNWordCounter(message);
+		return;
 	}
 
 	//Prevents autoquote from taking from sensitive channels
@@ -3290,23 +3286,12 @@ bot.on("message", async message => {
 	//XP Gain
 	if (message.guild.id === config.serverInfo.serverId){
 		try{
-			var con = mysql.createConnection({
-				host : mysqlLoginData.host,
-				user : mysqlLoginData.user,
-				password : mysqlLoginData.password,
-				database : mysqlLoginData.database,
-			});
-
-			con.connect(err => {
-				if(err) console.log(err);
-			});
-
-			con.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
+			mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
 				if(err) console.log(err);
 				let sql;
 				if(rows.length < 1){
 					sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${genXp()}, 0, '"n"', '1')`;
-					con.query(sql);
+					mainDatabaseConnectionPool.query(sql);
 				} else {
 					let eligible = rows[0].canget;
 					if (eligible === '"y"'){
@@ -3318,42 +3303,24 @@ bot.on("message", async message => {
 							newxp = 0;
 						}
 						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
-						con.query(sql);
+						mainDatabaseConnectionPool.query(sql);
 						giveUserMoney(0.2,message.author.id);
 					}else{
-						con.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+						mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
 					}
 				}
 			});
 
-			con.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+			mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
 				if (rows.length < 1){
-					con.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+					mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
 				}else{
-					con.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
+					mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
 				}
 			});
 
 			setTimeout(function(){
-				con.destroy();
-				con = null;
-			},3000);
-
-			setTimeout(function(){
-				var con = mysql.createConnection({
-					host : mysqlLoginData.host,
-					user : mysqlLoginData.user,
-					password : mysqlLoginData.password,
-					database : mysqlLoginData.database,
-				});
-				con.connect(err => {
-					if(err) console.log(err);
-				});
-				con.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
-				setTimeout(function(){
-					con.destroy();
-					con = null;
-				},3000);
+				mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
 			}, 180000);
 		}catch (e){
 			console.log(e);
@@ -3587,6 +3554,12 @@ bot.on("message", async message => {
 		case "restart":
 			if (message.author.id === config.ownerId){
 				await message.channel.send("Restarting....");
+				mainDatabaseConnectionPool.end(function (err){
+					if (err) console.log(err);
+				});
+				configurationDatabaseConnectionPool.end(function (err){
+					if (err) console.log(err);
+				})
 				process.exit();
 			}
 			break;
@@ -3655,7 +3628,7 @@ bot.on("message", async message => {
 			break;
 		case "purchase":
 			if (args[0] && args.length < 2){
-				purchaseItem(message.author.id,args[0],message);
+				purchaseItem(message.author.id,args[0],message,args);
 			}else{
 				message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
 			}
@@ -3698,11 +3671,7 @@ bot.on("message", async message => {
 			}
 			break;
 		case "quiz":
-			if (cooldowns.quiz.allowed){
-				quizQuestions(message);
-			}else{
-				message.channel.send(`Please wait, this command is currently on a ${parseInt(cooldowns.quiz.timeoutLength / 1000)}sec cooldown.`);
-			}
+			checkQuizAllowances(message,args);
 			break;
 		case "beg":
 			let num = getRandomInt(300);
@@ -3716,7 +3685,6 @@ bot.on("message", async message => {
 			break;
 		case "work":
 			economyWork(message);
-			//message.channel.send("Not Yet Active.");
 			break;
 		case "config":
 			if (message.member.roles.cache.has("665939545371574283")){
@@ -3742,6 +3710,28 @@ bot.on("message", async message => {
     			} catch (err) {
       				message.channel.send(`\`ERROR\` \`\`\`xl\n${clean(err)}\n\`\`\``);
     			}
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "database":
+			if (message.author.id === config.ownerId){
+				try{
+					if (args[0].startsWith("$"))
+					{
+						let databaseName = args[0].split(1, args[0].length);
+						args = args.shift();
+						runDatabaseCommand(message, databaseName, args.join(" "));
+					}else if (args[0] === "help")
+					{
+						message.channel.send("Current flags:\n `$`database");
+					}else
+					{
+						runDatabaseCommand(message, mysqlLoginData.database, args.join(" "));
+					}
+				}catch (err) {
+					message.channel.send(err);
+				}
 			}else{
 				lackingPermissions(message);
 			}
@@ -4377,34 +4367,18 @@ bot.on("message", async message => {
 
 	//If command is being tracked, update table
 	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
-		var conCheckIfInTable = mysql.createConnection({
-			host : mysqlLoginData.host,
-			user : mysqlLoginData.user,
-			password : mysqlLoginData.password,
-			database : mysqlLoginData.database,
-		});
-			
-		conCheckIfInTable.connect(err => {
-			if(err) console.log(err);
-		});
-
-		conCheckIfInTable.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
 			if(err) console.log(err);
 			let sql;
 			if(rows.length < 1){
 				sql = `INSERT INTO commandUsageOliverBot (command,TimesUsed) VALUES ('${command}',1)`;
-				conCheckIfInTable.query(sql);
+				mainDatabaseConnectionPool.query(sql);
 			} else {
 				let used = parseInt(rows[0].TimesUsed) + 1;
 				sql = `UPDATE commandUsageOliverBot SET TimesUsed = ${used} WHERE command = '${command}'`;
-				conCheckIfInTable.query(sql);
+				mainDatabaseConnectionPool.query(sql);
 			}
 		});
-
-		setTimeout(function(){
-			conCheckIfInTable.end();
-			conCheckIfInTable = null;
-		},3000);
 		TrackingCommand = false;
 	}
 
@@ -4425,18 +4399,7 @@ bot.on("message", async message => {
 });
 
 function getChannelInformation(message){
-	var con = mysql.createConnection({
-		host : mysqlLoginData.host,
-		user : mysqlLoginData.user,
-		password : mysqlLoginData.password,
-		database : mysqlLoginData.database,
-	});
-
-	con.connect(err => {
-		if(err) console.log(err);
-	});
-
-	con.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
 		let message_count;
 		if (rows.length < 1){
 			message_count = 0;
@@ -4462,11 +4425,6 @@ function getChannelInformation(message){
 			.setTimestamp();
 		message.channel.send(channelinfo);
 	});
-
-	setTimeout(function(){
-		con.destroy();
-		con = null;
-	},3000);
 	
 	return;
 }
@@ -4794,22 +4752,6 @@ bot.on('raw', async event => {
 
 	return;
 });
-
-// bot.on('presenceUpdate', (oldMember, newMember) => {
-// 	if (oldMember.guild.id){
-// 		console.log("------");
-// 		if (oldMember.presence.game["streaming"]){
-// 			console.log(oldMember.presence.game.streaming);
-// 			console.log("------");
-// 		}
-		
-// 		if (newMember.presence.game["streaming"]){
-// 			console.log(newMember.presence.game.streaming);
-// 			console.log("------");
-// 		}
-		
-// 	}
-// });
 
 
 bot.on('error', console.error);
