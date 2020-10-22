@@ -44,43 +44,5 @@
 	"pingedSounds" : [
 		"https://www.youtube.com/watch?v=X4EWMFpXQYA"],
 	"randomsongs" : [
-		"https://www.youtube.com/watch?v=68ugkg9RePc&list=PLtg6VBytbdL4O6cpBMbAoliCKLcddtHLF&index=118"],
-	"quizQuestions" : [
-		{
-				"format" : "text",
-				"worthFactor" : 1,
-				"timeFactor" : 1,
-				"maxAttempts" : 2,
-				"category" : "flags",
-				"question" : "Which country is this the flag of? :flag_af:",
-				"answers" : ["afghanistan"]		
-		},
-		{
-				"format" : "text",
-				"worthFactor" : 1,
-				"timeFactor" : 2,
-				"category" : "movie/show",
-				"maxAttempts" : 2,
-				"questionContent" : "Of what is the sci-fi show Torchwood an anagram?",
-				"answers" : ["clifton"]
-		},
-		{
-				"format" : "text",
-				"worthFactor" : 1,
-				"timeFactor" : 1,
-				"category" : "sports",
-				"maxAttempts" : 2,
-				"questionContent" : "Which city will host the 2028 Olympic Games?",
-				"answers" : ["los angeles","la"]
-		},
-		{
-				"format" : "text",
-				"worthFactor" : 1,
-				"timeFactor" : 1,
-				"category" : "music",
-				"maxAttempts" : 2,
-				"questionContent" : "Matt Goss, Luke Goss and Craig Logan made up which band?",
-				"answers" : ["bros"]
-		}
-	]
+		"https://www.youtube.com/watch?v=68ugkg9RePc&list=PLtg6VBytbdL4O6cpBMbAoliCKLcddtHLF&index=118"]
 }
