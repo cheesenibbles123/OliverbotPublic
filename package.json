@@ -12,7 +12,7 @@
     "@discordjs/opus": "^0.3.2",
     "btoa": "^1.2.1",
     "canvas": "^2.6.1",
-    "discord.js": "^12.2.0",
+    "discord.js": "^12.4.0",
     "fs": "0.0.1-security",
     "ftp": "^0.3.10",
     "mysql": "^2.18.1",
