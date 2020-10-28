@@ -1,0 +1,61 @@
+{
+	"token": "INSERTTOKEN",
+	"prefix": "INSERTPREFIX",
+	"ownerId" : "INSERTOWNERDISCORDID",
+	"apiKeys":{
+		"steam":"INSERTSTEAMAPIKEY",
+		"nasa":"INSERTNASAAPITKEY",
+		"yandex":"INSERTYANDEXAPIKEY"
+	},
+	"databaseInfo":{
+		"host" : "DBHOST",
+		"user" : "DBUSER",
+		"password" : "DBPASS",
+		"database" : "DBNAME"
+	},
+	"serverInfo" :{
+		"serverId" : "INSERTSERVERID",
+		"channels": {
+			"xpLeaderboard" : "630783753400352768",
+			"loggingChannel" : "INSERTCHANNELID",
+			"supportTicketChannel" : "INSERTCHANNELID",
+			"quotes" : "INSERTCHANNELID",
+			"initialJoinReactionConfirmation" : "INSERTCHANNELID",
+			"staffChannels" :{
+				"discordAdministrator" : "INSERTCHANNELID",
+				"serverAdministrator" : "INSERTCHANNELID",
+				"moderator" : "INSERTCHANNELID"
+			},
+			"economy" : {
+				"bigTransactionLoggingChannel" : "INSERTCHANNELID",
+				"shopWindowChannel" : "INSERTCHANNELID",
+				"shopBoardsChannel" : "INSERTCHANNELID"
+			}
+		},
+		"messages" : {
+			"xpLeaderboard" : "INSERTMESSAGEID",
+			"initialJoinReactionConfirmation" : "INSERTMESSAGEID",
+			"economy" : {
+				"shopInformationMessage" : "INSERTMESSAGEID",
+				"mainShopWindowMessage" : "INSERTMESSAGEID",
+				"richestUsersMessage" : "INSERTMESSAGEID",
+				"poorestUsersMessage" : "INSERTMESSAGEID"
+			}
+		},
+		"roles" : {
+			"defaultRole" : "INSERTROLEID",
+			"serverAdministrator" : "INSERTROLEID",
+			"serverModerator" : "INSERTROLEID",
+			"serverBooster" : "INSERTROLEID",
+			"muted" : "INSERTROLEID"
+		},
+		"emojiNames" : {
+			"initialJoinReactionConfirmation" : "INSERTEMOJINAME"
+		}
+	},
+	"embedColours" : {
+		"channels" : "INSERTHEXCOLOUR",
+		"bans" : "INSERTHEXCOLOUR",
+		"roles" : "INSERTHEXCOLOUR"
+	}
+}

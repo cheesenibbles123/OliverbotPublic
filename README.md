@@ -11,16 +11,17 @@ Incase the title of the files wasn't clear enough, the included config and dataf
 # Additional Info
 
 **Notes:**
+ - The config + datafile must be within the same directory as the main oliverbot.js file (see Templates)
  - Please note idk wtf im doing with github.
  - Adding comments to the code to help readability (I'll get round to it some day)
  - [Website link](http://www.archiesbots.com/index.html)
- - Release version: 1.6.0
+ - Release version: 1.7.0
 
 **Dependencies:**
  - @discordjs/opus: ^0.3.2
  - btoa: ^1.2.1
  - canvas: ^2.6.1
- - discord.js: ^12.2.0
+ - discord.js: ^12.4.0
  - fs: 0.0.1-security
  - ftp: ^0.3.10
  - mysql: ^2.18.1
@@ -36,4 +37,4 @@ Incase the title of the files wasn't clear enough, the included config and dataf
  - PM: PM2
 
 **Current Line Count:**
- - 4830
+ - 4772

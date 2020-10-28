@@ -1,0 +1,48 @@
+{
+	"Responses" : {
+		"dance" : [	"https://i.imgur.com/68qG8G6.gif",
+					"https://i.imgur.com/1D5dbFy.gif"],
+		"gif" : [	"https://i.imgur.com/DpXagXi.gif",
+					"https://i.imgur.com/CRM4sA8.gif",
+					"https://giphy.com/gifs/steven-universe-peridot-shitpost-13FYsvVfhvI3pS"],
+		"vid" : ["https://youtu.be/-DgnaC0Vm-I",
+					"https://i.imgur.com/LmOKhtt.8MuQ4P4"],
+		"img" : ["https://i.imgur.com/0VWobrW.jpg",
+					"https://i.imgur.com/0ut1m9N.jpg"],
+		"underground" : [],
+		"beg" : [
+			"Hah, you think I would give you anything?",
+			"how adorable, you believe I would give you coins.",
+			"Look at you, begging for virtual money xD",
+			"If you had been a good boy then perhaps...",
+			"Hey, everyone! Look at this kid xDDD"
+		]
+	},
+	"status" : {
+		"PLAYING" : [";ListCommands",
+			"Blackwake",
+			"Something"],
+		"STREAMING" : ["Sick 360 noscopes",
+			"Something"],
+		"WATCHING" : ["Human Behaviour",
+			"Danger Dolan",
+			"Something"],
+		"LISTENING" : ["Dank Tunes",
+			"Your Heartbeat",
+			"Something"]
+	},
+	"insults" : ["If your gonna be two faced, honey at least make one of them pretty.",
+				"As an outsider, what do you think of the human race? TARGET"],
+	"quotes" : ["All that we are is the result of what we have thought. Buddha",
+				"Look at the sparrows; they do not know what they will do in the next moment. Let us literally live from moment to moment. Mahatma Gandhi"],
+	"dadjokes" : [
+		"Why didn't the vampire attack Taylor Swift? She had bad blood.",
+		"Why did the Clydesdale give the pony a glass of water? Because he was a little horse!"],
+	"nootnoot" : [
+		"https://tenor.com/view/pingu-noot-intensifies-penguin-gif-12659856"
+	],
+	"pingedSounds" : [
+		"https://www.youtube.com/watch?v=X4EWMFpXQYA"],
+	"randomsongs" : [
+		"https://www.youtube.com/watch?v=68ugkg9RePc&list=PLtg6VBytbdL4O6cpBMbAoliCKLcddtHLF&index=118"]
+}
