@@ -2863,19 +2863,19 @@ function quizQuestions(message,isGainingIncome){
 	mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
 		let num = getRandomInt(rows.length - 1);
 		if (rows[num].format === "text"){
-			textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+			textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome);
 		}
 	});
 	return;
 }
 
-async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor,isGainingIncome){
+async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
 	let baseIncome = 5;
 	let filter = response => {
 		return (awnsers.indexOf(response.content.toLowerCase()) !== -1);
 	};
 	message.channel.send(question).then(() => {
-		message.channel.awaitMessages(filter, {max: 1, time: (30000 * timeFactor), errors: ['time']})
+		message.channel.awaitMessages(filter, {max: 1, time: (15000 * timeFactor), errors: ['time']})
 			.then(collected => {
 				if (isGainingIncome){
 					message.channel.send(`${collected.first().author} got the correct awnser and have earned themselves ${baseIncome * worthFactor}GC!`);
@@ -2892,7 +2892,67 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 
 //Will be moved over to switch case when implemented 
 function specificQuiz(message,type){
-	if (type === "flags"){}else if (type === "blackwake"){}else if (type === "science"){}else if (type === "sports"){}else if (type === "geography"){}else if (type === "show/music"){}else if (type === "music"){}else if (type === "tech"){}else {}
+	switch (type)
+	{
+		case "flags":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='flags'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "blackwake":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='blackwake'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "science":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='science'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "sports":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='sports'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "geography":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='geography'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "show/music":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='show/music'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		case "tech":
+			mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='tech'", (err,rows,fields) => {
+				let num = getRandomInt(rows.length - 1);
+				if (rows[num].format === "text"){
+					textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,isGainingIncome);
+				}
+			});
+			break;
+		default:
+			break;
+	}
 }
 
 function economyWork(message){
@@ -3147,7 +3207,7 @@ function editMsg(contents,channelID,msgID){
 }
 
 function updateNWordCounter(message){
-	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}' AND serverID='${message.guidl.id}'`, (err,rows, fields) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}'`, (err,rows, fields) => {
 		if (rows.length === 0){
 			mainDatabaseConnectionPool.query(`INSERT INTO nWordCount VALUES ('${message.author.id}', '1', '${message.guild.id}')`);
 		}else{
@@ -4752,6 +4812,22 @@ bot.on('raw', async event => {
 
 	return;
 });
+
+// bot.on('presenceUpdate', (oldMember, newMember) => {
+// 	if (oldMember.guild.id){
+// 		console.log("------");
+// 		if (oldMember.presence.game["streaming"]){
+// 			console.log(oldMember.presence.game.streaming);
+// 			console.log("------");
+// 		}
+		
+// 		if (newMember.presence.game["streaming"]){
+// 			console.log(newMember.presence.game.streaming);
+// 			console.log("------");
+// 		}
+		
+// 	}
+// });
 
 
 bot.on('error', console.error);
