@@ -27,7 +27,6 @@
 				"moderator" : "INSERTCHANNELID"
 			},
 			"economy" : {
-				"bigTransactionLoggingChannel" : "INSERTCHANNELID",
 				"shopWindowChannel" : "INSERTCHANNELID",
 				"shopBoardsChannel" : "INSERTCHANNELID"
 			}
@@ -35,12 +34,6 @@
 		"messages" : {
 			"xpLeaderboard" : "INSERTMESSAGEID",
 			"initialJoinReactionConfirmation" : "INSERTMESSAGEID",
-			"economy" : {
-				"shopInformationMessage" : "INSERTMESSAGEID",
-				"mainShopWindowMessage" : "INSERTMESSAGEID",
-				"richestUsersMessage" : "INSERTMESSAGEID",
-				"poorestUsersMessage" : "INSERTMESSAGEID"
-			}
 		},
 		"roles" : {
 			"defaultRole" : "INSERTROLEID",
