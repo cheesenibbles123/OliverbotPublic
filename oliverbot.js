@@ -46,7 +46,7 @@ const mysqlLoginData = {
 };
 
 var mainDatabaseConnectionPool = mysql.createPool({
-	connectionLimit : 10,
+	connectionLimit : 30,
 	host : mysqlLoginData.host,
 	user : mysqlLoginData.user,
 	password : mysqlLoginData.password,
@@ -1638,8 +1638,6 @@ function levelProgress(score, prestige){
 }
 
 async function getBlackwakeStats(message,args){
-	if (isAllowed){
-
 		fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[1]}`).then(resp => resp.text()).then(response => {
 
 			if (response.includes("500 Internal Server Error")){
@@ -1652,7 +1650,7 @@ async function getBlackwakeStats(message,args){
 				console.log("END OF RESPONSE");
 				message.channel.send("Error - Please ping @Archie so he checks the console in time!");
 			}else{
-
+				let bwStatsEmbed = new Discord.MessageEmbed().setTimestamp();
 				response = JSON.parse(response);
 				let stats = response.playerstats.stats;
 
@@ -1722,6 +1720,7 @@ async function getBlackwakeStats(message,args){
 							break;
 						case "stat_pres":
 							prestige = stats[i].value;
+							break;
 						default:
 							break;
 					}
@@ -1763,52 +1762,38 @@ async function getBlackwakeStats(message,args){
 									playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
 								}
 							}	
-							let BwMaintainStats = new Discord.MessageEmbed()
-								.setTitle(`${args[1]}`)
+							bwStatsEmbed.setTitle(`${args[1]}`)
 								.addField(`General`,`${playerStatsCombined}`,true)
 								.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}`,true)
-								.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true)
-								.setTimestamp();
-							message.channel.send(BwMaintainStats);				
+								.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true);
+							sendBWStatsEmbed(message,bwStatsEmbed);
 						});
 						break;
 					case "weaponstats":
 						let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
-						let BwWeaponsEmbed = new Discord.MessageEmbed()
-							.setTitle(`${args[1]}`)
-							.setDescription(WeaponStats)
-							.setTimestamp();;
-						message.channel.send(BwWeaponsEmbed);
-						setSteamApiNotAllowed();
+						bwStatsEmbed.setTitle(`${args[1]}`)
+							.setDescription(WeaponStats);
+						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "shipstats":
 						let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins");
 						let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
-						BwShipsEmbed = new Discord.MessageEmbed()
-							.setTitle(`${args[1]}`)
+						bwStatsEmbed.setTitle(`${args[1]}`)
 							.addField("Ships",`${ShipStats}`,true)
-							.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true)
-							.setTimestamp();;
-						message.channel.send(BwShipsEmbed);
-						setSteamApiNotAllowed();
+							.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true);
+						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "shipweaponry":
 						let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills");
-						BwShipsEmbed = new Discord.MessageEmbed()
-							.setTitle(`${args[1]}`)
-							.setDescription(`${shipWeap}`)
-							.setTimestamp();
-						message.channel.send(BwShipsEmbed);
-						setSteamApiNotAllowed();
+						bwStatsEmbed.setTitle(`${args[1]}`)
+							.setDescription(`${shipWeap}`);
+						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "maintenance":
 						let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
-						let BwMaintainStats = new Discord.MessageEmbed()
-							.setTitle(`${args[1]}`)
-							.setDescription(maintainStats)
-							.setTimestamp();
-						message.channel.send(BwMaintainStats);
-						setSteamApiNotAllowed();
+						bwStatsEmbed.setTitle(`${args[1]}`)
+							.setDescription(maintainStats);
+						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "compare":
 						let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
@@ -1865,13 +1850,10 @@ async function getBlackwakeStats(message,args){
 											playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
 										}
 									}
-									let bwComparisonStats = new Discord.MessageEmbed()
-										.setTitle(`${args[1]} VS ${args[2]}`)
+									bwStatsEmbed.setTitle(`${args[1]} VS ${args[2]}`)
 										.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
-										.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true)
-										.setTimestamp();
-									message.channel.send(bwComparisonStats);
-									setSteamApiNotAllowed();
+										.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true);
+									sendBWStatsEmbed(message,bwStatsEmbed);
 								});
 							});
 						});
@@ -1880,18 +1862,298 @@ async function getBlackwakeStats(message,args){
 						message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
 						break;
 				}
+				setSteamApiNotAllowed();
 			}
 		}).catch(err => {
 			if (err) {
 				console.error(err);
 				message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:");
 			};
-		});//.catch(message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:"));
+		});
+	return;
+}
 
+function sendBWStatsEmbed(message,embed){
+    message.channel.send(embed);
+    return;
+}
+
+function blackwakeCommandHandler(message,args){
+	if (isAllowed){
+		switch (args[0])
+		{
+			case "monthly":
+				fetchEloStuff(message, args[1], args[0]);
+				break;
+			case "elo":
+				fetchEloStuff(message, args[1], args[0]);
+				break;
+			default:
+				getBlackwakeStats(message,args);
+				break;
+		}
 	}else{
 		message.reply("This command is currently on cooldown due to steam API limitations, try again soon!");
 	}
-	return;
+}
+
+async function fetchEloStuff(message,steamID,type){
+
+	fetch(`http://ahoycommunity.com/leaderboard/statExport.js`).then(resp => resp.json()).then(response => {
+
+		let eloStatsEmbed = new Discord.MessageEmbed()
+			.setFooter(`This data is taken from the ahoycommunity LB, it only gets updated if your profile is public and you play on GT.`)
+			.setTimestamp();
+		let user;
+
+		switch (type)
+		{
+			case "elo":
+
+				user = response.elo[steamID];
+
+				let results = calculateEloPosition(steamID, response, user.matches, user.rating);
+
+				let elo = results[0];
+				let matches = results[1];
+				let desc;
+
+				if (parseFloat(user.rating) === 1000.00)
+				{
+					eloStatsEmbed.addField("You", `Rating: ${user.rating}\nMatches: ${user.matches}\nPosition: 1`, true)
+						.addField("2nd Place", `Rating: ${elo[2]}\nMatches: ${matches[2]}\nPosition: 2`, true);
+					//desc = `Rating: ${user.rating}\nMatches: ${user.matches}\nPosition: 1\n2nd Place: ${elo[2].rating}`;
+				}else{
+					let positions = results[2];
+					eloStatsEmbed.addField("Target", `Rating: ${elo[0]}\nMatches: ${matches[0]}\nPosition: ${positions[0]}`, true)
+						.addField("You", `Rating: ${elo[1]}\nMatches: ${matches[1]}\nPosition: ${positions[1]}`, true)
+						.addField("Chaser", `Rating: ${elo[2]}\nMatches: ${matches[2]}\nPosition: ${positions[2]}`, true)
+				}
+
+				eloStatsEmbed.setTitle(steamID);
+				sendBWStatsEmbed(message,eloStatsEmbed);
+				break;
+			case "monthly":
+				user = response.monthly[steamID];
+				if (user === undefined){
+					message.channel.send("You are not on the monthly leaderboard. Play a game or two on the GT server to be added.");
+					break;
+				}
+				
+				let weapons = ["acc_mus","acc_blun","acc_nock","acc_ann","acc_rev","acc_pis","acc_duck","acc_mpis","acc_cut","acc_dag","acc_bot","acc_tomo","acc_gren","acc_rap"];
+				let substituteNames = ["Musket","Blunderbuss","Nockgun","Annley","Revolver","Pistol","Duckfoot","Short Pistol","Cutlass","Dagger","Bottle","Tomohawk","Grenade","Rapier"];
+				let allWeaponStats = [];
+
+				let shipWeaponry = ["acc_can","acc_swiv","acc_grape","acc_arson","acc_ram"];
+				let shipWeaponrySubNames = ["Cannonball","Swivel","Grapeshot","Fireshot","Ramming"];
+				let shipWeaponryStats = [];
+
+				let ships = ["acc_winHoy","acc_winJunk","acc_winSchoon","acc_cutt","acc_bombk","acc_carr","acc_gunb","acc_winGal","acc_brig","acc_xeb","acc_cru","acc_bombv"];
+				let subShipNames = ["Hoy","Junk","Schooner","Cutter","Bomb Ketch","Carrack","Gunboat","Galleon","Brig","Xebec","Cruiser","Bomb Vessel"];
+				let shipStats = [];
+
+				let maintenance = ["acc_rep","acc_pump","acc_sail","acc_noseRep"];
+				let subMaintain = ["Hole Repairs","Pumping","Sail Repairs","Nose Repairs"];
+				let maintain = [];
+
+				let unassigned = true;
+				let faveWeap = {}; //"name" : "", "value": ""
+				let kills = 0;
+				let deaths = 0;
+				let captainWins = 0;
+				let captainLosses = 0;
+				let score = 0;
+				let rating = 0;
+				let statScoreGs = 0;
+				let prestige = 0;
+
+				for (var [key, value] of Object.entries(user))
+				{
+					switch (key)
+					{
+						// Totals
+						case "acc_kills":
+							kills = value;
+							break;
+						case "acc_deaths":
+							deaths = value;
+							break;
+						case "acc_capWins":
+							captainWins = value;
+							break;
+						case "acc_capLose":
+							captainLosses = value;
+							break;
+						case "stat_score":
+							score = value;
+							break;
+						// PLAYER WEAPONS
+						case "acc_mus":
+							allWeaponStats.push({ "name" : key , "value" : value});
+							break;
+						case "acc_blun":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_nock":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_ann":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_rev":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_pis":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_duck":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_mpis":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_cut":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_dag":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_bot":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_tomo":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_gren":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_rap":
+							allWeaponStats.push({ "name" : key , "value" : value});;
+							break;
+						// SHIP WEAPONRY
+						case "acc_can":
+							shipWeaponryStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_swiv":
+							shipWeaponryStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_grape":
+							shipWeaponryStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_arson":
+							shipWeaponryStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_ram":
+							shipWeaponryStats.push({ "name" : key , "value" : value});;
+							break;
+						// SHIPS
+						case "acc_winHoy":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_winJunk":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_winSchoon":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_cutt":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_bombk":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_carr":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_gunb":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_winGal":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_brig":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_xeb":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_cru":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_bombv":
+							shipStats.push({ "name" : key , "value" : value});;
+							break;
+						// MAINTENANCE
+						case "acc_rep":
+							maintain.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_pump":
+							maintain.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_sail":
+							maintain.push({ "name" : key , "value" : value});;
+							break;
+						case "acc_noseRep":
+							maintain.push({ "name" : key , "value" : value});;
+							break;
+						// If none of the above
+						default:
+							console.log("New entry found! -" + key + "-");
+							break;
+					}
+				}
+
+				let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins");
+				let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills");
+				let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
+				let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
+
+				eloStatsEmbed.setTitle(steamID)
+					.addField(`Overview`, `Kills: ${kills}, Deaths: ${deaths} => K/D ratio: ${kills/deaths}\nCap Wins: ${captainWins}, Cap Losses: ${captainLosses} => W/L ratio: ${captainWins/captainLosses}\nScore: ${score}`)
+					.addField(`Ship Stats`, ShipStats, true)
+					.addField(`Ship Weaponry`, shipWeap, true)
+					.addField(`Weapon Stats`, WeaponStats, true)
+					.addField(`Maintenance`, maintainStats, true);
+				sendBWStatsEmbed(message,eloStatsEmbed);
+				break;
+		}
+	});
+}
+
+function calculateEloPosition(steamID,response,userMatches,userRating){
+	// Infront, User, Behind
+	let elo = [1000.0,userRating,0.0];
+	let matches = [0,userMatches,0];
+	let position = [0,0,0];
+	let allRatings = [];
+	let allUsers = Object.values(response.elo);
+
+	for (let i = 0; i < allUsers.length; i++)
+	{
+		let rating = allUsers[i].rating;
+		if (rating != NaN)
+		{
+			if (rating > userRating && rating < elo[0]){
+
+				elo[0] = rating;
+				matches[0] = allUsers[i].matches;
+
+			}else if (rating < userRating && rating > elo[2]){
+
+				elo[2] = rating;
+				matches[2] = allUsers[i].matches;
+
+			}
+			allRatings.push(rating);
+		}
+	};
+
+	allRatings.sort(function(a, b){return b - a});
+	position[0] = allRatings.indexOf(elo[0]);
+	position[1] = position[0] + 1;
+	position[2] = position[0] + 2;
+
+	return [elo,matches,position];
 }
 
 function setSteamApiNotAllowed(){
@@ -1919,8 +2181,11 @@ function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type){
 	let returnMsg = "";
 	let count = 0;
 	for (i=0; i < weaponsArray.length;i++){
-		returnMsg = returnMsg + `${substituteNames[weapons.indexOf(weaponsArray[i].name)]} - ${weaponsArray[i].value} ${type}\n`;
-		count += weaponsArray[i].value;
+		if (weapons.indexOf(weaponsArray[i].name) != -1)
+		{
+			returnMsg = returnMsg + `${substituteNames[weapons.indexOf(weaponsArray[i].name)]} - ${weaponsArray[i].value} ${type}\n`;
+			count += weaponsArray[i].value;
+		}
 	}
 
 	returnMsg += `Total: ${count}`;
@@ -2332,21 +2597,48 @@ function updateShopWindow(){
 }
 
 function displayRichestUsers(){
-
-	return;
 	
+	return;
+
+	configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
+		let economyBoardsChannel;
+		let richetsUsersMesg;
+		let poorestUsersMsg;
+		for (let s = 0; s < rows2.length; s++)
+		{
+			if (rows2[s].name == "shopBoardsChannel")
+			{
+				economyBoardsChannel = rows2[s].channelID;
+			}else if (rows2[s].name == "richestUsers")
+			{
+				richetsUsersMesg = rows2[s].messageID;
+			}else if (rows2[s].name == "poorestUsers")
+			{
+				poorestUsersMsg = rows2[s].messageID;
+			}
+		}
 	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
 		let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
 		let factor = 100;
 		for (i=0;i<30;i++){
-			let user = bot.users.cache.get(rows[i].ID);
-			if (rows[i].ID === 'thereserve'){
-				name = "Federal Reserve";
-			}else if (user === undefined){
+			let name;
+
+			try
+			{
+				let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows[i].ID).user;
+				if (rows[i].ID === 'thereserve'){
+					name = "Federal Reserve";
+				}else if (member.user === undefined){
+					name = "REPLACEMENT";
+				}else{
+					name = member.user.username;
+				}
+			}catch(e)
+			{
+				console.log("Richest: " + e);
 				name = "REPLACEMENT";
-			}else{
-				name = user.username;
 			}
+
 			if (name.length < leaderboardlimits.usernameEco){
 				let x = leaderboardlimits.usernameEco - name.length;
 				name = name + new Array(x + 1).join(' ');
@@ -2366,7 +2658,7 @@ function displayRichestUsers(){
 			newRichest = newRichest + name +"|"+ coins +"\n";
 		}
 		newRichest += "```";
-		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.richestUsers).then(msg => {
+		bot.channels.cache.get(economyBoardsChannel).messages.fetch(richetsUsersMesg).then(msg => {
 			msg.edit(newRichest);
 		});
 	});
@@ -2375,14 +2667,24 @@ function displayRichestUsers(){
 		let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
 		let factor = 100;
 		for (i=0;i<30;i++){
-			let user = bot.users.cache.get(rows[i].ID);
-			if (rows[i].ID === 'thereserve'){
-				name = "The Federal Reserve";
-			}else if (user === undefined){
+			let name;
+
+			try
+			{
+				let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows[i].ID).user;
+				if (rows[i].ID === 'thereserve'){
+					name = "Federal Reserve";
+				}else if (member.user === undefined){
+					name = "REPLACEMENT";
+				}else{
+					name = member.user.username;
+				}
+			}catch(e)
+			{
+				console.log("Poorest: " + e);
 				name = "REPLACEMENT";
-			}else{
-				name = user.username;
 			}
+
 			if (name.length < leaderboardlimits.usernameEco){
 				let x = leaderboardlimits.usernameEco - name.length;
 				name = name + new Array(x + 1).join(' ');
@@ -2402,11 +2704,11 @@ function displayRichestUsers(){
 			newPoorest = newPoorest + name +"|"+ coins +"\n";
 		}
 		newPoorest += "```";
-		bot.channels.cache.get(config.serverInfo.channels.economy.shopBoardsChannel).messages.fetch(config.serverInfo.messages.economy.poorestUsers).then(msg => {
+		bot.channels.cache.get(economyBoardsChannel).messages.fetch(poorestUsersMsg).then(msg => {
 			msg.edit(newPoorest);
 		});
 	});
-	
+	});
 	return;
 }
 function giveUserMoney(amount,ID){
@@ -2419,6 +2721,7 @@ function giveUserMoney(amount,ID){
 			sql = `UPDATE inventoryGT SET giraffeCoins = '${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}' WHERE ID = '${ID}'`;
 		}
 		mainDatabaseConnectionPool.query(sql);
+		displayRichestUsers();
 	});
 
 	return;
@@ -2517,6 +2820,7 @@ function purchaseItem(ID,item,message,args){
 							bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(logEmbed);
 						}
 						updateShopWindow();
+						displayRichestUsers();
 					}
 				});	
 			}
@@ -2610,6 +2914,7 @@ function sellItem(ID,item,message){
 					message.channel.send(sellEmbed);
 					bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(sellEmbed);
 					updateShopWindow();
+					displayRichestUsers();
 				});
 			}
 
@@ -2731,7 +3036,19 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 					giftCoinsEmbed.setDescription(`<@${gifterID}> gifted user <@${recieverID}>, amount: ${amount}GC`);
 				}
 				message.channel.send(giftCoinsEmbed);
-				bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(giftCoinsEmbed);
+				if ((parseFloat(amount).toFixed(2) * 1) >= 1000)
+				{
+					configurationDatabaseConnectionPool.query("SELECT * FROM economyInformation", (err,rows) => {
+						for (let i = 0; i < rows.length; i++)
+						{
+							if (rows[i].name == "bigTransactionLoggingChannel")
+							{
+								bot.channels.cache.get(rows[i].channelID).send(giftCoinsEmbed);
+								displayRichestUsers();
+							}
+						}
+					});
+				}
 			});
 		}
 	});
@@ -2781,6 +3098,7 @@ function gambleMoney(amount,message){
 				.setDescription(`Income: ${((income * amount) - amount).toFixed(2)}`)
 				.setTimestamp();
 			message.channel.send(gambleEmbed);	
+			displayRichestUsers();
 		}
 	});
 
@@ -2890,7 +3208,6 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 	});
 }
 
-//Will be moved over to switch case when implemented 
 function specificQuiz(message,type){
 	switch (type)
 	{
@@ -3036,6 +3353,7 @@ function economyWork(message){
 			workingEmbed.setDescription("Something went wrong, please notify Archie");
 		}
 		message.channel.send(workingEmbed);
+		displayRichestUsers();
 	});
 
 	return;
@@ -3044,7 +3362,7 @@ function economyWork(message){
 
 function listTheCommands(message){
 		let embed = new Discord.MessageEmbed()
-			.setTitle("Commands")
+			.setTitle("General Commands")
    			.setColor(0x008000)
    			.addField(`Prefix:`,`;`)
    			.addField(`Translate:`,`translate en (words) --- this translates from russian to english\ntranslate ru (words) --- this translates from english to russian`)
@@ -3055,9 +3373,10 @@ function listTheCommands(message){
    			.addField(`Rankcard:`,`using this command shows you your current level and the amount of XP you have`)
    			.addField(`User Commands`,` - Em\n - Jakka\n - Extra\n - Emjakka\n - Torden\n - Spartan\n - Metz\n - Oli\n - Edward`,true)
    			.addField(`Misc Commands`,` - Nerds\n - Hangover\n - Russia\n - Ew\n - Dog\n - Cat\n - Art\n - Dance\n - Playdie\n - Rolldie\n - Rollcustom\n - Coinflip\n - Dad\n - Nootnoot\n - Urban\n - Today`,true)
-   			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish`,true)
+   			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish\n - Beg\n - Quiz`,true)
    			.addField(`Music Commands`,` - PlayAudio\n - RandomSong`,true)
    			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates`,true)
+   			.addField(`Economy Commands`,` - work\n - GiftCoins\n - Purchase\n - Sell\n - Inventory`,true)
    			.setTimestamp();
    		message.author.send(embed);
 
@@ -3093,6 +3412,8 @@ function listTheCommands(message){
    				.addField(`Ban:`,`Ban @user`)
    				.addField(`ServerInfo:`,`Gives information about the server`)
    				.addField(`ChannelInfo:`,`Gives information about a channel`)
+   				.addField(`Reaction Roles:`,` - **CreateRole** \`@role\` ***:emoji:***\n(Adds a role to the reaction role menu)\n  - **DeleteRole** ***:emoji:***\n(Removes a role to the reaction role menu)`, true)
+   				.addField(`Custom Commands:`,` - **CreateCommand** \`Command\` ***Stuff the command outputs***\n(Creates a command that anyone can use)\n - **DeleteCommand** \`Command\`\n(Deletes a custom made command permanently)`, true)
    				.setTimestamp();
    			message.author.send(Aembed); //Admins
    		}
@@ -3229,19 +3550,17 @@ bot.on("ready", () => {
 	//setInterval(() =>{
 	//	displayBotInfo();
 	//}, 6000);
-	setInterval(() =>{
-		update7DTDlistNew();
-	}, 25000);
+	//setInterval(() =>{
+	//	update7DTDlistNew();
+	//}, 25000);
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);
 	setInterval(() =>{
 		ISSLocation();
 	}, 10000);
-	setInterval(() =>{
-		displayRichestUsers();
-	}, 3600000);
-
+	
+	displayRichestUsers();
 	updateShopWindow();
 	LoadDataFromDatabase();
 	updateleaderboard();
@@ -3267,7 +3586,7 @@ bot.on("message", async message => {
 	//dont respond to bots
 	if (message.author.bot) return;
 	if (message.channel.type === "dm") return;
-	if (allowChannels.indexOf(message.channel.id) === -1)
+	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != "337541914687569920")
 	{
 		return;
 	}
@@ -4154,7 +4473,7 @@ bot.on("message", async message => {
 					message.react("🤔");
 					break;
 				case "blackwake":
-					message.channel.send("There are several actions for the blackwake command, currently the supported options are: `overview` `weaponstats` `shipstats` `maintenance` `shipweaponry`\nNote: requires your profile to be set to public!");
+					message.channel.send("There are several actions for the blackwake command, currently the supported options are: `overview` `weaponstats` `shipstats` `maintenance` `shipweaponry` `monthly` `elo`\nNotes:\n- Requires your profile to be set to public.\n- `Monthly` and `elo` may take a while to load.");
 					break;
 				case "payday2":
 					message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
@@ -4162,6 +4481,7 @@ bot.on("message", async message => {
 				case "trump":
 					message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
 					break;
+				//Non Public Commands
 				case "userinfo":
 					if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
 						message.channel.send("Displays information about a user.");
@@ -4191,7 +4511,7 @@ bot.on("message", async message => {
 				if (args.length < 2){
 					message.reply("Please enter the valid terms!");
 					}else{
-				getBlackwakeStats(message,args);
+				blackwakeCommandHandler(message,args);
 				}
 			}else{
 				message.reply("That command is currently disabled!");
@@ -4317,6 +4637,19 @@ bot.on("message", async message => {
 			}
 
 			break;
+		case "createwebhook":
+			// If owner or admin
+			if (message.author.id === config.ownerId || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				let name = args[0];
+				let imgURL = args[1];
+				message.channel.createWebhook(name,{
+					avatar : imgURL,
+				}).then(webhook => console.log(`Created webhook ${webhook}`)).catch(console.error);
+			}else{
+				lackingPermissions(message);
+			}
+
+			break;
 		case "ban":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
 				if (typeof args[0] === "string"){
@@ -4419,6 +4752,9 @@ bot.on("message", async message => {
 		case "payday2":
 			TrackingCommand = true;
 			getPayday2Information(message,args);
+			break;
+		case "test":
+			fetchEloStuff("76561198138287816");
 			break;
     	default:
     		message.react("🤔");
