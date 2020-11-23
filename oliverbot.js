@@ -38,32 +38,21 @@ const xpdetails = {
 	"max" : 0
 };
 
-const mysqlLoginData = {
-	"host":config.databaseInfo.host,
-	"user":config.databaseInfo.user,
-	"password":config.databaseInfo.password,
-	"database":config.databaseInfo.database,
-};
-
 var mainDatabaseConnectionPool = mysql.createPool({
 	connectionLimit : 30,
-	host : mysqlLoginData.host,
-	user : mysqlLoginData.user,
-	password : mysqlLoginData.password,
-	database : mysqlLoginData.database
+	host : config.databaseInfo.host,
+	user : config.databaseInfo.user,
+	password : config.databaseInfo.password,
+	database : config.databaseInfo.database
 });
 
 var configurationDatabaseConnectionPool = mysql.createPool({
 	connectionLimit : 10,
-	host : mysqlLoginData.host,
-	user : mysqlLoginData.user,
-	password : mysqlLoginData.password,
+	host : config.databaseInfo.host,
+	user : config.databaseInfo.user,
+	password : config.databaseInfo.password,
 	database : "oliverbotConfigs"
 });
-
-// const userActivitiesLimits = {
-// 	"Name" : 30
-// }
 
 var adjustableConfig = {
 	"reactions" : {
@@ -4680,23 +4669,23 @@ bot.on("message", async message => {
 				}else{
 					features = message.guild.features.join(", ");
 				}
-				let booster_role = message.guild.members.filter(m => m.roles.has(config.serverInfo.roles.serverbooster));
+				let booster_role = message.guild.members.cache.filter(m => m.roles.cache.has(config.serverInfo.roles.serverbooster));
 				let serverinfo = new Discord.MessageEmbed()
 									.setColor('#00008b')
 									.setTitle(`${message.guild.name}`)
 									.setDescription(`Server Information`)	
 									.addField('Basic', `Owner: ${message.guild.owner}\nDescription: ${message.guild.description}\nCreated on: ${message.guild.createdAt}\nAcronym: ${message.guild.nameAcronym}\nRegion: ${message.guild.region}\nID: ${message.guild.id}`)
-									.addField('Total Members', `Real People: ${message.guild.members.filter(member => !member.user.bot).size}\nBots: ${message.guild.members.filter(member => member.user.bot).size}`)
+									.addField('Total Members', `Real People: ${message.guild.members.cache.filter(member => !member.user.bot).size}\nBots: ${message.guild.members.cache.filter(member => member.user.bot).size}`)
 									.addField('Additional Info', `Number of Roles:\nNumber of Bans:\nMFA Level Required:\nNumber of Webhooks:\nDefault Message Notifications:`,true)
 									.addField('-----', `${message.guild.roles.size}\n${await message.guild.fetchBans().then(result => {return result.size})}\n${message.guild.mfaLevel}\n${await message.guild.fetchWebhooks().then(result => {return result.size})}\n${message.guild.defaultMessageNotifications}`,true)
 									.addField('Nitro', `Boosters: ${booster_role.size}\nLevel: ${message.guild.premiumTier}\nVanity URL: ${message.guild.vanityURLCode}`,)
-									.addField('Number of Channels', `Categories: ${message.guild.channels.filter(channel => channel.type === "category").size}\nText: ${message.guild.channels.filter(channel => channel.type === "text").size}\nVoice: ${message.guild.channels.filter(channel => channel.type === "voice").size}`,true)
+									.addField('Number of Channels', `Categories: ${message.guild.channels.cache.filter(channel => channel.type === "category").size}\nText: ${message.guild.channels.cache.filter(channel => channel.type === "text").size}\nVoice: ${message.guild.channels.cache.filter(channel => channel.type === "voice").size}`,true)
 									.addField('Verification', `Level: ${message.guild.verificationLevel}\nStatus: ${message.guild.verified}`,true)
 									.addField('Emoji Count', `${message.guild.emojis.size}`,true)
 									.addField('Explicit content filter level', `${message.guild.explicitContentFilter}`,true)
 									.addField('Features', `${features}`)
 									.addField('AFK', `Channel: ${message.guild.afkChannel}\nTimeout: ${message.guild.afkTimeout}sec`,true)
-									.setImage(`${message.guild.iconURL}`)
+									.setImage(`${message.guild.iconURL()}`)
 									.setTimestamp();
 				message.channel.send(serverinfo);
 			}else{
@@ -4931,7 +4920,7 @@ function getPayday2Information(message, args){
 
 function lackingPermissions(message){
 	let lackingEmbed = new Discord.MessageEmbed()
-		.setDescription("You do not have the right permissions to use this!")
+		.setDescription("🛑 You do not have the right permissions to use this! 🛑")
 		.setTimestamp();
 	message.channel.send(lackingEmbed);
 	return;
@@ -4979,13 +4968,14 @@ async function manageRawEmbeds(event){
  					rawEmbed.setTitle("Category Deleted");
  					break;
  				default:
- 					rawEmbed.setTitle("Text Channel Deleted");
+ 					rawEmbed.setTitle("Channel Deleted");
  					break;
 			}
 
 			break;
 		case "CHANNEL_PINS_UPDATE":
-			rawEmbed.setTitle(`Message Pinned`)
+			rawEmbed.setColor(embedColours.channels)
+				.setTitle(`Message Pinned`)
 				.setDescription(`Channel: <#${event.d.channel_id}>\nID: ${event.d.channel_id}`);
 			break;
 		case "GUILD_BAN_ADD":
@@ -5115,9 +5105,8 @@ bot.on('raw', async event => {
 		case "MESSAGE_REACTION_ADD":
 			if (event.d.channel_id === "762401591180525608"){
 				manageJoinReaction(event);
-			}
-			if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
-        		break;; 
+			}else if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+        		break;
     		}
 			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
 			reactionRoles.forEach(roleInfo => {
@@ -5128,7 +5117,7 @@ bot.on('raw', async event => {
 			});
 			break;
 		case "MESSAGE_REACTION_REMOVE":
-			if ((event.t === "MESSAGE_REACTION_REMOVE" || event.t === "MESSAGE_REACTION_ADD") && parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+			if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
         		break;; 
     		}
 			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
