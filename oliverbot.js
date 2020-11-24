@@ -3553,10 +3553,52 @@ function alternionHandler(message, args){
 			break;
 
 		case "help":
-			alternionHandlerEmbed.setTitle("Help Menu")
-				.addDescription("Default usage:\n`;Blackwake` `Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges")
-				.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+			if (args[2]){
+				switch (args[2].toLowerCase()){
+					case "listbadges":
+						alternionHandlerEmbed.setDescription("Lists all limited badges that you have access to.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "listsails":
+						alternionHandlerEmbed.setDescription("Lists all limited sails that you have access to.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "listmainsails":
+						alternionHandlerEmbed.setDescription("Lists all limited main sails that you have access to.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "listcannons":
+						alternionHandlerEmbed.setDescription("Lists all limited cannons that you have access to.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "listweapons":
+						alternionHandlerEmbed.setDescription("Lists all limited weapon skins that you have access to.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "assign":
+						alternionHandlerEmbed.setDescription("Assign an asset to be used.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					case "overview":
+						alternionHandlerEmbed.setDescription("Lists your currently selected setup.")
+							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+						sendAlternionEmbed(message,alternionHandlerEmbed,false);
+						break;
+					default:
+						break;
+				}
+			}else{
+				alternionHandlerEmbed.setTitle("Help Menu")
+					.setDescription("Default usage:\n`;Blackwake` `Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges\n- ListSails\n- ListMainSails\n- ListWeapons\n- Assign\n- Overview\nUse **;Blackwake Alternion Help** `FEATURE` for more help on each feature")
+					.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+				sendAlternionEmbed(message,alternionHandlerEmbed,false);
+			}
 			break;
 
 		case "assign":
@@ -3566,6 +3608,30 @@ function alternionHandler(message, args){
 
 		case "overview":
 			getAlternionOverview(message,alternionHandlerEmbed);
+			break;
+
+		case "listsails":
+			alternionHandlerEmbed.setTitle("Available Sails")
+				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
+			getNormalSails(message,message.author.id,alternionHandlerEmbed);
+			break;
+
+		case "listmainsails":
+			alternionHandlerEmbed.setTitle("Available Main Sails")
+				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
+			getMainSails(message,message.author.id,alternionHandlerEmbed);
+			break;
+
+		case "listcannons":
+			alternionHandlerEmbed.setTitle("Available Cannons")
+				.setFooter("The formatting is: - `Cannon_ID` : Cannon Name -");
+			getCannons(message,message.author.id,alternionHandlerEmbed);
+			break;
+
+		case "listweapons":
+			alternionHandlerEmbed.setTitle("Available Weapon Skins")
+				.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
+			getWeaponSkins(message,message.author.id,alternionHandlerEmbed);
 			break;
 
 		default:
@@ -3749,15 +3815,13 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	if (table1Name != "NA"){
 		alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID="${message.author.id}"`, (err, rows) => {
 				alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
-					console.log(rows);
-					console.log(rows2);
 					let found = false;
 					let assignedBadge = "";
 					if (rows){
 						for (let i = 0; i < rows.length; i++){
 							if (args[3] === rows[i].Name){
 								alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID="${message.author.id}"`);
-								console.log(`Found match: -${args[3]}- === -${rows[i].Name}-`);
+								console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
 								assignedBadge = rows[i].Display_Name;
 								found = true;
 								break;
@@ -3769,7 +3833,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 						for (let i = 0; i < rows2.length; i++){
 							if (args[3] === rows2[i].Name){
 								alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID="${message.author.id}"`);
-								console.log(`Found match: -${args[3]}- === -${rows2[i].Name}-`);
+								console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
 								assignedBadge = rows2[i].Display_Name;
 								found = true;
 								break;
@@ -3802,32 +3866,32 @@ function getAlternionOverview(message,alternionHandlerEmbed){
 			message.channel.send("You have multiple entries, please contact Archie.");
 			return;
 		}else{
-			let finalMsg = `Badge       : ${rows[0].bad}\n`
-						+	`Gold Mask   : ${rows[0].mas}\n`
-						+	`Sail        : ${rows[0].sai}\n`
-						+	`Mail Sail   : ${rows[0].msa}\n`
-						+	`Cannon      : ${rows[0].can}\n`
-						+	`Musket      : ${rows[0].mus}\n`
-						+	`Blunderbuss : ${rows[0].blu}\n`
-						+	`Nockgun     : ${rows[0].noc}\n`
-						+	`HandMortar  : ${rows[0].han}\n`
-						+	`Pistol      : ${rows[0].pis}\n`
-						+	`Short pistol: ${rows[0].spi}\n`
-						+	`Duckfoot    : ${rows[0].duc}\n`
-						+	`Matchlock   : ${rows[0].mat}\n`
-						+	`Annely      : ${rows[0].ann}\n`
-						+	`Axe         : ${rows[0].axe}\n`
-						+	`Rapier      : ${rows[0].rap}\n`
-						+	`Dagger      : ${rows[0].dag}\n`
-						+	`Bottle      : ${rows[0].bot}\n`
-						+	`Cutlass     : ${rows[0].cut}\n`
-						+	`Pike        : ${rows[0].pik}\n`
-						+	`Tomohawk    : ${rows[0].tom}\n`
-						+	`Spyglass    : ${rows[0].spy}\n`
-						+	`Grenade     : ${rows[0].gre}\n`
-						+	`Healing     : ${rows[0].hea}\n`
-						+	`Hammer      : ${rows[0].ham}\n`
-						+	`Atlas01     : ${rows[0].atl}\n`;
+			let finalMsg = `Badge       : **${rows[0].bad}**\n`
+						+	`Gold Mask   : **${rows[0].mas}**\n`
+						+	`Sail        : **${rows[0].sai}**\n`
+						+	`Mail Sail   : **${rows[0].msa}**\n`
+						+	`Cannon      : **${rows[0].can}**\n`
+						+	`Musket      : **${rows[0].mus}**\n`
+						+	`Blunderbuss : **${rows[0].blu}**\n`
+						+	`Nockgun     : **${rows[0].noc}**\n`
+						+	`HandMortar  : **${rows[0].han}**\n`
+						+	`Pistol      : **${rows[0].pis}**\n`
+						+	`Short pistol: **${rows[0].spi}**\n`
+						+	`Duckfoot    : **${rows[0].duc}**\n`
+						+	`Matchlock   : **${rows[0].mat}**\n`
+						+	`Annely      : **${rows[0].ann}**\n`
+						+	`Axe         : **${rows[0].axe}**\n`
+						+	`Rapier      : **${rows[0].rap}**\n`
+						+	`Dagger      : **${rows[0].dag}**\n`
+						+	`Bottle      : **${rows[0].bot}**\n`
+						+	`Cutlass     : **${rows[0].cut}**\n`
+						+	`Pike        : **${rows[0].pik}**\n`
+						+	`Tomohawk    : **${rows[0].tom}**\n`
+						+	`Spyglass    : **${rows[0].spy}**\n`
+						+	`Grenade     : **${rows[0].gre}**\n`
+						+	`Healing     : **${rows[0].hea}**\n`
+						+	`Hammer      : **${rows[0].ham}**\n`
+						+	`Atlas01     : **${rows[0].atl}**`;
 			alternionHandlerEmbed.setDescription(finalMsg);
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
 		}
@@ -3845,6 +3909,70 @@ function checkifInDatabase(message,args){
 		}else{
 			alternionHandler(message,args);
 		}
+	});
+}
+
+function getWeaponSkins(message,ID,alternionHandlerEmbed){
+	alternionConnectionPool.query(`SELECT WeaponSkin.Name, WeaponSkin.Display_Name FROM LimitedWeaponSkins INNER JOIN User ON User_ID = User.ID INNER JOIN WeaponSkin ON Allowed_Weapon_Skin_ID = WeaponSkin.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+		if (rows.length < 1){
+			alternionHandlerEmbed.setDescription("No Weapon Skins found.");
+		}else{
+			let returnString = "";
+			for (let i = 0; i < rows.length; i++){
+				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+			}
+			alternionHandlerEmbed.setDescription(returnString);
+		}
+
+		sendAlternionEmbed(message,alternionHandlerEmbed,false);
+	});
+}
+
+function getCannons(message,ID,alternionHandlerEmbed){
+	alternionConnectionPool.query(`SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+		if (rows.length < 1){
+			alternionHandlerEmbed.setDescription("No Cannons found.");
+		}else{
+			let returnString = "";
+			for (let i = 0; i < rows.length; i++){
+				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+			}
+			alternionHandlerEmbed.setDescription(returnString);
+		}
+
+		sendAlternionEmbed(message,alternionHandlerEmbed,false);
+	});
+}
+
+function getNormalSails(message,ID,alternionHandlerEmbed){
+	alternionConnectionPool.query(`SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+		if (rows.length < 1){
+			alternionHandlerEmbed.setDescription("No Sails found.");
+		}else{
+			let returnString = "";
+			for (let i = 0; i < rows.length; i++){
+				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+			}
+			alternionHandlerEmbed.setDescription(returnString);
+		}
+
+		sendAlternionEmbed(message,alternionHandlerEmbed,false);
+	});
+}
+
+function getMainSails(message,ID,alternionHandlerEmbed){
+	alternionConnectionPool.query(`SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+		if (rows.length < 1){
+			alternionHandlerEmbed.setDescription("No Sails found.");
+		}else{
+			let returnString = "";
+			for (let i = 0; i < rows.length; i++){
+				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+			}
+			alternionHandlerEmbed.setDescription(returnString);
+		}
+
+		sendAlternionEmbed(message,alternionHandlerEmbed,false);
 	});
 }
 
@@ -3898,27 +4026,27 @@ function updateLocalCache(discord_id,filepath){
 				alternionJsonFile.users[i].sailSkinName = rows[0].sai;
 				alternionJsonFile.users[i].mainSailName = rows[0].msa;
 				alternionJsonFile.users[i].cannonSkinName = rows[0].can;
-				alternionJsonFile.users[i].musketSkinName = rows[0].mus;
-				alternionJsonFile.users[i].blunderbussSkinName = rows[0].blu;
-				alternionJsonFile.users[i].nockgunSkinName = rows[0].noc;
-				alternionJsonFile.users[i].handMortarSkinName = rows[0].han;
-				alternionJsonFile.users[i].standardPistolSkinName = rows[0].pis;
-				alternionJsonFile.users[i].shortPistolSkinName = rows[0].spi;
-				alternionJsonFile.users[i].duckfootSkinName = rows[0].duc;
-				alternionJsonFile.users[i].matchlockRevolverSkinName = rows[0].mat;
-				alternionJsonFile.users[i].annelyRevolverSkinName = rows[0].ann;
-				alternionJsonFile.users[i].axeSkinName = rows[0].axe;
-				alternionJsonFile.users[i].rapierSkinName = rows[0].rap;
-				alternionJsonFile.users[i].daggerSkinName = rows[0].dag;
-				alternionJsonFile.users[i].bottleSkinName = rows[0].bot;
-				alternionJsonFile.users[i].cutlassSkinName = rows[0].cut;
-				alternionJsonFile.users[i].pikeSkinName = rows[0].pik;
-				alternionJsonFile.users[i].tomohawkSkinName = rows[0].tom;
-				alternionJsonFile.users[i].spyglassSkinName = rows[0].spy;
-				alternionJsonFile.users[i].grenadeSkinName = rows[0].gre;
-				alternionJsonFile.users[i].healItemSkinName = rows[0].hea;
-				alternionJsonFile.users[i].hammerSkinName = rows[0].ham;
-				alternionJsonFile.users[i].atlas01SkinName = rows[0].atl;
+				alternionJsonFile.users[i].musketSkinName = rows[0].mus.split("_")[1];
+				alternionJsonFile.users[i].blunderbussSkinName = rows[0].blu.split("_")[1];
+				alternionJsonFile.users[i].nockgunSkinName = rows[0].noc.split("_")[1];
+				alternionJsonFile.users[i].handMortarSkinName = rows[0].han.split("_")[1];
+				alternionJsonFile.users[i].standardPistolSkinName = rows[0].pis.split("_")[1];
+				alternionJsonFile.users[i].shortPistolSkinName = rows[0].spi.split("_")[1];
+				alternionJsonFile.users[i].duckfootSkinName = rows[0].duc.split("_")[1];
+				alternionJsonFile.users[i].matchlockRevolverSkinName = rows[0].mat.split("_")[1];
+				alternionJsonFile.users[i].annelyRevolverSkinName = rows[0].ann.split("_")[1];
+				alternionJsonFile.users[i].axeSkinName = rows[0].axe.split("_")[1];
+				alternionJsonFile.users[i].rapierSkinName = rows[0].rap.split("_")[1];
+				alternionJsonFile.users[i].daggerSkinName = rows[0].dag.split("_")[1];
+				alternionJsonFile.users[i].bottleSkinName = rows[0].bot.split("_")[1];
+				alternionJsonFile.users[i].cutlassSkinName = rows[0].cut.split("_")[1];
+				alternionJsonFile.users[i].pikeSkinName = rows[0].pik.split("_")[1];
+				alternionJsonFile.users[i].tomohawkSkinName = rows[0].tom.split("_")[1];
+				alternionJsonFile.users[i].spyglassSkinName = rows[0].spy.split("_")[1];
+				alternionJsonFile.users[i].grenadeSkinName = rows[0].gre.split("_")[1];
+				alternionJsonFile.users[i].healItemSkinName = rows[0].hea.split("_")[1];
+				alternionJsonFile.users[i].hammerSkinName = rows[0].ham.split("_")[1];
+				alternionJsonFile.users[i].atlas01SkinName = rows[0].atl.split("_")[1];
 				break;
 			}
 		}
