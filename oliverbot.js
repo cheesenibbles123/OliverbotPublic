@@ -1891,7 +1891,7 @@ function blackwakeCommandHandler(message,args){
 
 async function fetchEloStuff(message,steamID,type){
 
-	fetch(`http://ahoycommunity.com/leaderboard/statExport.js`).then(resp => resp.json()).then(response => {
+	fetch(config.eloBoardURL).then(resp => resp.json()).then(response => {
 
 		let eloStatsEmbed = new Discord.MessageEmbed()
 			.setFooter(`This data is taken from the ahoycommunity LB, it only gets updated if your profile is public and you play on GT.`)
