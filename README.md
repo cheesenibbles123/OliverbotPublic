@@ -8,7 +8,7 @@
 ![Latest Release](https://img.shields.io/github/v/release/cheesenibbles123/OliverbotPublic)
 ![License](https://img.shields.io/github/license/cheesenibbles123/OliverbotPublic)
 
-# Description
+## Description
 
 These are the oliverbot datafile and main js files.
 
@@ -18,11 +18,11 @@ There are likley lots of malpractises in here and in general don't expect everyt
 
 Incase the title of the files wasn't clear enough, the included config and datafile are simply templates containing the layout that should be used for them. ***A database is not included***, however it should be fairly simple to identify the columns used based on the code. For reference I used a **Mysql** database
 
-# Known key issues
+## Known key issues
 
 - N/A
 
-# Additional Info
+## Additional Info
 
 **Notes:**
  - The config + datafile must be within the same directory as the main oliverbot.js file (see Templates)
