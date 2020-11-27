@@ -5282,9 +5282,357 @@ bot.on("message", async message => {
 			TrackingCommand = true;
 			getPayday2Information(message,args);
 			break;
-		case "test":
-			fetchEloStuff("76561198138287816");
+
+
+		// Alternion
+		case "registeruser":
+			if (message.author.id === config.ownerId){
+				if (args.length > 3 || args.length < 3){
+					message.channel.send("Please check your input:\n`;Register` `Feature` `steamID/discordID` `discordID/steamID`");
+				}else{
+					handleAlternionRegistration(message,args[0],args[1],args[2]);
+				}
+			}else{
+				lackingPermissions(message);
+			}
 			break;
+		case "finduser":
+			if (message.author.id === config.ownerId){
+				if (args[0].toLowerCase() === "steam"){
+					alternionConnectionPool.query(`SELECT * FROM User WHERE Steam_ID="${args[1]}"`, (err,rows) => {
+						message.channel.send(`\`${rows[0].ID}\`, \`${rows[0].steam_id}\`, \`${rows[0].discord_id}\``);
+					});
+				}else if (args[0].toLowerCase() === "discord"){
+					alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${args[1]}"`, (err,rows) => {
+						message.channel.send(`\`${rows[0].ID}\`, \`${rows[0].steam_id}\`, \`${rows[0].discord_id}\``);
+					});
+				}else if (args[0].toLowerCase() === "id"){
+					alternionConnectionPool.query(`SELECT * FROM User WHERE ID="${args[1]}"`, (err,rows) => {
+						message.channel.send(`\`${rows[0].ID}\`, \`${rows[0].steam_id}\`, \`${rows[0].discord_id}\``);
+					});
+				}
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "assignuser":
+			if (message.author.id === config.ownerId){
+				// args[0] = type, args[1] = Alternion ID, args[2] ID to assign
+				switch (args[0].toLowerCase()){
+
+					case "steamid":
+						alternionConnectionPool.query(`UPDATE User SET Steam_ID=${args[2]} WHERE ID=${parseInt(args[1])}`);
+						message.channel.send("Complete.");
+						break;
+
+					case "discordid":
+						alternionConnectionPool.query(`UPDATE User SET Discord_ID=${args[2]} WHERE ID=${parseInt(args[1])}`);
+						message.channel.send("Complete.");
+						break;
+
+					case "badge":
+						alternionConnectionPool.query(`SELECT * FROM Badge WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 1){
+								alternionConnectionPool.query(`UPDATE User SET Badge_ID=${parseInt(args[2])} WHERE ID=${parseInt(args[1])}`);
+								message.channel.send("Complete.");
+							}else if (rows.length === 0){
+								message.channel.send("That badge does not exist!");
+							}else if (rows.length > 1){
+								message.channel.send("There appears to be more than one item with that ID!");
+							}
+						});
+						break;
+
+					case "mainsail":
+						alternionConnectionPool.query(`SELECT * FROM MainSail WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 1){
+								alternionConnectionPool.query(`UPDATE User SET Main_Sail_ID=${parseInt(args[2])} WHERE ID=${parseInt(args[1])}`);
+								message.channel.send("Complete.");
+							}else if (rows.length === 0){
+								message.channel.send("That MainSail does not exist!");
+							}else if (rows.length > 1){
+								message.channel.send("There appears to be more than one item with that ID!");
+							}
+						});
+						break;
+
+					default:
+						message.channel.send("That is not a valid item to assign to!");
+				}
+
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "grantuser":
+			if (message.author.id === config.ownerId){
+				// args[0] = type, args[1] = Alternion User ID, args[2] Item ID
+				let notFound = true;
+				switch (args[0].toLowerCase()){
+
+					case "badge":
+						alternionConnectionPool.query(`SELECT * FROM Badge WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That badge does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That badge is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple badges with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedBadges WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Badge_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedBadges VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that badge!");
+									}
+								});
+							}
+						});
+						break;
+					case "mainsail":
+						alternionConnectionPool.query(`SELECT * FROM MainSail WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That MainSail does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That MainSail is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple MainSails with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedMainSails WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Main_Sail_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedMainSails VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that MainSail!");
+									}
+								});
+							}
+						});
+						break;
+					case "sail":
+						alternionConnectionPool.query(`SELECT * FROM NormalSail WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("Those Sails do not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("Those Sails are public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple Sails with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedSails WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Sail_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedSails VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that Sail!");
+									}
+								});
+							}
+						});
+						break;
+					case "weapon":
+						alternionConnectionPool.query(`SELECT * FROM WeaponSkin WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That WeaponSkin do not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That WeaponSkin are public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple weapon skins with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedWeaponSkins WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Weapon_Skin_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedWeaponSkins VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that weapon skin!");
+									}
+								});
+							}
+						});
+						break;
+					case "cannon":
+						alternionConnectionPool.query(`SELECT * FROM Cannon WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That Cannon do not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That Cannon are public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple Cannons with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedCannons WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Cannon_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedCannons VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that cannon!");
+									}
+								});
+							}
+						});
+						break;
+					case "goldmask":
+						alternionConnectionPool.query(`SELECT * FROM GoldMask WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That GoldMask do not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That GoldMask are public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple Gold Masks skins with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedGoldMask WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Gold_Mask_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										alternionConnectionPool.query(`INSERT INTO LimitedGoldMask VALUES (${parseInt(args[1])},${parseInt(args[2])})`)
+									}else{
+										message.channel.send("This user already has access to that weapon skin!");
+									}
+								});
+							}
+						});
+						break;
+					default:
+						message.channel.send("That is not a valid item to assign to!");
+				}
+
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+		case "revokeuser":
+			if (message.author.id === config.ownerId){
+				let notFound = true;
+				switch (args[0].toLowerCase()){
+					case "badge":
+						alternionConnectionPool.query(`SELECT * FROM Badge WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That badge does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That badge is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple badges with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedBadges WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Badge_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										message.channel.send("This user doesn't have access to that badge!");
+									}else{
+										alternionConnectionPool.query(`DELETE FROM LimitedBadges WHERE User_ID=${parseInt(args[1])} AND Allowed_Badge_ID=${parseInt(args[2])}`);
+									}
+								});
+							}
+						});
+						break;
+					case "mainsail":
+						alternionConnectionPool.query(`SELECT * FROM MainSail WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That mainsail does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That mainsail is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple mainsails with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedMainSails WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Badge_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										message.channel.send("This user doesn't have access to that mainsail!");
+									}else{
+										alternionConnectionPool.query(`DELETE FROM LimitedMainSails WHERE User_ID=${parseInt(args[1])} AND Allowed_Main_Sail_ID=${parseInt(args[2])}`);
+									}
+								});
+							}
+						});
+						break;
+					case "sail":
+						alternionConnectionPool.query(`SELECT * FROM NormalSail WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That sail does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That sail is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple sails with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedSails WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Badge_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										message.channel.send("This user doesn't have access to that Sail!");
+									}else{
+										alternionConnectionPool.query(`DELETE FROM LimitedSails WHERE User_ID=${parseInt(args[1])} AND Allowed_Sail_ID=${parseInt(args[2])}`);
+									}
+								});
+							}
+						});
+						break;
+					case "weapon":
+						alternionConnectionPool.query(`SELECT * FROM WeaponSkin WHERE ID=${parseInt(args[2])}`, (err,rows) => {
+							if (rows.length === 0){
+								message.channel.send("That weapon skin does not exist!");
+							}else if (parseInt(rows[0].Limited) !== 1){
+								message.channel.send("That weapon skin is public!");
+							}else if (rows.length > 1){
+								message.channel.send("There seem to be multiple weapon skins with that ID.");
+							}else{
+								alternionConnectionPool.query(`SELECT * FROM LimitedWeaponSkins WHERE User_ID=${parseInt(args[1])}`, (err,rows) => {
+									for (let i=0; i < rows.length; i++){
+										if (rows[i].Allowed_Badge_ID === parseInt(args[2])){
+											notFound = false;
+										}
+									}
+									if (notFound){
+										message.channel.send("This user doesn't have access to that weapon skin!");
+									}else{
+										alternionConnectionPool.query(`DELETE FROM LimitedWeaponSkins WHERE User_ID=${parseInt(args[1])} AND Allowed_Weapon_Skin_ID=${parseInt(args[2])}`);
+									}
+								});
+							}
+						});
+						break;
+					default:
+						message.channel.send("Not a valid parameter.");
+						break;
+				}
+			}else{
+				lackingPermissions(message);
+			}
+			break;
+
+
+
     	default:
     		message.react("🤔");
     		break;
@@ -5322,6 +5670,71 @@ bot.on("message", async message => {
 		console.log("###########################################################");
 	}
 });
+
+function handleAlternionRegistration(message,term,steamID,discordID){
+	let registrationEmbed = new Discord.MessageEmbed().setTitle("Registration");
+	let list = "";
+	switch (term){
+		case "steam":
+			alternionConnectionPool.query(`SELECT * FROM User WHERE Steam_ID="${steamID}"`, (err,rows) => {
+
+				if (rows.length > 1){
+
+					for (let i = 0; i < rows.length; i++){
+						list += `${rows[i].ID}: ${rows[i].steam_id} - ${rows[i].discord_id}\n`;
+					}
+
+					registrationEmbed.addField("Heres a list of users with that steamID", list);
+					sendAlternionEmbed(message,registrationEmbed,false);
+
+				}else if (rows.length < 1){
+					// Create user
+					alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
+						alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${steamID}, ${discordID})`);
+						registrationEmbed.setDescription(`Added user into the database!\n\`${countRows.count}\`, \`${steamID}\`, \`${discordID}\``);
+						sendAlternionEmbed(message,registrationEmbed,false);
+					});
+				}else if (rows.length === 1){
+					// Already exists, output ID and discord_id
+					registrationEmbed.setDescription(`User already exists!\n\`${rows[0].ID}\`, \`${rows[0].steam_id}\`, \`${rows[0].discord_id}\``);
+					sendAlternionEmbed(message,registrationEmbed,false);
+				}
+
+			});
+			break;
+		case "discord":
+			alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${steamID}"`, (err,rows) => {
+
+				if (rows.length > 1){
+
+					for (let i = 0; i < rows.length; i++){
+						list += `${rows[i].ID}: ${rows[i].steam_id} - ${rows[i].discord_id}\n`;
+					}
+
+					registrationEmbed.addField("Heres a list of users with that discordID", list);
+					sendAlternionEmbed(message,registrationEmbed,false);
+
+				}else if (rows.length < 1){
+					// Create user
+					alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
+						alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${discordID}, ${steamID})`);
+						registrationEmbed.setDescription(`Added user into the database!\n\`${countRows.count}\`, \`${discordID}\`, \`${steamID}\``);
+						sendAlternionEmbed(message,registrationEmbed,false);
+					});
+				}else if (rows.length === 1){
+					// Already exists, output ID and discord_id
+					registrationEmbed.setDescription(`User already exists!\n\`${rows[0].ID}\`, \`${rows[0].steam_id}\`, \`${rows[0].discord_id}\``);
+					sendAlternionEmbed(message,registrationEmbed,false);
+				}
+
+			});
+			break;
+		default:
+			registrationEmbed.setDescription("Please check you entered a valid feature\n`discord` `steam`");
+			sendAlternionEmbed(message,registrationEmbed,false);
+			break;
+	}
+}
 
 function getChannelInformation(message){
 	mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
