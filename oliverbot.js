@@ -1610,7 +1610,7 @@ function scoreAdjustPrestige(score, prestige){
 	score -= prestige * 172873;
 	if (prestige != 10)
 	{
-		score = Mathf.Min(score, 172873);
+		score = Math.min(score, 172873);
 	}
 	return score;
 }
@@ -1624,6 +1624,25 @@ function levelProgress(score, prestige){
 			return i;
 		}
 	}
+}
+
+function checkifInDatabaseBW(message,args,type){
+	alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
+		if (rows.length > 1){
+			message.channel.send("You appear to have two accounts linked to this discord account, please contact Archie.");
+			return;
+		}else if (rows.length == 0){
+			message.channel.send("Your discord account is not linked to your steamID, please provide your steamID or contact Archie.");
+			return;
+		}else{
+			args.push(rows[0].steam_id)
+			if (type === "elo"){
+				fetchEloStuff(message, args[1], args[0]);
+			}else{
+				getBlackwakeStats(message,args);
+			}
+		}
+	});
 }
 
 async function getBlackwakeStats(message,args){
@@ -1658,6 +1677,10 @@ async function getBlackwakeStats(message,args){
 				let maintenance = ["acc_rep","acc_pump","acc_sail","acc_noseRep"];
 				let subMaintain = ["Hole Repairs","Pumping","Sail Repairs","Nose Repairs"];
 				let maintain = [];
+
+				let miscList = ["acc_head","acc_sup"];
+				let subMiscList = ["Headshots","Supplies"];
+				let misc = [];
 
 				let unassigned = true;
 				let faveWeap = {}; //"name" : "", "value": ""
@@ -1725,7 +1748,6 @@ async function getBlackwakeStats(message,args){
 					if (shipWeaponry.indexOf(stats[i].name) !== -1){
 						shipWeaponryStats.push(stats[i]);
 					}
-
 				}
 
 				let BwShipsEmbed;
@@ -1783,6 +1805,12 @@ async function getBlackwakeStats(message,args){
 						bwStatsEmbed.setTitle(`${args[1]}`)
 							.setDescription(maintainStats);
 						sendBWStatsEmbed(message,bwStatsEmbed);
+						break;
+					case "misc":
+						let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"");
+						bwMiscEmbed.setTitle(`${args[1]}`)
+							.addField("Msic",`${miscStats}`,true)
+						sendBWStatsEmbed(message,bwMiscEmbed);
 						break;
 					case "compare":
 						let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
@@ -1872,21 +1900,46 @@ function blackwakeCommandHandler(message,args){
 		switch (args[0].toLowerCase())
 		{
 			case "monthly":
-				fetchEloStuff(message, args[1], args[0]);
+				if (!isNaN(parseInt(args[1])))
+				{
+					fetchEloStuff(message, args[1], args[0]);
+				}else{
+					checkifInDatabaseBW(message,args,"elo");
+				}
 				break;
 			case "elo":
-				fetchEloStuff(message, args[1], args[0]);
+				if (!isNaN(parseInt(args[1])))
+				{
+					fetchEloStuff(message, args[1], args[0]);
+				}else{
+					checkifInDatabaseBW(message,args,"elo");
+				}
 				break;
 			case "alternion":
 				checkifInDatabase(message,args);
 				break;
+			case "f":
+				if (message.author.id == config.ownerId)
+				{
+					manualGetter(message,args);
+				}
 			default:
-				getBlackwakeStats(message,args);
+				if (!isNaN(parseInt(args[1])))
+				{
+					getBlackwakeStats(message,args);
+				}else{
+					checkifInDatabaseBW(message,args);
+				}
 				break;
 		}
 	}else{
 		message.reply("This command is currently on cooldown due to steam API limitations, try again soon!");
 	}
+}
+
+function manualGetter(message,args)
+{
+
 }
 
 async function fetchEloStuff(message,steamID,type){
@@ -2485,8 +2538,6 @@ function updateShopWindow(){
 					break;
 			}
 		}
-		setTimeout(function(){
-
 			configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
 
 				let shopWindowChannel = "";
@@ -2530,74 +2581,70 @@ function updateShopWindow(){
 							break;
 					}
 				}
-				setTimeout(function(){
-					let shopInfoEmbed = new Discord.MessageEmbed()
-						.setTitle("Shop Window")
-						.setDescription("Items that can be purchased are listed containers below in the following format:\n> Item Name - `ITEMID`\nNote: you do not need to make it a `code block`, you can simply type out the itemID")
-						.addField('Search', "To search for an item you search based off the `ITEMID` of the item you wish to search, for example:\n;search long9pounder",true)
-						.addField('Purchase', "To purchase an item, you purchase based off the `ITEMID` of the item you wish to purchase, for example:\n ;purchase jeanbart",true);
-					editMsg(shopInfoEmbed, shopWindowChannel, shopInformationMessage);
+				let shopInfoEmbed = new Discord.MessageEmbed()
+					.setTitle("Shop Window")
+					.setDescription("Items that can be purchased are listed within the containers below in the following format:\n> Item Name - `ITEMID`\nNote: you do not need to make it a `code block`, you can simply type out the itemID")
+					.addField('Search', "To search for an item you search based off the `ITEMID` of the item you wish to search, for example:\n;search long9pounder",true)
+					.addField('Purchase', "To purchase an item, you purchase based off the `ITEMID` of the item you wish to purchase, for example:\n ;purchase jeanbart",true);
+				editMsg(shopInfoEmbed, shopWindowChannel, shopInformationMessage);
 
-					let shopIncomeEmbed = new Discord.MessageEmbed()
-						.setTitle("Income")
-						.addField('Small', `${incomeSmall}`,true)
-						.addField('Medium', `${incomeMed}`,true)
-						.addField('Large', `${incomeLarge}`,true);
-					editMsg(shopIncomeEmbed, shopWindowChannel, shopIncomeMessage);
+				let shopIncomeEmbed = new Discord.MessageEmbed()
+					.setTitle("Income")
+					.addField('Small', `${incomeSmall}`,true)
+					.addField('Medium', `${incomeMed}`,true)
+					.addField('Large', `${incomeLarge}`,true);
+				editMsg(shopIncomeEmbed, shopWindowChannel, shopIncomeMessage);
 
-					let shopWeaponsEmbed = new Discord.MessageEmbed()
-						.setTitle("Weapons")
-						.addField('Primary', `${primary}`,true)
-						.addField('Secondary', `${secondary}`,true)
-						.addField('Melee', `${melee}`,true);
-					editMsg(shopWeaponsEmbed, shopWindowChannel, shopWeaponsMessage);
+				let shopWeaponsEmbed = new Discord.MessageEmbed()
+					.setTitle("Weapons")
+					.addField('Primary', `${primary}`,true)
+					.addField('Secondary', `${secondary}`,true)
+					.addField('Melee', `${melee}`,true);
+				editMsg(shopWeaponsEmbed, shopWindowChannel, shopWeaponsMessage);
 
-					let shopShipsEmbed = new Discord.MessageEmbed()
-						.setTitle("Ships")
-						.addField('Small', `${smallShips}`,true)
-						.addField('Big', `${bigShips}`,true)
-						.addField('Mega', `${megaShips}`,true);
-					editMsg(shopShipsEmbed, shopWindowChannel, shopShipsMessage);
+				let shopShipsEmbed = new Discord.MessageEmbed()
+					.setTitle("Ships")
+					.addField('Small', `${smallShips}`,true)
+					.addField('Big', `${bigShips}`,true)
+					.addField('Mega', `${megaShips}`,true);
+				editMsg(shopShipsEmbed, shopWindowChannel, shopShipsMessage);
 
-					let shopShipsArnamentEmbed = new Discord.MessageEmbed()
-						.setTitle("Ship Arnament")
-						.addField('Swivels', `${swivelTypes}`,true)
-						.addField('Cannons', `${cannons}`,true);
-					editMsg(shopShipsArnamentEmbed, shopWindowChannel, shopShipsArnamentMessage);
+				let shopShipsArnamentEmbed = new Discord.MessageEmbed()
+					.setTitle("Ship Arnament")
+					.addField('Swivels', `${swivelTypes}`,true)
+					.addField('Cannons', `${cannons}`,true);
+				editMsg(shopShipsArnamentEmbed, shopWindowChannel, shopShipsArnamentMessage);
 
-					let shopPetsEmbed = new Discord.MessageEmbed()
-						.setTitle("Pets")
-						.addField('Birds', `${birds}`,true)
-						.addField('Mammals', `${Mammals}`,true)
-						.addField('Reptiles', `${Reptiles}`,true);
-					editMsg(shopPetsEmbed, shopWindowChannel, shopPetsMessage);
+				let shopPetsEmbed = new Discord.MessageEmbed()
+					.setTitle("Pets")
+					.addField('Birds', `${birds}`,true)
+					.addField('Mammals', `${Mammals}`,true)
+					.addField('Reptiles', `${Reptiles}`,true);
+				editMsg(shopPetsEmbed, shopWindowChannel, shopPetsMessage);
 
-					let shopConstructionEmbed = new Discord.MessageEmbed()
-						.setTitle("Construction Materials")
-						.addField('Basic', `${basicMaterials}`,true)
-						.addField('Advanced', `${advancedMaterials}`,true);
-					editMsg(shopConstructionEmbed, shopWindowChannel, shopConstructionMessage);
+				let shopConstructionEmbed = new Discord.MessageEmbed()
+					.setTitle("Construction Materials")
+					.addField('Basic', `${basicMaterials}`,true)
+					.addField('Advanced', `${advancedMaterials}`,true);
+				editMsg(shopConstructionEmbed, shopWindowChannel, shopConstructionMessage);
 
-					return;
-				},9000);
+				return;
 			});
-						
-		},6000);
 	});
 	
 	return;
 }
 
-function displayRichestUsers(){
+async function displayRichestUsers(){
 	
 	return;
+	let guild = await bot.guilds.cache.get("401924028627025920");
 
 	configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
 		let economyBoardsChannel;
 		let richetsUsersMesg;
 		let poorestUsersMsg;
-		for (let s = 0; s < rows2.length; s++)
-		{
+		for (let s = 0; s < rows2.length; s++){
 			if (rows2[s].name == "shopBoardsChannel")
 			{
 				economyBoardsChannel = rows2[s].channelID;
@@ -2609,101 +2656,108 @@ function displayRichestUsers(){
 				poorestUsersMsg = rows2[s].messageID;
 			}
 		}
-	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
-		let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
-		let factor = 100;
-		for (i=0;i<30;i++){
-			let name;
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
+			let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
+			let factor = 100;
+			for (i=0;i<30;i++){
+				let name;
 
-			try
-			{
-				let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows[i].ID).user;
-				if (rows[i].ID === 'thereserve'){
-					name = "Federal Reserve";
-				}else if (member.user === undefined){
+				try
+				{
+					console.log("ID: " + rows[i].ID);
+					if (rows[i].ID === 'thereserve'){
+						name = "Federal Reserve";
+					}else {
+						
+						let member = bot.users.cache.find(user => user.id === rows[i].ID);
+						console.log(member);
+						if (member.username === undefined){
+							name = "REPLACEMENT";
+						}else{
+							name = member.username;
+						}
+					}
+				}catch(e)
+				{
+					console.log("Richest: " + e);
 					name = "REPLACEMENT";
-				}else{
-					name = member.user.username;
 				}
-			}catch(e)
-			{
-				console.log("Richest: " + e);
-				name = "REPLACEMENT";
-			}
 
-			if (name.length < leaderboardlimits.usernameEco){
-				let x = leaderboardlimits.usernameEco - name.length;
-				name = name + new Array(x + 1).join(' ');
-			}else{
-				name = name.split(0,leaderboardlimits.usernameEco);
+				if (name.length < leaderboardlimits.usernameEco){
+					let x = leaderboardlimits.usernameEco - name.length;
+					name = name + new Array(x + 1).join(' ');
+				}else{
+					name = name.split(0,leaderboardlimits.usernameEco);
+				}
+				let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
+				if (coins >= (1000000000 * factor)){
+					coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
+				}else if (coins >= (1000000 * factor)){
+					coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
+				}else if (coins >= (1000 * factor)){
+					coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
+				}else{
+					coins = coins / factor;
+				}
+				newRichest = newRichest + name +"|"+ coins +"\n";
 			}
-			let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
-			if (coins >= (1000000000 * factor)){
-				coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
-			}else if (coins >= (1000000 * factor)){
-				coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
-			}else if (coins >= (1000 * factor)){
-				coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
-			}else{
-				coins = coins / factor;
-			}
-			newRichest = newRichest + name +"|"+ coins +"\n";
-		}
-		newRichest += "```";
-		bot.channels.cache.get(economyBoardsChannel).messages.fetch(richetsUsersMesg).then(msg => {
-			msg.edit(newRichest);
+			newRichest += "```";
+			bot.channels.cache.get(economyBoardsChannel).messages.fetch(richetsUsersMesg).then(msg => {
+				msg.edit(newRichest);
+			});
 		});
-	});
 
-	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
-		let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
-		let factor = 100;
-		for (i=0;i<30;i++){
-			let name;
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows3) => {
+			let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
+			let factor = 100;
+			for (s=0;s<30;s++){
+				let name;
 
-			try
-			{
-				let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows[i].ID).user;
-				if (rows[i].ID === 'thereserve'){
-					name = "Federal Reserve";
-				}else if (member.user === undefined){
+				try
+				{
+					let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows3[s].ID).user;
+					if (rows[s].ID === 'thereserve'){
+						name = "Federal Reserve";
+					}else if (member.username === undefined){
+						name = "REPLACEMENT";
+					}else{
+						name = member.username;
+					}
+				}catch(e)
+				{
+					console.log("Poorest: " + e);
 					name = "REPLACEMENT";
-				}else{
-					name = member.user.username;
 				}
-			}catch(e)
-			{
-				console.log("Poorest: " + e);
-				name = "REPLACEMENT";
-			}
 
-			if (name.length < leaderboardlimits.usernameEco){
-				let x = leaderboardlimits.usernameEco - name.length;
-				name = name + new Array(x + 1).join(' ');
-			}else{
-				name = name.split(0,leaderboardlimits.usernameEco);
+				if (name.length < leaderboardlimits.usernameEco){
+					let x = leaderboardlimits.usernameEco - name.length;
+					name = name + new Array(x + 1).join(' ');
+				}else{
+					name = name.split(0,leaderboardlimits.usernameEco);
+				}
+				let coins = parseInt(parseFloat(rows3[s].giraffeCoins).toFixed(2) * factor);
+				if (coins >= (1000000000 * factor)){
+					coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
+				}else if (coins >= (1000000 * factor)){
+					coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
+				}else if (coins >= (1000 * factor)){
+					coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
+				}else{
+					coins = coins / factor;
+				}
+				newPoorest = newPoorest + name +"|"+ coins +"\n";
 			}
-			let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
-			if (coins >= (1000000000 * factor)){
-				coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
-			}else if (coins >= (1000000 * factor)){
-				coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
-			}else if (coins >= (1000 * factor)){
-				coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
-			}else{
-				coins = coins / factor;
-			}
-			newPoorest = newPoorest + name +"|"+ coins +"\n";
-		}
-		newPoorest += "```";
-		bot.channels.cache.get(economyBoardsChannel).messages.fetch(poorestUsersMsg).then(msg => {
-			msg.edit(newPoorest);
+			newPoorest += "```";
+			bot.channels.cache.get(economyBoardsChannel).messages.fetch(poorestUsersMsg).then(msg => {
+				msg.edit(newPoorest);
+			});
 		});
-	});
 	});
 	return;
 }
+
 function giveUserMoney(amount,ID){
+	console.log("Preparing to give");
 	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
@@ -2712,9 +2766,15 @@ function giveUserMoney(amount,ID){
 		} else {
 			sql = `UPDATE inventoryGT SET giraffeCoins = '${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}' WHERE ID = '${ID}'`;
 		}
+		console.log("Going to query the following");
+		console.log(`Calculated -${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}- GC as income`);
+		console.log(sql);
 		mainDatabaseConnectionPool.query(sql);
+		console.log("Complete query.");
 		displayRichestUsers();
 	});
+	console.log("Given to user");
+	console.log("#######################################");
 
 	return;
 }
@@ -2734,8 +2794,8 @@ function purchaseItem(ID,item,message,args){
 				message.channel.send( "Please make sure you entered the correct name!");
 			}else if(rows2.length > 1){
 				message.channel.send(`Could you be a bit more specific? Using your search term I have ${rows.length} results.`);
-			}else if (parseFloat(rows[0].giraffeCoins) < rows2[0].value){
-				message.channel.send(`You have insufficient coins to afford this item! You need another ${rows2[0].value - rows[0].giraffeCoins}GC`);
+			}else if (parseFloat(rows[0].giraffeCoins) < (rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock)){
+				message.channel.send(`You have insufficient coins to afford this item! You need another ${(rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock) - rows[0].giraffeCoins}GC`);
 			}else if(parseInt(rows2[0].inStock) <= 0){
 				message.channel.send( "This item is currently out of stock! Try get someone else to sell theirs so you can buy it, or wait for the next increase in stock!");
 			}else{
@@ -2743,37 +2803,37 @@ function purchaseItem(ID,item,message,args){
 				let inventory = JSON.parse(rows[0].inventory);
 				let itemInfo = JSON.parse(rows2[0].info);
 				let continueAnyway = true;
+
 				mainDatabaseConnectionPool.query(`SELECT * FROM shopTypeLimits WHERE type='${itemInfo.type}'`, (err,rows3) => {
 					let counter = 0;
 					let maxCount = rows3[0].maxCount;
-					if (itemInfo.type === "constructionResources")
-					{
-						resourceAmountPurchased = parseInt(args[1]);
-						if (isNaN)
-						{
+					if (itemInfo.type === "constructionResources"){
+						let resourceAmountPurchased = parseInt(args[1]);
+						if (isNaN(resourceAmountPurchased)){
 							message.channel.send("Please enter a valid amount!");
 							continueAnyway = false;
-						}else
-						{
-							if ((rows2[0].value * resourceAmountPurchased) > parseFloat(rows[0].giraffeCoins))
-							{
-								message.channel.send(`You have insufficient coins to afford this item! You need another ${(rows2[0].value * resourceAmountPurchased) - rows[0].giraffeCoins}GC`);
+						}else{
+							if (((rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock) * resourceAmountPurchased) > parseFloat(rows[0].giraffeCoins)){
+								message.channel.send(`You have insufficient coins to afford this item! You need another ${((rows2[0].value * (parseInt(rows2[0].inStock))/ rows2[0].initialStock) * resourceAmountPurchased) - rows[0].giraffeCoins}GC`);
 								continueAnyway = false;
 							}
 						}
 					}
-					for (i=0; i< inventory.length ; i++){
-						if (continueAnyway){
-							if (inventory[i].name === rows2[0].name){
-								message.channel.send("You already own that item!");
-								continueAnyway = false;
-							}else if(inventory[i].type === itemInfo.type){
-								counter = counter + 1;
-								if (counter >= maxCount){
-									message.channel.send("You already own an item of this type!");
-									continueAnyway = false;
+					if (continueAnyway){
+						for (i=0; i< inventory.length; i++){
+								if (inventory[i].name === rows2[0].name){
+									if (inventory[i].type !== "constructionResources"){
+										message.channel.send("You already own that item!");
+										continueAnyway = false;
+									}
+								}else if(inventory[i].type === itemInfo.type){
+									counter = counter + 1;
+									if (counter >= maxCount){
+										message.channel.send("You already own an item of this type!");
+										continueAnyway = false;
+									}
 								}
-							}
+							
 						}
 					}
 					if (continueAnyway){
@@ -2798,18 +2858,38 @@ function purchaseItem(ID,item,message,args){
 						}
 						if (itemInfo.type === "constructionResources")
 						{
-							inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "value" : (rows2[0].value / 2), "properName" : itemInfo.name, "amount" : amount} );
+							let doesntExist = true;
+
+							for (i=0; i < inventory.length; i++){
+								if (inventory[i].name === rows2[0].name){
+									inventory[i].amount += parseInt(args[1]);
+									doesntExist = false;
+									break;
+								}
+							}
+							if (doesntExist){
+								inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "value" : (rows2[0].value / 2), "properName" : itemInfo.name, "amount" : parseInt(args[1])} );
+							}
+
+							mainDatabaseConnectionPool.query(`update shop set inStock = ${rows2[0].inStock - parseInt(args[1])} where name='${item}'`);
+
 						}else{
 							inventory.push( {"name" : rows2[0].name, "type" : itemInfo.type, "customizable" : customizable, "value" : (rows2[0].value / 2), "properName" : itemInfo.name} );
+							mainDatabaseConnectionPool.query(`update shop set inStock = ${rows2[0].inStock - 1} where name='${item}'`);
 						}
-						mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${rows[0].giraffeCoins - rows2[0].value}', inventory='${JSON.stringify(inventory)}' where ID = '${ID}'`);
-						mainDatabaseConnectionPool.query(`update shop set inStock = ${rows2[0].inStock - 1} where name='${item}'`);
+						mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${rows[0].giraffeCoins - (rows2[0].value * (parseInt(rows2[0].inStock))/ rows2[0].initialStock)}', inventory='${JSON.stringify(inventory)}' where ID = '${ID}'`);
 						message.channel.send(fancyPurchaseEmbed);
 						if (parseInt(rows2[0].value) > 5000){
+							let desc = "";
+							if (itemInfo.type !== "constructionResources"){
+								desc = `${itemInfo.name}\nPurchased by <@${message.author.id}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`;
+							}else{
+								desc = `${itemInfo.name} (${parseInt(args[1])})\nPurchased by <@${message.author.id}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`
+							}
 							let logEmbed = new Discord.MessageEmbed()
 								.setTitle("Transaction Occured")
-								.setDescription(`${itemInfo.name}\nPurchased by <@${message.author}> for ${rows2[0].value}GC`);
-							bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(logEmbed);
+								.setDescription(desc);
+							bot.channels.cache.get("718232760388550667").send(logEmbed);
 						}
 						updateShopWindow();
 						displayRichestUsers();
@@ -2859,7 +2939,7 @@ function searchForItem(item,message){
 				searchEmbed.addField(`Info`,`Name: ${itemInfo.name}\nType: ${itemInfo.type}`);
 			}
 
-			searchEmbed.addFields({name : `Value`, value: `Cost: ${rows[0].value}`,inline: true},{name : `To Purchase`, value: "`"+`;purchase`+"` `"+`${rows[0].name}`+"`", inline: true});
+			searchEmbed.addFields({name : `Value`, value: `Cost: ${rows[0].value * (parseInt(rows[0].inStock) / rows[0].initialStock)}\nIn Stock: ${rows[0].inStock}`,inline: true},{name : `To Purchase`, value: "`"+`;purchase`+"` `"+`${rows[0].name}`+"`", inline: true});
 			message.channel.send(searchEmbed);
 		}
 	});
@@ -2919,7 +2999,7 @@ function sellItem(ID,item,message){
 	return;
 }
 
-async function listInventory(ID,message){
+async function listInventory(ID,message,args){
 	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 
@@ -2929,19 +3009,39 @@ async function listInventory(ID,message){
 			message.channel.send("An error has occured, please contact Archie.");
 		}else{
 			let inv = JSON.parse(rows[0].inventory);
-			let response = ""
-			if (inv.length > 0){
-				for (i=0;i<inv.length;i++){
-					response = response + inv[i].properName + "\n";
+			let response = "";
+			let inventoryEmbed = new Discord.MessageEmbed();
+			if (!args.length >= 1){
+				if (inv.length > 0){
+					for (i=0;i<inv.length;i++){
+						response = response + inv[i].properName + "\n";
+					}
+				}else{
+					response = "N/A";
 				}
+
+				inventoryEmbed.setTitle(`Inventory for ${message.author.username}`)
+					.setDescription(`${response}`);
 			}else{
-				response = "N/A";
+				let notFound = true;
+				for (let i=0;i<inv.length;i++){
+					if (inv[i].name === args.join(" ") || inv[i].properName === args.join(" ")){
+						notFound = false;
+						inventoryEmbed.setTitle(inv[i].name);
+						switch (inv[i].type){
+							case "constructionResources":
+								inventoryEmbed.setDescription(`Amount: ${inv[i].amount}`)
+								break;
+							default:
+								inventoryEmbed.setDescription("Amount: 1");
+								break;
+						}
+					}
+				}
+				if (notFound){
+					inventoryEmbed.setDescription("Either you do not own this item, or you didn't type it correctly.");
+				}
 			}
-
-			let inventoryEmbed = new Discord.MessageEmbed()
-				.setTitle(`Inventory for ${message.author.username}`)
-				.setDescription(`${response}`);
-
 			message.channel.send(inventoryEmbed);
 		}
 	});
@@ -3060,7 +3160,7 @@ function gambleMoney(amount,message){
 			let result = getRandomInt(30);
 			switch(true){
 				case result < 20:
-					income = -0.7;
+					income = 0;
 					break;
 				case result < 24:
 					income = 1;
@@ -3137,6 +3237,113 @@ function customizeShip(ID,args,message){
 	return;
 }
 
+function craftItem(message,args){
+	let craftEmbed = new Discord.MessageEmbed();
+	mainDatabaseConnectionPool.query(`SELECT * FROM crafting WHERE Name=${args[0]}`, (err,craftingRows) => {
+		if (craftingRows[0]){
+			mainDatabaseConnectionPool.query(`SELECT * FROM skills WHERE id=${ID}`, (err,skillRows) => {
+				let requirements = JSON.parse(craftingRows[0].Requirements);
+				let requiredSkills = [];
+				let requiredMaterials = [];
+				let missingSkills = "";
+				for (i=0;i<requirements.length;i++){
+					if (requirements[i].type === "skill"){
+						requiredSkills.push({"name" : requirements[i].name, "level" : requirements[i].level});
+					}else if (requirements[i].type === "material"){	
+						requiredMaterials.push({"name" : requirements[i].name, "amount" : requirements[i].amount})
+					}
+				}
+				for (let s=0; s<requiredSkills.length;s++){
+					if (skillRows[requiredSkills[s].name] < requiredSkills[s].level){
+						missingSkills += `${missingSkills[i].name} : ${missingSkills[i].level}\n`;
+					}
+				}
+
+				if (missingSkills.length < 1){
+					mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${ID}'`,(err,inventoryRows) => {
+						if (inventoryRows.length){
+							if (inventoryRows.length === 1){
+								let inv = JSON.parse(inventoryRows[0].inventory);
+								let possible = true;
+								let missingResources = "";
+								for (let s=0; s<requiredMaterials.length;s++){
+									let val = checkOrRemoveResources(true,inv,requiredMaterials[s].name,requiredMaterials[s].amount);
+									if (val === 0 || val === 2){
+										missingResources += `${requiredMaterials[s].name} : ${requiredMaterials[s].amount}\n`;
+										possible = false;
+									}
+								}
+
+								if (possible){
+
+									//remove the resources
+									for (let s=0;s<requiredMaterials.length;s++){
+										inv = checkOrRemoveResources(false,inv,requiredMaterials[s].name,requiredMaterials[s].amount);
+									}
+
+									let doesntExist = true;
+									for (let i=0;i<inv.length;i++){
+										if (inv[i].name === args[0]){
+											inv[i].amount += 1;
+											doesntExist = false;
+											break;
+										}
+									}
+
+									if (doesntExist){
+										if (craftingRows[0].canBeUsedForCrafting === 1){
+											inv.push({"name" : `${args[0]}`, "amount" : 1, "type" : "constructionResources"});
+										}else{
+											inv.push({"name" : `${args[0]}`, "amount" : 1, "type" : "finalCraft"});
+										}
+									}
+
+									craftEmbed.setTitle("Item crafted")
+										.setDescription(`Crafted: ${craftingRows[0].properName}`);
+										message.channel.send(craftEmbed);
+
+								}else{
+									craftEmbed.setTitle("Missing Resources")
+										.setDescription(missingResources);
+									message.channel.send(craftEmbed);
+								}
+							}
+						}
+					});
+				}else{
+					craftEmbed.setTitle("Missing Skills")
+						.setDescription(missingSkills);
+					message.channel.send(craftEmbed);
+				}
+			});
+		}else{
+			craftEmbed.setDescription("Unable to find that item.");
+			message.channel.send(craftEmbed);
+		}
+	});
+}
+
+function checkOrRemoveResources(check,list,checkForName,checkForAmount){
+	if (check){
+		for (let s=0; s<list.length;s++){
+			if (list[i].type === "constructionResources" && list[i].name === checkForName){
+				if (list[i].amount < checkForAmount){
+					return 0;
+				}else{
+					return 1;
+				}
+			}
+		}
+		return 2;
+	}else{
+		for (let s=0; s<list.length;s++){
+			if (list[i].type === "constructionResources" && list[i].name === checkForName){
+				list[i].amount -= checkForAmount
+			}
+		}
+		return list;
+	}
+}
 //Income Methods
 
 function checkQuizAllowances(message,args){
@@ -3285,10 +3492,10 @@ function economyWork(message){
 						if (inv[i].type === 'income')
 						{
 							income += inv[i].value;
-							count += 1;
 						}
 					}
 				}
+				console.log("Fetched null");
 				giveUserMoney(income, message.author.id);
 				workingEmbed.setDescription(`You have earnt: ${income}GC!`);
 
@@ -3304,6 +3511,7 @@ function economyWork(message){
 							income += inv[i].value;
 						}
 					}
+					console.log("Fetched income for user => " + income);
 					giveUserMoney(income, message.author.id);
 					mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
 					workingEmbed.setDescription(`You have earnt: ${income}GC!`);
@@ -3368,9 +3576,17 @@ function listTheCommands(message){
    			.addField(`Meme Commands`,` - France\n - Assemble\n - Memegen\n - Random\n - Insult\n - Trump\n - 8Ball\n - Execute\n - Frustration\n - Magic\n - Pong\n - Ping\n - Advice\n - yodish\n - Beg\n - Quiz`,true)
    			.addField(`Music Commands`,` - PlayAudio\n - RandomSong`,true)
    			.addField(`Nerd Commands`,` - APOD\n - MarsWeather\n - NumTrivia\n - ExchangeRates`,true)
-   			.addField(`Economy Commands`,` - work\n - GiftCoins\n - Purchase\n - Sell\n - Inventory`,true)
+   			.addField(`Economy Commands`,` - Work\n - GiftCoins\n - Purchase\n - Sell\n - Inventory`,true)
    			.setTimestamp();
    		message.author.send(embed);
+
+   		let embed2 = new Discord.MessageEmbed()
+			.setTitle("Blackwake Commands")
+   			.setColor(0x008000)
+   			.addField(`Main Features`,`Used in the following context:\n\`;Blackwake\` \`Feature\` \`SteamID\`\n - Overview\n - Weaponstats\n - Maintenance\n - ShipWeaponry\n - ShipStats\n - Compare\n - Monthly\n - Elo\n - Alternion`)
+   			.addField(`Alternion Features`,`Used in the following context:\n\`;Blackwake\` \`Alternion\` \`Feature\`\n - ListBadges\n - ListSails\n - ListMainSails\n - ListCannons\n - ListWeapons\n - Overview\n - Assign\n - Help`)
+   			.setTimestamp();
+   		message.author.send(embed2);
 
    		let dembed = new Discord.MessageEmbed()
 			.setTitle("Currently Unavailable Commands")
@@ -3547,9 +3763,9 @@ function alternionHandler(message, args){
 	switch (args[1].toLowerCase()){
 
 		case "listbadges":
-			alternionHandlerEmbed.setTitle("Available Badges")
+			alternionHandlerEmbed.setTitle("Available Restricted Badges")
 				.setFooter("The formatting is: - `badge_id` : Badge Name -");
-			getBadges(message,message.author.id,alternionHandlerEmbed);
+			getBadges(message,message.author.id,args[2],alternionHandlerEmbed);
 			break;
 
 		case "help":
@@ -3606,32 +3822,42 @@ function alternionHandler(message, args){
 			assignItemSkin(message,args,alternionHandlerEmbed);
 			break;
 
+		case "whatsmyid":
+			alternionHandlerEmbed.setTitle("Your Info");
+			getUserID(message,alternionHandlerEmbed);
+			break;
+
 		case "overview":
 			getAlternionOverview(message,alternionHandlerEmbed);
 			break;
 
 		case "listsails":
-			alternionHandlerEmbed.setTitle("Available Sails")
+			alternionHandlerEmbed.setTitle("Available Restricted Sails")
 				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getNormalSails(message,message.author.id,alternionHandlerEmbed);
+			getNormalSails(message,message.author.id,args[2],alternionHandlerEmbed);
 			break;
 
 		case "listmainsails":
-			alternionHandlerEmbed.setTitle("Available Main Sails")
+			alternionHandlerEmbed.setTitle("Available Restricted Main Sails")
 				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getMainSails(message,message.author.id,alternionHandlerEmbed);
+			getMainSails(message,message.author.id,args[2],alternionHandlerEmbed);
 			break;
 
 		case "listcannons":
-			alternionHandlerEmbed.setTitle("Available Cannons")
+			alternionHandlerEmbed.setTitle("Available Restricted Cannons")
 				.setFooter("The formatting is: - `Cannon_ID` : Cannon Name -");
-			getCannons(message,message.author.id,alternionHandlerEmbed);
+			getCannons(message,message.author.id,args[2],alternionHandlerEmbed);
 			break;
 
 		case "listweapons":
-			alternionHandlerEmbed.setTitle("Available Weapon Skins")
+			alternionHandlerEmbed.setTitle("Available Restricted Weapon Skins")
 				.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
 			getWeaponSkins(message,message.author.id,alternionHandlerEmbed);
+			break;
+
+		case "manage":
+			alternionHandlerEmbed.setTitle("Managing User...");
+			teamLeaderBadgeHandler(message,args[2],args[3],args[4],alternionHandlerEmbed);
 			break;
 
 		default:
@@ -3642,6 +3868,23 @@ function alternionHandler(message, args){
 	}
 
 	return;
+}
+
+function getUserID(message,embed){
+	alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID="${message.author.id}`, (err,rows) => {
+		if (rows){
+			if (rows.length < 1){
+				message.channel.send("You are currently not in the database.");
+			}else if (rows.length > 1){
+				message.channel.send("There seems to be an issue, you are recorded multiple times.");
+			}else{
+				embed.setDescription("`" + rows[0].ID + "`");
+				sendAlternionEmbed(embed);
+			}
+		}else{
+			message.channel.send("Something went wrong.");
+		}
+	});
 }
 
 function assignItemSkin(message,args,alternionHandlerEmbed){
@@ -3794,6 +4037,24 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 			fieldName = "HealItem_ID";
 			table2Field = "Allowed_Weapon_Skin_ID";
 			break;
+		case "teacup":
+			table1Name = "WeaponSkin";
+			table2Name = "LimitedWeaponSkins";
+			fieldName = "TeaCup_ID";
+			table2Field = "Allowed_Weapon_Skin_ID";
+			break;
+		case "teawater":
+			table1Name = "WeaponSkin";
+			table2Name = "LimitedWeaponSkins";
+			fieldName = "TeaWater_ID";
+			table2Field = "Allowed_Weapon_Skin_ID";
+			break;
+		case "bucket":
+			table1Name = "WeaponSkin";
+			table2Name = "LimitedWeaponSkins";
+			fieldName = "Bucket_ID";
+			table2Field = "Allowed_Weapon_Skin_ID";
+			break;
 		case "hammer":
 			table1Name = "WeaponSkin";
 			table2Name = "LimitedWeaponSkins";
@@ -3813,8 +4074,8 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	}
 
 	if (table1Name != "NA"){
-		alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID="${message.author.id}"`, (err, rows) => {
-				alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
+		alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID="${message.author.id}"`, (err, rows) => {
+				alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
 					let found = false;
 					let assignedBadge = "";
 					if (rows){
@@ -3858,7 +4119,7 @@ function getAlternionOverview(message,alternionHandlerEmbed){
 
 	// Prepare for an SQL nightmare
 
-	alternionConnectionPool.query(`SELECT Badge.Display_Name AS bad, GoldMask.Display_Name AS mas, NormalSail.Display_Name AS sai, MainSail.Display_Name AS msa, Cannon.Display_Name AS can, Musket.Display_Name AS mus, Blunderbuss.Display_Name AS blu, Nockgun.Display_Name AS noc, HM.Display_Name AS han, Pis.Display_Name AS pis, Spis.Display_Name AS spi, Duck.Display_Name AS duc, Mat.Display_Name AS mat, Ann.Display_Name AS ann, Axe.Display_Name AS axe, Rap.Display_Name AS rap, Dag.Display_Name AS dag, Bot.Display_Name AS bot, Cut.Display_Name AS cut, Pik.Display_Name AS pik, Tom.Display_Name AS tom, Spy.Display_Name AS spy, Gre.Display_Name AS gre, Hea.Display_Name AS hea, Ham.Display_Name AS ham, Atl.Display_Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
+	alternionConnectionPool.query(`SELECT Badge.Display_Name AS bad, GoldMask.Display_Name AS mas, NormalSail.Display_Name AS sai, Tea.Display_Name as tea, Bucket.Display_Name as buc, TeaWater.Display_Name as tew, MainSail.Display_Name AS msa, Cannon.Display_Name AS can, Musket.Display_Name AS mus, Blunderbuss.Display_Name AS blu, Nockgun.Display_Name AS noc, HM.Display_Name AS han, Pis.Display_Name AS pis, Spis.Display_Name AS spi, Duck.Display_Name AS duc, Mat.Display_Name AS mat, Ann.Display_Name AS ann, Axe.Display_Name AS axe, Rap.Display_Name AS rap, Dag.Display_Name AS dag, Bot.Display_Name AS bot, Cut.Display_Name AS cut, Pik.Display_Name AS pik, Tom.Display_Name AS tom, Spy.Display_Name AS spy, Gre.Display_Name AS gre, Hea.Display_Name AS hea, Ham.Display_Name AS ham, Atl.Display_Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS TeaWater ON TeaWater_ID = TeaWater.ID INNER JOIN WeaponSkin AS Tea ON TeaCup_ID = Tea.ID INNER JOIN WeaponSkin AS Bucket ON Bucket_ID = Bucket.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
 		if (rows.length === 0){
 			message.channel.send("You are currently not in the database, please contact Archie.");
 			return;
@@ -3889,7 +4150,10 @@ function getAlternionOverview(message,alternionHandlerEmbed){
 						+	`Tomohawk    : **${rows[0].tom}**\n`
 						+	`Spyglass    : **${rows[0].spy}**\n`
 						+	`Grenade     : **${rows[0].gre}**\n`
-						+	`Healing     : **${rows[0].hea}**\n`
+						+	`Rum         : **${rows[0].hea}**\n`
+						+	`Tea         : **${rows[0].tea}**\n`
+						+	`Tea Water   : **${rows[0].tew}**\n`
+						+	`Bucket      : **${rows[0].buc}**\n`
 						+	`Hammer      : **${rows[0].ham}**\n`
 						+	`Atlas01     : **${rows[0].atl}**`;
 			alternionHandlerEmbed.setDescription(finalMsg);
@@ -3929,67 +4193,139 @@ function getWeaponSkins(message,ID,alternionHandlerEmbed){
 }
 
 function getCannons(message,ID,alternionHandlerEmbed){
-	alternionConnectionPool.query(`SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
-		if (rows.length < 1){
-			alternionHandlerEmbed.setDescription("No Cannons found.");
-		}else{
-			let returnString = "";
-			for (let i = 0; i < rows.length; i++){
-				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+	if (pubPriv.toLowerCase() === "private"){
+		alternionConnectionPool.query(`SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Cannons found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
 			}
-			alternionHandlerEmbed.setDescription(returnString);
-		}
 
-		sendAlternionEmbed(message,alternionHandlerEmbed,false);
-	});
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else if (pubPriv.toLowerCase() === "public"){
+		alternionConnectionPool.query(`SELECT Name, Display_Name FROM Cannon WHERE Limited!=1`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Cannons found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
+			}
+
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else{
+		message.channel.send("Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.");
+	}
 }
 
-function getNormalSails(message,ID,alternionHandlerEmbed){
-	alternionConnectionPool.query(`SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
-		if (rows.length < 1){
-			alternionHandlerEmbed.setDescription("No Sails found.");
-		}else{
-			let returnString = "";
-			for (let i = 0; i < rows.length; i++){
-				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+function getNormalSails(message,ID,pubPriv,alternionHandlerEmbed){
+	if (pubPriv.toLowerCase() === "private"){
+		alternionConnectionPool.query(`SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Sails found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
 			}
-			alternionHandlerEmbed.setDescription(returnString);
-		}
 
-		sendAlternionEmbed(message,alternionHandlerEmbed,false);
-	});
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else if (pubPriv.toLowerCase() === "public"){
+		alternionConnectionPool.query(`SELECT Name, Display_Name FROM NormalSail WHERE Limited!=1`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Sails found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
+			}
+
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else{
+		message.channel.send("Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.");
+	}
 }
 
-function getMainSails(message,ID,alternionHandlerEmbed){
-	alternionConnectionPool.query(`SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
-		if (rows.length < 1){
-			alternionHandlerEmbed.setDescription("No Sails found.");
-		}else{
-			let returnString = "";
-			for (let i = 0; i < rows.length; i++){
-				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
+	if (pubPriv.toLowerCase() === "private"){
+		alternionConnectionPool.query(`SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Sails found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
 			}
-			alternionHandlerEmbed.setDescription(returnString);
-		}
 
-		sendAlternionEmbed(message,alternionHandlerEmbed,false);
-	});
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else if (pubPriv.toLowerCase() === "public"){
+		alternionConnectionPool.query(`SELECT Name, Display_Name FROM MainSail WHERE Limited!=1`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Sails found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
+			}
+
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else{
+		message.channel.send("Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.");
+	}
 }
 
-function getBadges(message,ID,alternionHandlerEmbed){
-	alternionConnectionPool.query(`SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
-		if (rows.length < 1){
-			alternionHandlerEmbed.setDescription("No badges found.");
-		}else{
-			let returnString = "";
-			for (let i = 0; i < rows.length; i++){
-				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+function getBadges(message,ID,pubPriv,alternionHandlerEmbed){
+	if (pubPriv.toLowerCase() === "private"){
+		alternionConnectionPool.query(`SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No badges found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
 			}
-			alternionHandlerEmbed.setDescription(returnString);
-		}
 
-		sendAlternionEmbed(message,alternionHandlerEmbed,false);
-	});
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else if (pubPriv.toLowerCase() === "public"){
+		alternionConnectionPool.query(`SELECT Name, Display_Name FROM Badge where Limited!=1`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No badges found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
+			}
+
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
+	}else{
+		message.channel.send("Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.");
+	}
 }
 
 function sendAlternionEmbed(message,embed,needsUpdate){
@@ -3998,6 +4334,54 @@ function sendAlternionEmbed(message,embed,needsUpdate){
 		getLocalJson(message.author.id);
 	}
 	return;
+}
+
+function teamLeaderBadgeHandler(message,user_id,action,badgeID,alternionHandlerEmbed){
+	alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User where discord_ID="${message.author.id}"`, (err,rows) => {
+		if (rows){
+			if (rows[0].tl_ID === 0){
+				message.channel.send("You are not a team leader!");
+			}else if (rows.length > 1){
+				message.channel.send("Something went wrong, you appear to be in the DB twice.");
+			}else{
+				alternionConnectionPool.query(`SELECT ID,Limited,Team_ID from Badge WHERE Name="${badgeID}"`, (err,rows2) => {
+					if (rows){
+						if (rows[0].tl_ID !== rows2[0].Team_ID){
+							message.channel.send("Please ensure you entered the correct badge ID.");
+						}else{
+							alternionConnectionPool.query(`SELECT * FROM LimitedBadges WHERE User_ID=${user_id} and Allowed_badge_ID=${rows2[0].ID}`, (err,rows3) => {
+								if (action.toLowerCase() === "assign"){
+									if (rows3){
+										if (rows3[0].User_ID){
+											message.channel.send("This user already has access to this badge!");
+										}
+									}else{
+										alternionConnectionPool.query(`INSERT INTO LimitedBadges Values (${user_id},${rows2[0].ID})`);
+										alternionHandlerEmbed.setDescription("Inserted user into DB");
+										sendAlternionEmbed(message,alternionHandlerEmbed);
+									}
+								}else if (action.toLowerCase() === "revoke"){
+									if (rows3){
+										if (rows3[0].User_ID){
+											alternionConnectionPool.query(`DELETE FROM LimitedBadges WHERE User_ID=${user_id} and Allowed_Badge_ID=${badgeID}`);
+											alternionHandlerEmbed.setDescription("Removed user into DB");
+											sendAlternionEmbed(message,alternionHandlerEmbed);
+										}
+									}
+								}else {
+									message.channel.send("That is not a valid action!");
+								}
+							});
+						}
+					}else{
+						message.channel.send("Please ensure you entered the correct badge ID.");
+					}
+				});
+			}
+		}else{
+			message.channel.send("You are not in the database, please contact Archie.");
+		}
+	});
 }
 
 var alternionJsonFile = null;
@@ -4017,10 +4401,12 @@ function getLocalJson(discord_id){
 }
 
 function updateLocalCache(discord_id,filepath){
-	alternionConnectionPool.query(`SELECT User.Steam_ID AS steam_ID, Badge.Name AS bad, GoldMask.Name AS mas, NormalSail.Name AS sai, MainSail.Name AS msa, Cannon.Name AS can, Musket.Name AS mus, Blunderbuss.Name AS blu, Nockgun.Name AS noc, HM.Name AS han, Pis.Name AS pis, Spis.Name AS spi, Duck.Name AS duc, Mat.Name AS mat, Ann.Name AS ann, Axe.Name AS axe, Rap.Name AS rap, Dag.Name AS dag, Bot.Name AS bot, Cut.Name AS cut, Pik.Name AS pik, Tom.Name AS tom, Spy.Name AS spy, Gre.Name AS gre, Hea.Name AS hea, Ham.Name AS ham, Atl.Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID WHERE Discord_ID="${discord_id}"`, (err,rows) => {
+	let notFoundUser = true;
+	alternionConnectionPool.query(`SELECT User.steam_ID, Badge.Name AS bad, GoldMask.Name AS mas, NormalSail.Name AS sai, Tea.Name as tea, Bucket.Name as buc, TeaWater.Name as tew, MainSail.Name AS msa, Cannon.Name AS can, Musket.Name AS mus, Blunderbuss.Name AS blu, Nockgun.Name AS noc, HM.Name  AS han, Pis.Name AS pis, Spis.Name AS spi, Duck.Name AS duc, Mat.Name AS mat, Ann.Name AS ann, Axe.Name AS axe, Rap.Name AS rap, Dag.Name AS dag, Bot.Name AS bot, Cut.Name AS cut, Pik.Name AS pik, Tom.Name AS tom, Spy.Name AS spy, Gre.Name AS gre, Hea.Name AS hea, Ham.Name AS ham, Atl.Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS TeaWater ON TeaWater_ID = TeaWater.ID INNER JOIN WeaponSkin AS Tea ON TeaCup_ID = Tea.ID INNER JOIN WeaponSkin AS Bucket ON Bucket_ID = Bucket.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID WHERE Discord_ID="${discord_id}"`, (err,rows) => {
 		for (let i = 0; i < alternionJsonFile.users.length; i++){
 			if (alternionJsonFile.users[i].steamID === rows[0].steam_ID){
 				console.log(`Found User: -${alternionJsonFile.users[i].steamID}- => -${discord_id}-`);
+				console.log(alternionJsonFile.users[i]);
 				alternionJsonFile.users[i].badgeName = rows[0].bad;
 				alternionJsonFile.users[i].maskSkinName = rows[0].mas;
 				alternionJsonFile.users[i].sailSkinName = rows[0].sai;
@@ -4045,10 +4431,53 @@ function updateLocalCache(discord_id,filepath){
 				alternionJsonFile.users[i].spyglassSkinName = rows[0].spy.split("_")[1];
 				alternionJsonFile.users[i].grenadeSkinName = rows[0].gre.split("_")[1];
 				alternionJsonFile.users[i].healItemSkinName = rows[0].hea.split("_")[1];
+				alternionJsonFile.users[i].teaCupSkinName = rows[0].tea.split("_")[1];
+				alternionJsonFile.users[i].teaWaterSkinName = rows[0].tew.split("_")[1];
+				alternionJsonFile.users[i].bucketSkinName = rows[0].buc.split("_")[1];
 				alternionJsonFile.users[i].hammerSkinName = rows[0].ham.split("_")[1];
 				alternionJsonFile.users[i].atlas01SkinName = rows[0].atl.split("_")[1];
+				notFoundUser = false;
+				console.log("###########################################################");
+				console.log(alternionJsonFile.users[i]);
 				break;
 			}
+		}
+
+		if (notFoundUser){
+			let user = {};
+			user["steamID"] = rows[0].steam_ID;
+			user["badgeName"] = rows[0].bad;
+			user["maskSkinName"] = rows[0].mas;
+			user["sailSkinName"] = rows[0].sai;
+			user["mainSailName"] = rows[0].msa;
+			user["cannonSkinName"] = rows[0].can;
+			user["musketSkinName"] = rows[0].mus.split("_")[1];
+			user["blunderbussSkinName"] = rows[0].blu.split("_")[1];
+			user["nockgunSkinName"] = rows[0].noc.split("_")[1];
+			user["handMortarSkinName"] = rows[0].han.split("_")[1];
+			user["standardPistolSkinName"] = rows[0].pis.split("_")[1];
+			user["shortPistolSkinName"] = rows[0].spi.split("_")[1];
+			user["duckfootSkinName"] = rows[0].duc.split("_")[1];
+			user["matchlockRevolverSkinName"] = rows[0].mat.split("_")[1];
+			user["annelyRevolverSkinName"] = rows[0].ann.split("_")[1];
+			user["axeSkinName"] = rows[0].axe.split("_")[1];
+			user["rapierSkinName"] = rows[0].rap.split("_")[1];
+			user["daggerSkinName"] = rows[0].dag.split("_")[1];
+			user["bottleSkinName"] = rows[0].bot.split("_")[1];
+			user["cutlassSkinName"] = rows[0].cut.split("_")[1];
+			user["pikeSkinName"] = rows[0].pik.split("_")[1];
+			user["tomohawkSkinName"] = rows[0].tom.split("_")[1];
+			user["spyglassSkinName"] = rows[0].spy.split("_")[1];
+			user["grenadeSkinName"] = rows[0].gre.split("_")[1];
+			user["healItemSkinName"] = rows[0].hea.split("_")[1];
+			user["teaCupSkinName"] = rows[0].tea.split("_")[1];
+			user["teaWaterSkinName"] = rows[0].tew.split("_")[1];
+			user["bucketSkinName"] = rows[0].buc.split("_")[1];
+			user["hammerSkinName"] = rows[0].ham.split("_")[1];
+			user["atlas01SkinName"] = rows[0].atl.split("_")[1];
+
+			alternionJsonFile.users.push(user);
+			console.log("Setup new user! -" + rows[0].steam_ID + "- => -" + discord_id + "-");
 		}
 
 		updateJsonFile(filepath);
@@ -4066,6 +4495,91 @@ function updateJsonFile(filepath){
 		}
 	}
 	fs.writeFile(filepath, writeString.toString(), function(err){});
+	console.log(`Written to file`);
+}
+
+function globalJsonUpdate(){
+	getLocalJson("337541914687569920");
+	alternionConnectionPool.query("SELECT User.steam_ID, Badge.Name AS bad, GoldMask.Name AS mas, NormalSail.Name AS sai, Tea.Name as tea, Bucket.Name as buc, TeaWater.Name as tew, MainSail.Name AS msa, Cannon.Name AS can, Musket.Name AS mus, Blunderbuss.Name AS blu, Nockgun.Name AS noc, HM.Name  AS han, Pis.Name AS pis, Spis.Name AS spi, Duck.Name AS duc, Mat.Name AS mat, Ann.Name AS ann, Axe.Name AS axe, Rap.Name AS rap, Dag.Name AS dag, Bot.Name AS bot, Cut.Name AS cut, Pik.Name AS pik, Tom.Name AS tom, Spy.Name AS spy, Gre.Name AS gre, Hea.Name AS hea, Ham.Name AS ham, Atl.Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS TeaWater ON TeaWater_ID = TeaWater.ID INNER JOIN WeaponSkin AS Tea ON TeaCup_ID = Tea.ID INNER JOIN WeaponSkin AS Bucket ON Bucket_ID = Bucket.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID", (err,rows) => {
+		for (let s = 0; s < rows.length; s++){
+			let notFoundUser = true;
+			for (let i = 0; i < alternionJsonFile.users.length; i++){
+				if (alternionJsonFile.users[i].steamID === rows[s].steam_ID){
+					alternionJsonFile.users[i].badgeName = rows[s].bad;
+					alternionJsonFile.users[i].maskSkinName = rows[s].mas;
+					alternionJsonFile.users[i].sailSkinName = rows[s].sai;
+					alternionJsonFile.users[i].mainSailName = rows[s].msa;
+					alternionJsonFile.users[i].cannonSkinName = rows[s].can;
+					alternionJsonFile.users[i].musketSkinName = rows[s].mus.split("_")[1];
+					alternionJsonFile.users[i].blunderbussSkinName = rows[s].blu.split("_")[1];
+					alternionJsonFile.users[i].nockgunSkinName = rows[s].noc.split("_")[1];
+					alternionJsonFile.users[i].handMortarSkinName = rows[s].han.split("_")[1];
+					alternionJsonFile.users[i].standardPistolSkinName = rows[s].pis.split("_")[1];
+					alternionJsonFile.users[i].shortPistolSkinName = rows[s].spi.split("_")[1];
+					alternionJsonFile.users[i].duckfootSkinName = rows[s].duc.split("_")[1];
+					alternionJsonFile.users[i].matchlockRevolverSkinName = rows[s].mat.split("_")[1];
+					alternionJsonFile.users[i].annelyRevolverSkinName = rows[s].ann.split("_")[1];
+					alternionJsonFile.users[i].axeSkinName = rows[s].axe.split("_")[1];
+					alternionJsonFile.users[i].rapierSkinName = rows[s].rap.split("_")[1];
+					alternionJsonFile.users[i].daggerSkinName = rows[s].dag.split("_")[1];
+					alternionJsonFile.users[i].bottleSkinName = rows[s].bot.split("_")[1];
+					alternionJsonFile.users[i].cutlassSkinName = rows[s].cut.split("_")[1];
+					alternionJsonFile.users[i].pikeSkinName = rows[s].pik.split("_")[1];
+					alternionJsonFile.users[i].tomohawkSkinName = rows[s].tom.split("_")[1];
+					alternionJsonFile.users[i].spyglassSkinName = rows[s].spy.split("_")[1];
+					alternionJsonFile.users[i].grenadeSkinName = rows[s].gre.split("_")[1];
+					alternionJsonFile.users[i].healItemSkinName = rows[s].hea.split("_")[1];
+					alternionJsonFile.users[i].teaCupSkinName = rows[s].tea.split("_")[1];
+					alternionJsonFile.users[i].teaWaterSkinName = rows[s].tew.split("_")[1];
+					alternionJsonFile.users[i].bucketSkinName = rows[s].buc.split("_")[1];
+					alternionJsonFile.users[i].hammerSkinName = rows[s].ham.split("_")[1];
+					alternionJsonFile.users[i].atlas01SkinName = rows[s].atl.split("_")[1];
+					notFoundUser = false;
+					console.log(`Updated user ${s}`);
+					break;
+				}
+			}
+			if (notFoundUser){
+				let user = {};
+				user["steamID"] = rows[s].steam_ID;
+				user["badgeName"] = rows[s].bad;
+				user["maskSkinName"] = rows[s].mas;
+				user["sailSkinName"] = rows[s].sai;
+				user["mainSailName"] = rows[s].msa;
+				user["cannonSkinName"] = rows[s].can;
+				user["musketSkinName"] = rows[s].mus.split("_")[1];
+				user["blunderbussSkinName"] = rows[s].blu.split("_")[1];
+				user["nockgunSkinName"] = rows[s].noc.split("_")[1];
+				user["handMortarSkinName"] = rows[s].han.split("_")[1];
+				user["standardPistolSkinName"] = rows[s].pis.split("_")[1];
+				user["shortPistolSkinName"] = rows[s].spi.split("_")[1];
+				user["duckfootSkinName"] = rows[s].duc.split("_")[1];
+				user["matchlockRevolverSkinName"] = rows[s].mat.split("_")[1];
+				user["annelyRevolverSkinName"] = rows[s].ann.split("_")[1];
+				user["axeSkinName"] = rows[s].axe.split("_")[1];
+				user["rapierSkinName"] = rows[s].rap.split("_")[1];
+				user["daggerSkinName"] = rows[s].dag.split("_")[1];
+				user["bottleSkinName"] = rows[s].bot.split("_")[1];
+				user["cutlassSkinName"] = rows[s].cut.split("_")[1];
+				user["pikeSkinName"] = rows[s].pik.split("_")[1];
+				user["tomohawkSkinName"] = rows[s].tom.split("_")[1];
+				user["spyglassSkinName"] = rows[s].spy.split("_")[1];
+				user["grenadeSkinName"] = rows[s].gre.split("_")[1];
+				user["healItemSkinName"] = rows[s].hea.split("_")[1];
+				user["teaCupSkinName"] = rows[s].tea.split("_")[1];
+				user["teaWaterSkinName"] = rows[s].tew.split("_")[1];
+				user["bucketSkinName"] = rows[s].buc.split("_")[1];
+				user["hammerSkinName"] = rows[s].ham.split("_")[1];
+				user["atlas01SkinName"] = rows[s].atl.split("_")[1];
+
+				alternionJsonFile.users.push(user);
+				console.log(`Pushed new user ${s}`);
+			}
+		}
+
+		console.log(`Complete global Update`);
+		updateJsonFile(config.alternion.jsonFilePath);
+	});
 }
 
 allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147"];
@@ -4194,42 +4708,44 @@ bot.on("message", async message => {
 	//XP Gain
 	if (message.guild.id === config.serverInfo.serverId){
 		try{
-			mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
-				if(err) console.log(err);
-				let sql;
-				if(rows.length < 1){
-					sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${genXp()}, 0, '"n"', '1')`;
-					mainDatabaseConnectionPool.query(sql);
-				} else {
-					let eligible = rows[0].canget;
-					if (eligible === '"y"'){
-						let level = parseInt(rows[0].level);
-						let newxp = parseInt(rows[0].xp) + genXp();
-						let go = levelsystem(newxp,level);
-						if (go) {
-							level = level+1;
-							newxp = 0;
-						}
-						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
+			if (!message.content.startsWith(";work")){
+				mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
+					if(err) console.log(err);
+					let sql;
+					if(rows.length < 1){
+						sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${genXp()}, 0, '"n"', '1')`;
 						mainDatabaseConnectionPool.query(sql);
-						giveUserMoney(0.2,message.author.id);
-					}else{
-						mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+					} else {
+						let eligible = rows[0].canget;
+						if (eligible === '"y"'){
+							let level = parseInt(rows[0].level);
+							let newxp = parseInt(rows[0].xp) + genXp();
+							let go = levelsystem(newxp,level);
+							if (go) {
+								level = level+1;
+								newxp = 0;
+							}
+							sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
+							mainDatabaseConnectionPool.query(sql);
+							giveUserMoney(0.2,message.author.id);
+						}else{
+							mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+						}
 					}
-				}
-			});
+				});
 
-			mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
-				if (rows.length < 1){
-					mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
-				}else{
-					mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
-				}
-			});
+				mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+					if (rows.length < 1){
+						mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+					}else{
+						mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
+					}
+				});
 
-			setTimeout(function(){
-				mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
-			}, 180000);
+				setTimeout(function(){
+					mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
+				}, 180000);
+			}
 		}catch (e){
 			console.log(e);
 		}
@@ -4535,7 +5051,7 @@ bot.on("message", async message => {
 			}
 			break;
 		case "purchase":
-			if (args[0] && args.length < 2){
+			if (args[0] && args.length < 3){
 				purchaseItem(message.author.id,args[0],message,args);
 			}else{
 				message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
@@ -4556,11 +5072,7 @@ bot.on("message", async message => {
 			}
 			break;
 		case "inventory":
-			if (args.length < 1){
-				listInventory(message.author.id,message);
-			}else{
-				message.channel.send("Please enter the correct format:\n`;inventory`");
-			}
+			listInventory(message.author.id,message,args);
 			break;
 		case "giftcoins":
 			if (args.length < 3){
@@ -5037,10 +5549,10 @@ bot.on("message", async message => {
 				if (!args){
 					message.reply("Please enter the valid terms!");
 				}else
-				if (args.length < 2){
+				if (args.length < 1){
 					message.reply("Please enter the valid terms!");
-					}else{
-				blackwakeCommandHandler(message,args);
+				}else{
+					blackwakeCommandHandler(message,args);
 				}
 			}else{
 				message.reply("That command is currently disabled!");
