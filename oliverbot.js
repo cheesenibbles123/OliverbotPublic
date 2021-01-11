@@ -2780,8 +2780,6 @@ function giveUserMoney(amount,ID){
 		mainDatabaseConnectionPool.query(sql);
 		displayRichestUsers();
 	});
-	console.log("Given to user");
-	console.log("#######################################");
 
 	return;
 }
@@ -6572,7 +6570,7 @@ async function manageJoinReaction(event){
 	return;
 }
 
-//Pure Logging of events
+//Pure Logging of events for administrative purposes
 bot.on('raw', async event => {
 	if (event.d){
 	if (event.d.guild_id){
