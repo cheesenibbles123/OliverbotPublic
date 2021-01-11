@@ -298,17 +298,23 @@ function loadFromDatafile(commandUsed,data,message){
 			message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
 			break;
 		case "insult":
-			let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
-			try{
-				if (typeof data === "undefined"){
+			if (message.content.includes("everyone") || message.content.includes("here"))
+			{
+				message.channel.send("nah");
+			}else{
+				let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
+				try{
+					if (typeof data === "undefined"){
+						message.reply("Please ensure you have use the correct syntax.");
+					}else{
+						insult = insult.replace("TARGET",`${data}`);
+						message.channel.send(insult);
+					}
+				}catch(e){
 					message.reply("Please ensure you have use the correct syntax.");
-				}else{
-					insult = insult.replace("TARGET",`${data}`);
-					message.channel.send(insult);
 				}
-			}catch(e){
-				message.reply("Please ensure you have use the correct syntax.");
 			}
+			break;
 	}
 	}catch(e){
 		console.log("###########################################");
@@ -852,29 +858,33 @@ function randompirateshit(msg,content){
 
 /////////////////////////////////////////////Rankcard Generation
 
-function rankcardCreation(message){
-
-	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${message.author.id}'`, (err,rows) => {
+function rankcardCreation(message, args){
+	let id = message.author.id;
+	if (Array.isArray(args)){
+		id = getUserFromMention(args[0]).id;
+	}
+	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, (err,rows) => {
 		if(err) console.log(err);
 		if(rows.length < 1){
-			createDefaultRankCard(message);
+			createDefaultRankCard(message,id);
 		}else if(rows.length > 1){
-			createDefaultRankCard(message);
+			createDefaultRankCard(message,id);
 		}else{
 			let inventory = JSON.parse(rows[0].inventory);
 			let notFound = true;
 			let shipName = "";
-			for (i=0; i < inventory.length; i++){
+			for (let i = 0; i < inventory.length; i++){
 				if (inventory[i].type === "largeShips"){
 					shipName = inventory[i].name;
 					notFound = false;
+					break;
 				}
 			}
 
 			if (notFound){
-				createDefaultRankCard(message);
+				createDefaultRankCard(message, message.author.id);
 			}else{
-				createRankCanvas(message.channel,message.member,shipName,message.author.id);
+				createRankCanvas(message.channel,message.member,shipName,id);
 			}
 
 		}
@@ -883,9 +893,9 @@ function rankcardCreation(message){
 	return;
 }
 
-function createDefaultRankCard(message){
+function createDefaultRankCard(message,id){
 
-	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'` , (err,rows) => {
+	mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${id}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
 		let level;
@@ -897,7 +907,7 @@ function createDefaultRankCard(message){
 
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${message.author.id}`, (err,rows) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${id}`, (err,rows) => {
 			let rankcard = new Discord.MessageEmbed()
 				.setColor('#0099ff')
 				.setTitle(`${message.member.user.username}`)
@@ -1908,6 +1918,8 @@ function blackwakeCommandHandler(message,args){
 				}
 				break;
 			case "elo":
+				message.channel.send("This command is currently disabled.");
+				break;
 				if (!isNaN(parseInt(args[1])))
 				{
 					fetchEloStuff(message, args[1], args[0]);
@@ -2757,7 +2769,6 @@ async function displayRichestUsers(){
 }
 
 function giveUserMoney(amount,ID){
-	console.log("Preparing to give");
 	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
@@ -2766,11 +2777,7 @@ function giveUserMoney(amount,ID){
 		} else {
 			sql = `UPDATE inventoryGT SET giraffeCoins = '${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}' WHERE ID = '${ID}'`;
 		}
-		console.log("Going to query the following");
-		console.log(`Calculated -${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(amount * 100)) / 100).toFixed(2)}- GC as income`);
-		console.log(sql);
 		mainDatabaseConnectionPool.query(sql);
-		console.log("Complete query.");
 		displayRichestUsers();
 	});
 	console.log("Given to user");
@@ -3376,6 +3383,15 @@ function checkQuizAllowances(message,args){
 	return;
 }
 
+isNotLocked = true;
+
+function lock(){
+	isNotLocked = false;
+	setTimeout(() => {
+		isNotLocked = true;
+	}, 6000)
+}
+
 function quizQuestions(message,isGainingIncome){
 	mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
 		let num = getRandomInt(rows.length - 1);
@@ -3495,9 +3511,8 @@ function economyWork(message){
 						}
 					}
 				}
-				console.log("Fetched null");
 				giveUserMoney(income, message.author.id);
-				workingEmbed.setDescription(`You have earnt: ${income}GC!`);
+				workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${income}`);
 
 			}else
 			{
@@ -3511,10 +3526,9 @@ function economyWork(message){
 							income += inv[i].value;
 						}
 					}
-					console.log("Fetched income for user => " + income);
 					giveUserMoney(income, message.author.id);
 					mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
-					workingEmbed.setDescription(`You have earnt: ${income}GC!`);
+					workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(income * 100)) / 100).toFixed(2)}`);
 				}
 				else
 				{
@@ -4923,9 +4937,14 @@ bot.on("message", async message => {
 			Cat(message);
 			break;
 		case "trump":
-			fetch(`https://api.whatdoestrumpthink.com/api/v1/quotes`).then(resp=>resp.json()).then(response => {
-				message.channel.send(`${args.join(" ")} ${response.messages.personalized[getRandomInt(response.messages.personalized.length)]}`);
-			});
+			if (message.content.includes("everyone") || message.content.includes("here"))
+			{
+				message.channel.send("nah.");
+			}else{
+				fetch(`https://api.whatdoestrumpthink.com/api/v1/quotes`).then(resp=>resp.json()).then(response => {
+					message.channel.send(`${args.join(" ")} ${response.messages.personalized[getRandomInt(response.messages.personalized.length)]}`);
+				});
+			}
 			break;
 		case "rolldie":
 			TrackingCommand = true;
@@ -4983,7 +5002,7 @@ bot.on("message", async message => {
 				});
 				configurationDatabaseConnectionPool.end(function (err){
 					if (err) console.log(err);
-				})
+				});
 				process.exit();
 			}
 			break;
@@ -5091,7 +5110,9 @@ bot.on("message", async message => {
 			}
 			break;
 		case "quiz":
-			checkQuizAllowances(message,args);
+			if (isNotLocked){
+				checkQuizAllowances(message,args);
+			}
 			break;
 		case "beg":
 			let num = getRandomInt(300);
@@ -5754,12 +5775,32 @@ bot.on("message", async message => {
 		case "warn":
 			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
 				let member = getUserFromMention(args[0]);
+
+				let warningEmbed = new Discord.MessageEmbed()
+					.setTitle(`Warning from ${message.guild.name}`)
+					.setDescription(`${(args.slice(1)).join(" ")}`);
+
+				let loggingWarningEmbed = new Discord.MessageEmbed()
+					.setTitle(`Warning to ${member.username}`)
+					.setDescription(`${(args.slice(1)).join(" ")}`)
+					.setFooter(`ID: ${member.id}`);
+
+				if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+					loggingWarningEmbed.setColor(config.embedColours.warningAdmin);
+					warningEmbed.setColor(config.embedColours.warningAdmin);
+				}else{
+					loggingWarningEmbed.setColor(config.embedColours.warningMod);
+					warningEmbed.setColor(config.embedColours.warningMod);
+				}
+
 				try{
-					member.send(`Warning from ${message.guild.name}:\n${(args.slice(1)).join(" ")}.\nYou have been warned.`).catch(() => message.channel.send("This user does not have open DMs."));
-					bot.channels.cache.get(config.channels.loggingChannel).send(`User <@${member.id}> has been warned for:\n${args.slice(1).join(" ")}`);
+					member.send(warningEmbed).catch(() => message.channel.send("This user does not have open DMs."));
+					bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(loggingWarningEmbed);
 				}catch(e){
 					message.reply("This isnt working currently. Tell archie to go look at the logs.");
+					console.log(e);
 				}
+
 			}else{
 				lackingPermissions(message);
 			}
