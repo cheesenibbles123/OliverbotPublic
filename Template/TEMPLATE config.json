@@ -16,7 +16,7 @@
 	"serverInfo" :{
 		"serverId" : "INSERTSERVERID",
 		"channels": {
-			"xpLeaderboard" : "630783753400352768",
+			"xpLeaderboard" : "INSERTCHANNELID",
 			"loggingChannel" : "INSERTCHANNELID",
 			"supportTicketChannel" : "INSERTCHANNELID",
 			"quotes" : "INSERTCHANNELID",
