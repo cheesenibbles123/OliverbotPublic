@@ -1627,7 +1627,7 @@ function scoreAdjustPrestige(score, prestige){
 
 function levelProgress(score, prestige){
 	score = scoreAdjustPrestige(score, prestige);
-	for (let i = 0; i < 1000; i++)
+	for (let i = 0; i < 2000; i++)
 	{
 		if (score <= i * i * 72)
 		{
@@ -1698,6 +1698,7 @@ async function getBlackwakeStats(message,args){
 				let deaths = 0;
 				let captainWins = 0;
 				let captainLosses = 0;
+				let crewHits = 0;
 				let score = 0;
 				let rating = 0;
 				let statScoreGs = 0;
@@ -1718,6 +1719,19 @@ async function getBlackwakeStats(message,args){
 						allWeaponStats.push(stats[i]);
 					}
 					
+										if (ships.indexOf(stats[i].name) !== -1){
+						shipStats.push(stats[i]);
+					}else
+					if (maintenance.indexOf(stats[i].name) !== -1){
+						maintain.push(stats[i]);
+					}else
+					if (shipWeaponry.indexOf(stats[i].name) !== -1){
+						shipWeaponryStats.push(stats[i]);
+					}else
+					if (miscList.indexOf(stats[i].name) !== -1){
+						misc.push(stats[i]);
+					}
+
 					switch (stats[i].name){
 						case "acc_kills":
 							kills = stats[i].value;
@@ -1743,20 +1757,11 @@ async function getBlackwakeStats(message,args){
 						case "stat_pres":
 							prestige = stats[i].value;
 							break;
+						case "acc_capHit":
+							crewHits = stats[i].value;
+							break;
 						default:
 							break;
-					}
-
-					if (ships.indexOf(stats[i].name) !== -1){
-						shipStats.push(stats[i]);
-					}
-
-					if (maintenance.indexOf(stats[i].name) !== -1){
-						maintain.push(stats[i]);
-					}
-
-					if (shipWeaponry.indexOf(stats[i].name) !== -1){
-						shipWeaponryStats.push(stats[i]);
 					}
 				}
 
@@ -1785,19 +1790,19 @@ async function getBlackwakeStats(message,args){
 							}	
 							bwStatsEmbed.setTitle(`${args[1]}`)
 								.addField(`General`,`${playerStatsCombined}`,true)
-								.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}`,true)
+								.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}\nCrew Hits: ${crewHits}`,true)
 								.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true);
 							sendBWStatsEmbed(message,bwStatsEmbed);
 						});
 						break;
 					case "weaponstats":
-						let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
+						let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills",true);
 						bwStatsEmbed.setTitle(`${args[1]}`)
 							.setDescription(WeaponStats);
 						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "shipstats":
-						let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins");
+						let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins",true);
 						let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
 						bwStatsEmbed.setTitle(`${args[1]}`)
 							.addField("Ships",`${ShipStats}`,true)
@@ -1805,22 +1810,22 @@ async function getBlackwakeStats(message,args){
 						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "shipweaponry":
-						let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills");
+						let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills",true);
 						bwStatsEmbed.setTitle(`${args[1]}`)
 							.setDescription(`${shipWeap}`);
 						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "maintenance":
-						let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
+						let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"",false);
 						bwStatsEmbed.setTitle(`${args[1]}`)
 							.setDescription(maintainStats);
 						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "misc":
-						let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"");
-						bwMiscEmbed.setTitle(`${args[1]}`)
-							.addField("Msic",`${miscStats}`,true)
-						sendBWStatsEmbed(message,bwMiscEmbed);
+						let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"",false);
+						bwStatsEmbed.setTitle(`${args[1]}`)
+							.addField("Misc",`${miscStats}`,true);
+						sendBWStatsEmbed(message,bwStatsEmbed);
 						break;
 					case "compare":
 						let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
@@ -2234,7 +2239,7 @@ function WeaponSorter(weaponsArray){
 	return weaponsArray;
 }
 
-function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type){
+function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type,enableTotal){
 	let returnMsg = "";
 	let count = 0;
 	for (i=0; i < weaponsArray.length;i++){
@@ -2244,8 +2249,9 @@ function WeaponTextGenerator(weaponsArray,substituteNames,weapons,type){
 			count += weaponsArray[i].value;
 		}
 	}
-
-	returnMsg += `Total: ${count}`;
+	if (enableTotal){
+		returnMsg += `Total: ${count}`;
+	}
 	return returnMsg;
 }
 
@@ -2647,6 +2653,11 @@ function updateShopWindow(){
 	return;
 }
 
+async function getUserFromID(ID){
+	let id = await bot.users.cache.get(ID);
+	return id;
+}
+
 async function displayRichestUsers(){
 	
 	return;
@@ -2673,45 +2684,46 @@ async function displayRichestUsers(){
 			let factor = 100;
 			for (i=0;i<30;i++){
 				let name;
-
-				try
-				{
-					console.log("ID: " + rows[i].ID);
-					if (rows[i].ID === 'thereserve'){
-						name = "Federal Reserve";
-					}else {
-						
-						let member = bot.users.cache.find(user => user.id === rows[i].ID);
-						console.log(member);
-						if (member.username === undefined){
-							name = "REPLACEMENT";
-						}else{
-							name = member.username;
+				bot.users.cache.get(rows[i].ID).then(user => {
+					try
+					{
+						console.log("ID: " + rows[i].ID);
+						if (rows[i].ID === 'thereserve'){
+							name = "Federal Reserve";
+						}else {
+							
+							//let member = getUserFromID(rows[i].ID);
+							//console.log(member);
+							if (user.username === undefined){
+								name = "REPLACEMENT";
+							}else{
+								name = user.username;
+							}
 						}
+					}catch(e)
+					{
+						console.log("Richest: " + e);
+						name = "REPLACEMENT";
 					}
-				}catch(e)
-				{
-					console.log("Richest: " + e);
-					name = "REPLACEMENT";
-				}
 
-				if (name.length < leaderboardlimits.usernameEco){
-					let x = leaderboardlimits.usernameEco - name.length;
-					name = name + new Array(x + 1).join(' ');
-				}else{
-					name = name.split(0,leaderboardlimits.usernameEco);
-				}
-				let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
-				if (coins >= (1000000000 * factor)){
-					coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
-				}else if (coins >= (1000000 * factor)){
-					coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
-				}else if (coins >= (1000 * factor)){
-					coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
-				}else{
-					coins = coins / factor;
-				}
-				newRichest = newRichest + name +"|"+ coins +"\n";
+					if (name.length < leaderboardlimits.usernameEco){
+						let x = leaderboardlimits.usernameEco - name.length;
+						name = name + new Array(x + 1).join(' ');
+					}else{
+						name = name.split(0,leaderboardlimits.usernameEco);
+					}
+					let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
+					if (coins >= (1000000000 * factor)){
+						coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
+					}else if (coins >= (1000000 * factor)){
+						coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
+					}else if (coins >= (1000 * factor)){
+						coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
+					}else{
+						coins = coins / factor;
+					}
+					newRichest = newRichest + name +"|"+ coins +"\n";
+				});
 			}
 			newRichest += "```";
 			bot.channels.cache.get(economyBoardsChannel).messages.fetch(richetsUsersMesg).then(msg => {
@@ -2719,7 +2731,7 @@ async function displayRichestUsers(){
 			});
 		});
 
-		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows3) => {
+		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
 			let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
 			let factor = 100;
 			for (s=0;s<30;s++){
@@ -2727,7 +2739,8 @@ async function displayRichestUsers(){
 
 				try
 				{
-					let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows3[s].ID).user;
+					//let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows3[s].ID).user;
+					let member = getUserFromID(rows[i].ID);
 					if (rows[s].ID === 'thereserve'){
 						name = "Federal Reserve";
 					}else if (member.username === undefined){
@@ -2747,7 +2760,7 @@ async function displayRichestUsers(){
 				}else{
 					name = name.split(0,leaderboardlimits.usernameEco);
 				}
-				let coins = parseInt(parseFloat(rows3[s].giraffeCoins).toFixed(2) * factor);
+				let coins = parseInt(parseFloat(rows[s].giraffeCoins).toFixed(2) * factor);
 				if (coins >= (1000000000 * factor)){
 					coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
 				}else if (coins >= (1000000 * factor)){
@@ -3500,7 +3513,6 @@ function economyWork(message){
 				let income = 10;
 				if (rows[0].inventory.length)
 				{
-					let count = 0;
 					for (let i = 0; i < inv.length; i++)
 					{
 						if (inv[i].type === 'income')
@@ -3510,7 +3522,11 @@ function economyWork(message){
 					}
 				}
 				giveUserMoney(income, message.author.id);
-				workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${income}`);
+				if (rows[0].giraffeCoins){
+					workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(income * 100)) / 100).toFixed(2)}`);
+				}else{
+					workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${income}`);
+				}
 
 			}else
 			{
@@ -4595,6 +4611,7 @@ function globalJsonUpdate(){
 }
 
 allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147"];
+allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
@@ -4641,10 +4658,6 @@ bot.on("message", async message => {
 	//dont respond to bots
 	if (message.author.bot) return;
 	if (message.channel.type === "dm") return;
-	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != "337541914687569920")
-	{
-		return;
-	}
 
 	//this situation specific, if running your own just remove
 	if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
@@ -4829,10 +4842,23 @@ bot.on("message", async message => {
 
 	if (!message.content.startsWith(config.prefix)) return;
 
-	//Split messages into the command and arguments
 	let messagearray = message.content.split(" ");
 	let command = messagearray[0].substring(1);
 	command = command.toLowerCase();
+
+	let isNotAllowed = true;
+	for (let i = 0; i< allowedCommands.length;i++){
+		if (allowedCommands[i] === command){
+			isNotAllowed = false;
+		}
+	}
+	
+	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != "337541914687569920" && isNotAllowed)
+	{
+		return;
+	}
+
+	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
 
