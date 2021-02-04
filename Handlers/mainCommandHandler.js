@@ -120,7 +120,7 @@ exports.handler = function handler(message,command,args){
 
 		// Alternion
 		case "alternion":
-			alternion.handler(message,command,args);
+			alternion.alternionMainhandler(message,command,args);
 			break;
 
     	default:
