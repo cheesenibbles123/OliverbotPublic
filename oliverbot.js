@@ -161,7 +161,7 @@ function displayBotInfo(){
 //economy
 
 function updateShopWindow(){
-	mainDatabaseConnectionPool.query(`SELECT * FROM shop`, (err,rows) => {
+	db.mainDatabaseConnectionPool.query(`SELECT * FROM shop`, (err,rows) => {
 		let newShopListing = new Discord.MessageEmbed().setTitle("Shop Channel");
 
 		let melee = "";
