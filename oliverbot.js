@@ -12,6 +12,7 @@ const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./Handlers/initialSetup");
 const random = require("./Handlers/randomStuff");
+const economy = require("./Handlers/economySystem")
 
 var serverStatus = {
 	"active" : false,
@@ -369,7 +370,7 @@ async function displayRichestUsers(){
 	return;
 	let guild = await bot.guilds.cache.get("401924028627025920");
 
-	configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
+	db.configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
 		let economyBoardsChannel;
 		let richetsUsersMesg;
 		let poorestUsersMsg;
@@ -385,7 +386,7 @@ async function displayRichestUsers(){
 				poorestUsersMsg = rows2[s].messageID;
 			}
 		}
-		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
 			let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
 			let factor = 100;
 			for (i=0;i<30;i++){
@@ -437,7 +438,7 @@ async function displayRichestUsers(){
 			});
 		});
 
-		mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
 			let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
 			let factor = 100;
 			for (s=0;s<30;s++){
@@ -788,12 +789,12 @@ bot.on("message", async message => {
 	if (message.guild.id === config.serverInfo.serverId){
 		try{
 			if (!message.content.startsWith(";work")){
-				mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
+				db.mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
 					if(err) console.log(err);
 					let sql;
 					if(rows.length < 1){
 						sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${economy.genXp()}, 0, '"n"', '1')`;
-						mainDatabaseConnectionPool.query(sql);
+						db.mainDatabaseConnectionPool.query(sql);
 					} else {
 						let eligible = rows[0].canget;
 						if (eligible === '"y"'){
@@ -805,19 +806,19 @@ bot.on("message", async message => {
 								newxp = 0;
 							}
 							sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
-							mainDatabaseConnectionPool.query(sql);
+							db.mainDatabaseConnectionPool.query(sql);
 							db.giveUserMoney(0.2,message.author.id);
 						}else{
-							mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+							db.mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
 						}
 					}
 				});
 
-				mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+				db.mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
 					if (rows.length < 1){
-						mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+						db.mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
 					}else{
-						mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
+						db.mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
 					}
 				});
 
