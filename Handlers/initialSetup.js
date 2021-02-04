@@ -1,15 +1,19 @@
 const economy = require("./economySystem");
 const statusHandler = require("./statusHandler");
 const db = require("./databaseSetup");
-const { bot } = require("./../oliverbot.js");
+//const {bot} = require("./../oliverbot.js");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
+
+var bot;
 
 exports.init = function init(){
 	statusHandler.initStatus();
 	db.setupDatabase();
 	economy.initEconomy();
-
+	setTimeout(()=>{
+		bot = require("./../oliverbot.js");
+	});
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);

@@ -1,9 +1,9 @@
 const db = require("./databaseSetup");
-const { bot } = require("../oliverbot.js");
 const config = require("./../config.json");
 const glob = require("./globalFunctions");
 const issueEmbed = require("./issueEmbed");
 const Discord = require("discord.js");
+var bot;
 
 var leaderboardlimits = {
 	"listsizelimit" : 30,
@@ -42,6 +42,9 @@ exports.handler = function handler(message,command,args){
 
 exports.initEconomy = function initEconomy(){
 	updateleaderboard();
+	setTimeout(()=>{
+		bot = require("./../oliverbot.js");
+	});
 }
 
 async function updateleaderboard(){

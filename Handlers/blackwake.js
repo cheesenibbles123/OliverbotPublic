@@ -1,10 +1,16 @@
 const Discord = require("discord.js");
-const { bot } = require("../oliverbot.js");
+var bot;
 const config = require("./../config.json");
 const fetch = require("node-fetch");
 var { adjustableConfig } = require("./databaseSetup.js");
 const issueEmbeds = require("./issueEmbed");
 const db = require("./databaseSetup");
+
+exports.init = function init(){
+	setTimeout(()=>{
+		bot = require("./../oliverbot.js");
+	});
+}
 
 exports.handler = function handler(message,command,args){
 	if (adjustableConfig.apis.blackwake){
