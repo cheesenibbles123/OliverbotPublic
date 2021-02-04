@@ -7,7 +7,7 @@ const issueEmbeds = require("./issueEmbed");
 const fs = require("fs");
 
 exports.init = function init(){
-	djustableConfig = require("./databaseSetup.js").adjustableConfig;
+	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
 }
 
 function randomGif(message,content){
@@ -271,8 +271,8 @@ function randomPirateShit(msg,content){
 }
 
 exports.handleRandomReactions = function handleRandomReactions(message){
-	if (adjustableConfig.reactions.randomReactions){
-		let num = glob.getRandomInt(adjustableConfig.reactions.chanceofRandomReactions);
+	//if (adjustableConfig.reactions.randomReactions){
+		let num = glob.getRandomInt(300);
 		if (num in [3,4,5,6]){
 			let reactions = randomResponse(message,message.content.toLowerCase(),message.channel.guild.id);
 			reactions.forEach(reaction => {
@@ -291,7 +291,7 @@ exports.handleRandomReactions = function handleRandomReactions(message){
 				message.channel.send(content);
 			}
 		}
-	}
+	//}
 }
 
 exports.handleRandomCommand = function handleRandomCommand(message,level){
