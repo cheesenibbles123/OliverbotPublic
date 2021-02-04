@@ -133,7 +133,7 @@ function beg(){
 
 function work(message){
 	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows,fields) =>{
-		let result = getRandomInt(30);
+		let result = glob.getRandomInt(30);
 		let workingEmbed = new Discord.MessageEmbed().setTimestamp();
 		let inv = JSON.parse(rows[0].inventory);
 		workingEmbed.setTitle("Result");
