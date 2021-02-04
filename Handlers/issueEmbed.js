@@ -12,6 +12,8 @@ exports.grabEmbed = function grabEmbed(type,additionalInfo){
 			return generalError(additionalInfo);
 		case 4:
 			return disabled();
+		case 5:
+			return somethingWentWrong(additionalInfo);
 		default:
 			return null;
 	}
@@ -45,6 +47,13 @@ function generalError(info){
 function disabled(){
 	let embed = new Discord.MessageEmbed()
 		.setDescription("This command is currently disabled.");
+	console.log(info);
+	return embed;
+}
+
+function somethingWentWrong(info){
+	let embed = new Discord.MessageEmbed()
+		.setDescription("Something went wrong, please notify Archie.");
 	console.log(info);
 	return embed;
 }

@@ -2,23 +2,24 @@ const db = require("./databaseSetup");
 const Discord = require("discord.js");
 const config = require("./config.json");
 const fs = require('fs');
+const issueEmbed = require("./issueEmbed");
 
 var alternionJsonFile = null;
 
-exports.alternionMainhandler = function alternionHandler(message, args){
+exports.alternionMainhandler = function alternionHandler(message,args){
 	let alternionHandlerEmbed = new Discord.MessageEmbed();
 
-	switch (args[1].toLowerCase()){
+	switch (args[0].toLowerCase()){
 
 		case "listbadges":
 			alternionHandlerEmbed.setTitle("Available Restricted Badges")
 				.setFooter("The formatting is: - `badge_id` : Badge Name -");
-			getBadges(message,message.author.id,args[2],alternionHandlerEmbed);
+			getBadges(message,message.author.id,args[1],alternionHandlerEmbed);
 			break;
 
 		case "help":
-			if (args[2]){
-				switch (args[2].toLowerCase()){
+			if (args[1]){
+				switch (args[1].toLowerCase()){
 					case "listbadges":
 						alternionHandlerEmbed.setDescription("Lists all limited badges that you have access to.")
 							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
@@ -82,19 +83,19 @@ exports.alternionMainhandler = function alternionHandler(message, args){
 		case "listsails":
 			alternionHandlerEmbed.setTitle("Available Restricted Sails")
 				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getNormalSails(message,message.author.id,args[2],alternionHandlerEmbed);
+			getNormalSails(message,message.author.id,args[1],alternionHandlerEmbed);
 			break;
 
 		case "listmainsails":
 			alternionHandlerEmbed.setTitle("Available Restricted Main Sails")
 				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getMainSails(message,message.author.id,args[2],alternionHandlerEmbed);
+			getMainSails(message,message.author.id,args[1],alternionHandlerEmbed);
 			break;
 
 		case "listcannons":
 			alternionHandlerEmbed.setTitle("Available Restricted Cannons")
 				.setFooter("The formatting is: - `Cannon_ID` : Cannon Name -");
-			getCannons(message,message.author.id,args[2],alternionHandlerEmbed);
+			getCannons(message,message.author.id,args[1],alternionHandlerEmbed);
 			break;
 
 		case "listweapons":
@@ -105,17 +106,16 @@ exports.alternionMainhandler = function alternionHandler(message, args){
 
 		case "manage":
 			alternionHandlerEmbed.setTitle("Managing User...");
-			teamLeaderBadgeHandler(message,args[2],args[3],args[4],alternionHandlerEmbed);
+			teamLeaderBadgeHandler(message,args[1],args[2],args[3],alternionHandlerEmbed);
 			break;
+
+		
 
 		default:
 			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Blackwake Alternion Help` to get a list of supported commands!");
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
 			break;
-
 	}
-
-	return;
 }
 
 function getUserID(message,embed){
@@ -130,7 +130,7 @@ function getUserID(message,embed){
 				sendAlternionEmbed(embed);
 			}
 		}else{
-			message.channel.send("Something went wrong.");
+			message.channel.send(issueEmbed.grabEmbed(5,"GETUSERID : No rows found."));
 		}
 	});
 }
@@ -323,43 +323,43 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 
 	if (table1Name != "NA"){
 		db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID="${message.author.id}"`, (err, rows) => {
-				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
-					let found = false;
-					let assignedBadge = "";
-					if (rows){
-						for (let i = 0; i < rows.length; i++){
-							if (args[3] === rows[i].Name){
-								db.lternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID="${message.author.id}"`);
-								console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
-								assignedBadge = rows[i].Display_Name;
-								found = true;
-								break;
-							}
+			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
+				let found = false;
+				let assignedBadge = "";
+				if (rows){
+					for (let i = 0; i < rows.length; i++){
+						if (args[3] === rows[i].Name){
+							db.lternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID="${message.author.id}"`);
+							console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
+							assignedBadge = rows[i].Display_Name;
+							found = true;
+							break;
 						}
 					}
+				}
 
-					if (rows2){
-						for (let i = 0; i < rows2.length; i++){
-							if (args[3] === rows2[i].Name){
-								db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID="${message.author.id}"`);
-								console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
-								assignedBadge = rows2[i].Display_Name;
-								found = true;
-								break;
-							}
+				if (rows2){
+					for (let i = 0; i < rows2.length; i++){
+						if (args[3] === rows2[i].Name){
+							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID="${message.author.id}"`);
+							console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
+							assignedBadge = rows2[i].Display_Name;
+							found = true;
+							break;
 						}
 					}
+				}
 
-					if (!found){
-						alternionHandlerEmbed.setDescription("You cannot assign that Item!");
-					}else{
-						alternionHandlerEmbed.setDescription(`Assigned badge: **${assignedBadge}**`);
-					}
+				if (!found){
+					alternionHandlerEmbed.setDescription("You cannot assign that Item!");
+				}else{
+					alternionHandlerEmbed.setDescription(`Assigned badge: **${assignedBadge}**`);
+				}
 
-					sendAlternionEmbed(message,alternionHandlerEmbed,true);
+				sendAlternionEmbed(message,alternionHandlerEmbed,true);
 
-				});
 			});
+		});
 	}
 }
 
@@ -741,10 +741,10 @@ function updateJsonFile(filepath){
 		}
 	}
 	fs.writeFile(filepath, writeString.toString(), function(err){});
-	console.log(`Written to file`);
+	console.log(`Written to JSON file`);
 }
 
-function globalJsonUpdate(){
+exports.globalJsonUpdate = function globalJsonUpdate(){
 	getLocalJson("337541914687569920");
 	db.alternionConnectionPool.query("SELECT User.steam_ID, Badge.Name AS bad, GoldMask.Name AS mas, NormalSail.Name AS sai, Tea.Name as tea, Bucket.Name as buc, TeaWater.Name as tew, MainSail.Name AS msa, Cannon.Name AS can, Musket.Name AS mus, Blunderbuss.Name AS blu, Nockgun.Name AS noc, HM.Name  AS han, Pis.Name AS pis, Spis.Name AS spi, Duck.Name AS duc, Mat.Name AS mat, Ann.Name AS ann, Axe.Name AS axe, Rap.Name AS rap, Dag.Name AS dag, Bot.Name AS bot, Cut.Name AS cut, Pik.Name AS pik, Tom.Name AS tom, Spy.Name AS spy, Gre.Name AS gre, Hea.Name AS hea, Ham.Name AS ham, Atl.Name AS atl FROM User INNER JOIN Badge ON Badge_ID = Badge.ID INNER JOIN GoldMask ON Mask_ID = GoldMask.ID INNER JOIN NormalSail ON Sail_ID = NormalSail.ID INNER JOIN MainSail ON Main_Sail_ID = MainSail.ID INNER JOIN Cannon ON Cannon_ID = Cannon.ID INNER JOIN WeaponSkin AS TeaWater ON TeaWater_ID = TeaWater.ID INNER JOIN WeaponSkin AS Tea ON TeaCup_ID = Tea.ID INNER JOIN WeaponSkin AS Bucket ON Bucket_ID = Bucket.ID INNER JOIN WeaponSkin AS Musket ON Musket_ID = Musket.ID INNER JOIN WeaponSkin AS Blunderbuss ON Blunderbuss_ID = Blunderbuss.ID INNER JOIN WeaponSkin AS Nockgun ON Nockgun_ID = Nockgun.ID INNER JOIN WeaponSkin AS HM ON Handmortar_ID = HM.ID INNER JOIN WeaponSkin AS Pis ON Standard_Pistol_ID = Pis.ID INNER JOIN WeaponSkin AS Spis ON Short_Pistol_ID = Spis.ID INNER JOIN WeaponSkin AS Duck ON Duckfoot_ID = Duck.ID INNER JOIN WeaponSkin AS Mat ON Matchlock_Revolver_ID = Mat.ID INNER JOIN WeaponSkin AS Ann ON Annely_Revolver_ID = Ann.ID INNER JOIN WeaponSkin AS Axe ON Axe_ID = Axe.ID INNER JOIN WeaponSkin AS Rap ON Rapier_ID = Rap.ID INNER JOIN WeaponSkin AS Dag ON Dagger_ID = Dag.ID INNER JOIN WeaponSkin AS Bot ON Bottle_ID = Bot.ID INNER JOIN WeaponSkin AS Cut ON Cutlass_ID = Cut.ID INNER JOIN WeaponSkin AS Pik ON Pike_ID = Pik.ID INNER JOIN WeaponSkin AS Tom ON Tomohawk_ID = Tom.ID INNER JOIN WeaponSkin AS Spy ON Spyglass_ID = Spy.ID INNER JOIN WeaponSkin AS Gre ON Grenade_ID = Gre.ID INNER JOIN WeaponSkin AS Hea ON HealItem_ID = Hea.ID INNER JOIN WeaponSkin AS Ham ON Hammer_ID = Ham.ID INNER JOIN WeaponSkin AS Atl ON atlas01_ID = Atl.ID", (err,rows) => {
 		for (let s = 0; s < rows.length; s++){
