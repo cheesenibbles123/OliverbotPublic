@@ -3,6 +3,7 @@ const glob = require("./globalFunctions");
 const Discord = require("discord.js");
 const { bot } = require("./../oliverbot.js");
 const config = require("./../config.json");
+const audio = require("./audio");
 
 exports.handler = function handler(message,command,args){
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
@@ -216,7 +217,7 @@ function displayBotInfo(message,args){
 	}
 
 	let botInfo = new Discord.MessageEmbed()
-		.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${isPlaying}`)
+		.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${audio.isPlaying}`)
 		.setTimestamp();
 
 	if (args[0] === "adv"){
