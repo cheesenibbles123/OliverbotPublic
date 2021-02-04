@@ -11,6 +11,7 @@ const glob = require("./Handlers/globalFunctions");
 const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./Handlers/initialSetup");
+const random = require("./Handlers/randomStuff");
 
 var serverStatus = {
 	"active" : false,
