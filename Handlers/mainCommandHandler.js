@@ -97,6 +97,7 @@ exports.handler = function handler(message,command,args){
 		case "totalusers":
 		case "warn":
 		case "savequote":
+		case "tempmute":
 			modCommands.handler(message,command,args);
 			break;
 		case "nWordCount":
@@ -115,47 +116,6 @@ exports.handler = function handler(message,command,args){
         	break;
 		case "blackwake":
 			blackwake.handler(message,command,args);
-			break;
-		case "tempmute":
-			if (serverid === config.serverInfo.serverId && adjustableConfig.misc.moderatorCommands){
-				let tempmuteMember = message.guild.members.find('id',message.mentions.users.first().id);
-				if (tempmuteMember.roles.has(config.serverInfo.roles.serverModerator)){
-					try{
-						let tempmuteAwnser = rolecheckformutes(tempmuteMember, message);
-						if (tempmuteAwnser){
-							message.channel.send("You can't mute someone higher than, or at your current role.");
-						}else{
-							let tempmuteGo = false;
-							if (typeof args[1] === "undefined"){
-								time = 86400000;
-								tempmuteGo = true;
-							}else{
-								try{
-									time = parseInt(args[1]);
-									tempmuteGo = true;
-								}catch(e){
-									message.channel.send("Please enter a correct number of hours.");
-								}
-							}
-							if (tempmuteGo){
-								let delayTemp = (parseInt(args[1])*1000*60*60);
-								mute(tempmuteMember,message);
-								bot.channels.cache.get("512331083493277706").send("User: "+tempmuteMember+" has been temporarily muted for "+time+" hour(s) by "+message.member.user.username+".\n"
-																	+"Reason: "+(args.slice(2)).join(" "));
-								setTimeout(() => {
-									unmute(tempmuteMember,message)
-								}, delay);
-							}
-						}
-					}catch(e){
-						message.channel.send("Error, please check you pinged an individual/ used the command correctly.");
-					}
-				}else{
-					message.channel.send("You cannot use this command");
-				}	
-			}else{
-				lackingPermissions(message);
-			}
 			break;
 
 		// Alternion
