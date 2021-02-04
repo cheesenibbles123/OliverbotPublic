@@ -4,6 +4,7 @@ const config = require("./../config.json");
 const fetch = require("node-fetch");
 var { adjustableConfig } = require("./databaseSetup.js");
 const issueEmbeds = require("./issueEmbed");
+const db = require("./databaseSetup");
 
 exports.handler = function handler(message,command,args){
 	if (adjustableConfig.apis.blackwake){
