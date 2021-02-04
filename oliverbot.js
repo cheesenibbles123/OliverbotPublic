@@ -10,7 +10,7 @@ const commands = require("./Handlers/mainCommandHandler");
 const glob = require("./Handlers/globalFunctions");
 const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
-const initialSetup = require("./initialSetup");
+const initialSetup = require("./Handlers/initialSetup");
 
 var serverStatus = {
 	"active" : false,
