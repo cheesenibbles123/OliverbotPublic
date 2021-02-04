@@ -3,6 +3,7 @@ const config = require("./../config.json");
 const db = require("./databaseSetup");
 const Discord = require("discord.js");
 const { bot } = require("../oliverbot.js");
+const issueEmbeds = require("./issueEmbed");
 
 exports.handler = function handler(message,command,args){
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
@@ -21,7 +22,7 @@ exports.handler = function handler(message,command,args){
 				break;
 		}
 	}else{
-		message.channel.send(embedGrabber.grabEmbed(0,null));
+		message.channel.send(issueEmbeds.grabEmbed(0,null));
 	}
 }
 

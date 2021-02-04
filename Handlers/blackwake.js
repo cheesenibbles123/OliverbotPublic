@@ -3,6 +3,7 @@ const { bot } = require("../oliverbot.js");
 const config = require("./../config.json");
 const fetch = require("node-fetch");
 var { adjustableConfig } = require("./databaseSetup.js");
+const issueEmbeds = require("./issueEmbed");
 
 exports.handler = function handler(message,command,args){
 	if (adjustableConfig.apis.blackwake){
@@ -42,7 +43,7 @@ exports.handler = function handler(message,command,args){
 			}
 		}
 	}else{
-		message.reply("That command is currently disabled!");
+		message.channel.send(issueEmbeds.grabEmbed(4,null));
 	}
 }
 
