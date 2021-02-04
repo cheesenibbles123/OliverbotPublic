@@ -57,7 +57,6 @@ exports.handler = function handler(message,command,args){
 		case "inspire":
 		case "urban":
 		case "memegen":
-		case "insult":
 			miscCommands.handler(message,command,args);
 			break;
 		case "quote":
@@ -65,6 +64,7 @@ exports.handler = function handler(message,command,args){
 		case "randomsong":
 		case "dad":
 		case "dance":
+		case "insult":
 			glob.loadDataFromFile(command,"",message);
 			break;
 		case "marsweather":
