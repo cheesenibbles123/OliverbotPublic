@@ -28,7 +28,7 @@ exports.handler = function handler(message,command,args){
 			case "serverinfo":
 				displayServerInfo(message);
 				break;
-			case "channelinf":
+			case "channelinfo":
 				getChannelInformation(message);
 				break;
 			case "ban":
