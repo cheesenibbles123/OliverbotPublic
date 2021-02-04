@@ -7,8 +7,8 @@ const Discord = require("discord.js");
 
 exports.init = function init(){
 	statusHandler.initStatus();
-	economy.initEconomy();
 	db.setupDatabase();
+	economy.initEconomy();
 
 	setInterval(() =>{
 		getSteamGroupData();
