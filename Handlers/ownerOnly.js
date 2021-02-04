@@ -31,7 +31,7 @@ function restart(message){
 	process.exit();
 }
 
-function execute(message){
+async function execute(message){
 	try{
 		let code = args.join(" ");
 		let evaled = eval(code);
