@@ -20,6 +20,10 @@ exports.handler = function handler(message,command,args){
 			case "savequote":
 				saveQuote(message.channel,args[0]);
 				break;
+			case "mute":
+				break;
+			case "unmute":
+				break;
 		}
 	}else{
 		message.channel.send(issueEmbeds.grabEmbed(0,null));
@@ -160,5 +164,57 @@ function saveQuote(channel,id){
 	});
 	}catch(e){
 		channel.send("Please make sure you have entered it correctly!");
+	}
+}
+
+////////////////////////////////////////////////////////////////MUTES
+function rolecheckformutes(member,msg){
+	let response = true;
+	//if commander just do
+	if (msg.member.roles.cache.has("401925172094959616")){
+		response = false;
+	}
+	// if admin mutes, target non admin
+	if (msg.member.roles.cache.has("402120143364423682") & !(member.roles.cache.has("402120143364423682"))){
+		response = false;
+	}
+	//if mode mutes, target non mod
+	if ( (msg.member.roles.cache.has("440514569849536512") & !(msg.member.roles.cache.has("402120143364423682"))) & !(member.roles.cache.has("440514569849536512"))){
+		response = false;
+	}
+	return response;
+}
+
+async function mute(message){
+	let member = message.guild.members.find('id',message.mentions.users.first().id);
+	let pass = rolecheckformutes(muteMember, message);
+	if (pass){
+		message.channel.send("You can't use this command.");
+	}else{
+		try{
+			member.roles.add(config.serverInfo.roles.muted);
+			message.channel.send(member + " has been muted");
+		}catch (e) {
+			console.log(e);
+			message.channel.send("Can't mute this person right now, something doesnt seem to be working");
+		}
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: " + muteMember + " has been muted by " + message.member.user.username + ".");
+	}
+}
+
+async function unmute(message){
+	let member = message.guild.members.find('id',message.mentions.users.first().id);
+	let pass = rolecheckformutes(muteMember, message);
+	if (pass){
+		message.channel.send("You can't use this command.");
+	}else{
+		try{
+			member.roles.remove(config.serverInfo.roles.muted);
+			message.channel.send(member + " has been unmuted");
+		}catch (e) {
+			console.log(e);
+			message.channel.send("Can't unmute " + member + "right now, something doesnt seem to be working");
+		}
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+unmuteMember+" has been unmuted by " + message.member.user.username + ".");
 	}
 }
