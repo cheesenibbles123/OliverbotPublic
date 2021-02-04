@@ -291,7 +291,7 @@ exports.handleRandomReactions = function handleRandomReactions(message){
 
 exports.handleRandomCommand = function handleRandomCommand(message,level){
 	let item;
-	if (db.levelchecker(message,level)){
+	if (db.levelChecker(message,level)){
 		type = glob.getRandomInt(10);
 		switch (type){
 			case 0:
