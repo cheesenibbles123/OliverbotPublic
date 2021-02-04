@@ -2,6 +2,7 @@ const issueEmbed = require("./issueEmbed");
 const config = require("./../config.json");
 const db = require("./databaseSetup");
 const Discord = require("discord.js");
+const { bot } = require("../oliverbot.js");
 
 exports.handler = function handler(message,command,args){
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
@@ -14,6 +15,9 @@ exports.handler = function handler(message,command,args){
 				break;
 			case "userinfo":
 				getUserInformation(message,args);
+				break;
+			case "savequote":
+				saveQuote(message.channel,args[0]);
 				break;
 		}
 	}else{
@@ -131,4 +135,29 @@ function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,se
 	});
 
   	return;
+}
+
+function saveQuote(channel,id){
+	try{
+	bot.channels.cache.get(channel.id).messages.fetch(id).then(message => {
+		let Quote = new Discord.MessageEmbed()
+			.setTitle(`${message.author.username}`)
+			.setDescription(`${message.content}`)
+			.setThumbnail(message.author.displayAvatarURL())
+			.setFooter(`Sent in: #${channel.name} `)
+			.setTimestamp();
+		let hasNotAddedImage = true;
+		message.attachments.forEach(attachment => {
+    		if (message.attachments.size === 1) {
+      			if (attachment.url && hasNotAddedImage){
+      				Quote.setImage(`${attachment.url}`);
+      				hasNotAddedImage = false;
+      			}
+    		}
+  		});
+		bot.channels.cache.get(config.serverInfo.channels.quotes).send(Quote);
+	});
+	}catch(e){
+		channel.send("Please make sure you have entered it correctly!");
+	}
 }
