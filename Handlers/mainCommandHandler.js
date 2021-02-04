@@ -22,7 +22,7 @@ exports.handler = function handler(message,command,args){
 			break;
 		case "listcommands":
 		case "help":
-			help.handler(messagecommand,args);
+			help.handler(message,command,args);
 			break;
 		case "playaudio":
     	case "stopaudio":
@@ -122,7 +122,7 @@ exports.handler = function handler(message,command,args){
 		case "alternion":
 			alternion.handler(message,command,args);
 			break;
-			
+
     	default:
     		message.react("🤔");
     		break;
