@@ -105,6 +105,7 @@ exports.handler = function handler(message,command,args){
 		case "botinfo":
 		case "serverinfo":
 		case "channelinfo":
+		case "ban":
 			adminCommands.handler(message,command,args);
 			break;
         case "random":
@@ -150,28 +151,6 @@ exports.handler = function handler(message,command,args){
 				}else{
 					message.channel.send("You cannot use this command");
 				}	
-			}else{
-				lackingPermissions(message);
-			}
-			break;
-		case "ban":
-			if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-				if (typeof args[0] === "string"){
-					try{
-						let member = message.guild.members.find('id',message.mentions.users.first().id);
-						if (member.roles.has(config.serverInfo.roles.serverAdministrator)){
-							message.channel.send("You can't ban an admin!");
-						}else{
-							message.guild.members.ban(member);
-							bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+", has been banned. Reason: "+(args.slice(2)).join(" ")+"\n"
-																		+"Banned by: "+message.member.user.username+".");
-						}
-					}catch(e){
-						message.channel.send("Please enter a correct member.");
-					}
-				}else{
-					message.channel.send("Please enter a User.");
-				}
 			}else{
 				lackingPermissions(message);
 			}
