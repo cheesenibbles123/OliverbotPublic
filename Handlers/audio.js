@@ -5,6 +5,8 @@ var { adjustableConfig } = require("./../oliverbot.js");
 var isPlaying = false;
 var currentDispatcher = null;
 
+exports.isPlaying = isPlaying;
+
 exports.handler = function handler(message,commands,args){
 	switch (command){
 		case "playaudio":
