@@ -258,12 +258,24 @@ async function fetchEloStuff(message,steamID,type){
 				let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills");
 				let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"");
 
+				if (ShipStats.length < 1){
+					ShipStats = "-";
+				}
+
 				eloStatsEmbed.setTitle(steamID)
-					.addField(`Overview`, `Kills: ${kills}, Deaths: ${deaths} => K/D ratio: ${kills/deaths}\nCap Wins: ${captainWins}, Cap Losses: ${captainLosses} => W/L ratio: ${captainWins/captainLosses}\nScore: ${score}`)
-					.addField(`Ship Stats`, ShipStats, true)
-					.addField(`Ship Weaponry`, shipWeap, true)
-					.addField(`Weapon Stats`, WeaponStats, true)
-					.addField(`Maintenance`, maintainStats, true);
+					.addField(`Overview`, `Kills: ${kills}, Deaths: ${deaths} => K/D ratio: ${kills/deaths}\nCap Wins: ${captainWins}, Cap Losses: ${captainLosses} => W/L ratio: ${captainWins/captainLosses}\nScore: ${score}`);
+				if (ShipStats.length > 1){
+					eloStatsEmbed.addField(`Ship Stats`, ShipStats, true);
+				}
+				if (shipWeap.length > 1){
+					eloStatsEmbed.addField(`Ship Weaponry`, shipWeap, true);
+				}
+				if (WeaponStats.length > 1){
+					eloStatsEmbed.addField(`Weapon Stats`, WeaponStats, true);
+				}
+				if (maintainStats.length > 1){
+					eloStatsEmbed.addField(`Maintenance`, maintainStats, true);
+				}
 				sendBWStatsEmbed(message,eloStatsEmbed);
 				break;
 		}
