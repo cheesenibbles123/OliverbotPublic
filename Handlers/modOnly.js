@@ -26,6 +26,9 @@ exports.handler = function handler(message,command,args){
 			case "unmute":
 				unmute(message);
 				break;
+			case "totalusers":
+				message.channel.send(message.guild.members.cache.filter(member => !member.user.bot).size);
+				break;
 		}
 	}else{
 		message.channel.send(issueEmbeds.grabEmbed(0,null));
