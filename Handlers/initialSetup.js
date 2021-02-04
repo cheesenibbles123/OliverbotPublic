@@ -5,6 +5,7 @@ const db = require("./databaseSetup");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
 const blackwake = require("./blackwake");
+const miscCommands = require("./smallCommands");
 
 var bot;
 
@@ -12,8 +13,10 @@ exports.init = function init(){
 	statusHandler.initStatus();
 	db.setupDatabase();
 	economy.initEconomy();
-	blackwake.init();
 	
+	blackwake.init();
+	miscCommands.init();
+
 	bot = require("./../oliverbot.js").bot;
 	
 	setInterval(() =>{
