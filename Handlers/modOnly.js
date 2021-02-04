@@ -32,6 +32,9 @@ exports.handler = function handler(message,command,args){
 			case "warn":
 				warn(message,args);
 				break;
+			case "tempmute":
+				tempMute(message);
+				break;
 		}
 	}else{
 		message.channel.send(issueEmbeds.grabEmbed(0,null));
@@ -262,7 +265,7 @@ function warn(message,args){
 	}
 }
 
-function tempMute(){
+function tempMute(message){
 	let member = message.guild.members.find('id',message.mentions.users.first().id);
 	try{
 		let tempmuteAwnser = rolecheckformutes(member, message);
