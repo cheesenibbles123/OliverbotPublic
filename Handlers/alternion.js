@@ -59,7 +59,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 				}
 			}else{
 				alternionHandlerEmbed.setTitle("Help Menu")
-					.setDescription("Default usage:\n`;Blackwake` `Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges\n- ListSails\n- ListMainSails\n- ListWeapons\n- Assign\n- Overview\nUse **;Blackwake Alternion Help** `FEATURE` for more help on each feature")
+					.setDescription("Default usage:\n`;Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges\n- ListSails\n- ListMainSails\n- ListWeapons\n- Assign\n- Overview\nUse **;Blackwake Alternion Help** `FEATURE` for more help on each feature")
 					.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
 				sendAlternionEmbed(message,alternionHandlerEmbed,false);
 			}
