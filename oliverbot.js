@@ -823,7 +823,7 @@ bot.on("message", async message => {
 				});
 
 				setTimeout(function(){
-					mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
+					db.mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
 				}, 180000);
 			}
 		}catch (e){
