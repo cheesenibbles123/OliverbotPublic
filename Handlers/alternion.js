@@ -833,7 +833,7 @@ function handleAlternionRegistration(message,term,steamID,discordID){
 	let list = "";
 	switch (term){
 		case "steam":
-			alternionConnectionPool.query(`SELECT * FROM User WHERE Steam_ID="${steamID}"`, (err,rows) => {
+			db.alternionConnectionPool.query(`SELECT * FROM User WHERE Steam_ID="${steamID}"`, (err,rows) => {
 
 				if (rows.length > 1){
 
@@ -846,8 +846,8 @@ function handleAlternionRegistration(message,term,steamID,discordID){
 
 				}else if (rows.length < 1){
 					// Create user
-					alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
-						alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${steamID}, ${discordID})`);
+					db.alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
+						db.alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${steamID}, ${discordID})`);
 						registrationEmbed.setDescription(`Added user into the database!\n\`${countRows.count}\`, \`${steamID}\`, \`${discordID}\``);
 						sendAlternionEmbed(message,registrationEmbed,false);
 					});
@@ -860,7 +860,7 @@ function handleAlternionRegistration(message,term,steamID,discordID){
 			});
 			break;
 		case "discord":
-			alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${steamID}"`, (err,rows) => {
+			db.alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${steamID}"`, (err,rows) => {
 
 				if (rows.length > 1){
 
@@ -873,8 +873,8 @@ function handleAlternionRegistration(message,term,steamID,discordID){
 
 				}else if (rows.length < 1){
 					// Create user
-					alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
-						alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${discordID}, ${steamID})`);
+					db.alternionConnectionPool.query(`SELECT Count(*) FROM User`, (err,countRows) => {
+						db.alternionConnectionPool.query(`INSERT INTO User (ID,Steam_ID,Discord_ID) VALUES (${countRows.count}, ${discordID}, ${steamID})`);
 						registrationEmbed.setDescription(`Added user into the database!\n\`${countRows.count}\`, \`${discordID}\`, \`${steamID}\``);
 						sendAlternionEmbed(message,registrationEmbed,false);
 					});
