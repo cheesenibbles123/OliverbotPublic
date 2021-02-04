@@ -4,6 +4,7 @@ const Discord = require("discord.js");
 const fetch = require("node-fetch");
 const db = require("./databaseSetup");
 const issueEmbeds = require("./issueEmbed");
+const fs = require("fs");
 
 function randomGif(message,content){
 	let yay = glob.getRandomInt(5);
@@ -291,6 +292,7 @@ exports.handleRandomReactions = function handleRandomReactions(message){
 
 exports.handleRandomCommand = function handleRandomCommand(message,level){
 	let item;
+	let file;
 	if (db.levelChecker(message,level)){
 		type = glob.getRandomInt(10);
 		switch (type){
@@ -316,10 +318,14 @@ exports.handleRandomCommand = function handleRandomCommand(message,level){
 				message.channel.send(file.Responses.gif[getRandomInt(file.Responses.gif.length)]);
 				break;
 			case 7:
+				fs.readFileSync("./datafile.json").toString();
+				file = JSON.parse(file);
 				item = glob.getRandomInt(file.Responses.vid.length);
 				message.channel.send(file.Responses.vid[item]);
 				break;
 			case 8:
+				fs.readFileSync("./datafile.json").toString();
+				file = JSON.parse(file);
 				item = glob.getRandomInt(file.Responses.img.length);
 				message.channel.send(file.Responses.img[item]);
 				break;
