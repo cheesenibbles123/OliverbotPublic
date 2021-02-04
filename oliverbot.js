@@ -44,8 +44,8 @@ var adjustableConfig = {
 	}
 };
 
-exports.bot = bot;
-exports.adjustableConfig = adjustableConfig;
+global.bot = bot;
+global.adjustableConfig = adjustableConfig;
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
