@@ -65,7 +65,7 @@ exports.handler = function handler(message,command,args){
 		case "randomsong":
 		case "dad":
 		case "dance":
-			glob.loadFromDatafile(command,"",message);
+			glob.loadDataFromFile(command,"",message);
 			break;
 		case "marsweather":
 			//GetMarsWeatherData(message);
