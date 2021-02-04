@@ -3,6 +3,7 @@ const glob = require("./globalFunctions");
 var bot;
 
 exports.initStatus = function initStatus(){
+	Status();
 	setInterval(() =>{
 		Status();
 	}, 30000000);
