@@ -29,6 +29,9 @@ exports.handler = function handler(message,command,args){
 			case "totalusers":
 				message.channel.send(message.guild.members.cache.filter(member => !member.user.bot).size);
 				break;
+			case "warn":
+				warn(message,args);
+				break;
 		}
 	}else{
 		message.channel.send(issueEmbeds.grabEmbed(0,null));
@@ -221,5 +224,34 @@ async function unmute(message){
 			message.channel.send("Can't unmute " + member + "right now, something doesnt seem to be working");
 		}
 		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+unmuteMember+" has been unmuted by " + message.member.user.username + ".");
+	}
+}
+
+function warn(message,args){
+	let member = glob.getUserFromMention(args[0]);
+
+	let warningEmbed = new Discord.MessageEmbed()
+		.setTitle(`Warning from ${message.guild.name}`)
+		.setDescription(`${(args.slice(1)).join(" ")}`);
+
+	let loggingWarningEmbed = new Discord.MessageEmbed()
+		.setTitle(`Warning to ${member.username}`)
+		.setDescription(`${(args.slice(1)).join(" ")}`)
+		.setFooter(`ID: ${member.id}`);
+
+	if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+		loggingWarningEmbed.setColor(config.embedColours.warningAdmin);
+		warningEmbed.setColor(config.embedColours.warningAdmin);
+	}else{
+		loggingWarningEmbed.setColor(config.embedColours.warningMod);
+		warningEmbed.setColor(config.embedColours.warningMod);
+	}
+
+	try{
+		member.send(warningEmbed).catch(() => message.channel.send("This user does not have open DMs."));
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(loggingWarningEmbed);
+	}catch(e){
+		message.reply("This isnt working currently. Tell archie to go look at the logs.");
+		console.log(e);
 	}
 }
