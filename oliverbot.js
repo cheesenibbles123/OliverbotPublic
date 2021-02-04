@@ -2,8 +2,6 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-exports.bot = bot;
-
 const btoa = require("btoa");
 
 const commands = require("./Handlers/mainCommandHandler");
@@ -45,6 +43,9 @@ var adjustableConfig = {
 		"checkNudity" : true,
 	}
 };
+
+exports.bot = bot;
+exports.adjustableConfig = adjustableConfig;
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
