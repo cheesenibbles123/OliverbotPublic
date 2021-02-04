@@ -6,9 +6,8 @@ const issueEmbed = require("./issueEmbed");
 
 var alternionJsonFile = null;
 
-exports.alternionMainhandler = function alternionHandler(message,args){
+exports.alternionMainhandler = function alternionHandler(message,command,args){
 	let alternionHandlerEmbed = new Discord.MessageEmbed();
-
 	switch (args[0].toLowerCase()){
 
 		case "listbadges":
@@ -140,7 +139,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	let table2Name = "";
 	let fieldName = "";
 	let table2Field = "";
-	switch (args[2].toLowerCase()){
+	switch (args[1].toLowerCase()){
 		case "badge":
 			table1Name = "Badge";
 			table2Name = "LimitedBadges";
@@ -328,7 +327,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 				let assignedBadge = "";
 				if (rows){
 					for (let i = 0; i < rows.length; i++){
-						if (args[3] === rows[i].Name){
+						if (args[2] === rows[i].Name){
 							db.lternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID="${message.author.id}"`);
 							console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
 							assignedBadge = rows[i].Display_Name;
@@ -340,7 +339,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 
 				if (rows2){
 					for (let i = 0; i < rows2.length; i++){
-						if (args[3] === rows2[i].Name){
+						if (args[2] === rows2[i].Name){
 							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID="${message.author.id}"`);
 							console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
 							assignedBadge = rows2[i].Display_Name;
@@ -441,6 +440,9 @@ function getWeaponSkins(message,ID,alternionHandlerEmbed){
 }
 
 function getCannons(message,ID,alternionHandlerEmbed){
+	if (!pubPriv){
+		pubPriv = "private";
+	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
 			if (rows.length < 1){
@@ -475,6 +477,9 @@ function getCannons(message,ID,alternionHandlerEmbed){
 }
 
 function getNormalSails(message,ID,pubPriv,alternionHandlerEmbed){
+	if (!pubPriv){
+		pubPriv = "private";
+	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
 			if (rows.length < 1){
@@ -509,6 +514,9 @@ function getNormalSails(message,ID,pubPriv,alternionHandlerEmbed){
 }
 
 function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
+	if (!pubPriv){
+		pubPriv = "private";
+	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
 			if (rows.length < 1){
@@ -543,6 +551,9 @@ function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
 }
 
 function getBadges(message,ID,pubPriv,alternionHandlerEmbed){
+	if (!pubPriv){
+		pubPriv = "private";
+	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
 			if (rows.length < 1){
