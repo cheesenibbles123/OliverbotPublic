@@ -96,6 +96,7 @@ exports.handler = function handler(message,command,args){
 		case "unmute":
 		case "totalusers":
 		case "warn":
+		case "savequote":
 			modCommands.handler(message,command,args);
 			break;
 		case "nWordCount":
@@ -152,18 +153,6 @@ exports.handler = function handler(message,command,args){
 				}else{
 					message.channel.send("You cannot use this command");
 				}	
-			}else{
-				lackingPermissions(message);
-			}
-			break;
-		case "savequote":
-			if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator) && adjustableConfig.misc.moderatorCommands){
-				if (typeof args[0] !== null && Number.isInteger(parseInt(args[0]))){
-					saveQuote(message.channel,args[0]);
-					message.reply("Done!");
-				}else{
-					message.reply("Please make sure you have entered the correct message ID :)");
-				}
 			}else{
 				lackingPermissions(message);
 			}

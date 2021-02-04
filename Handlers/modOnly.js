@@ -151,27 +151,33 @@ function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,se
 }
 
 function saveQuote(channel,id){
-	try{
-	bot.channels.cache.get(channel.id).messages.fetch(id).then(message => {
-		let Quote = new Discord.MessageEmbed()
-			.setTitle(`${message.author.username}`)
-			.setDescription(`${message.content}`)
-			.setThumbnail(message.author.displayAvatarURL())
-			.setFooter(`Sent in: #${channel.name} `)
-			.setTimestamp();
-		let hasNotAddedImage = true;
-		message.attachments.forEach(attachment => {
-    		if (message.attachments.size === 1) {
-      			if (attachment.url && hasNotAddedImage){
-      				Quote.setImage(`${attachment.url}`);
-      				hasNotAddedImage = false;
-      			}
-    		}
-  		});
-		bot.channels.cache.get(config.serverInfo.channels.quotes).send(Quote);
-	});
-	}catch(e){
-		channel.send("Please make sure you have entered it correctly!");
+
+	if (typeof args[0] !== null && Number.isInteger(parseInt(args[0]))){
+			try{
+			bot.channels.cache.get(channel.id).messages.fetch(id).then(message => {
+				let quote = new Discord.MessageEmbed()
+					.setTitle(`${message.author.username}`)
+					.setDescription(`${message.content}`)
+					.setThumbnail(message.author.displayAvatarURL())
+					.setFooter(`Sent in: #${channel.name} `)
+					.setTimestamp();
+				let hasNotAddedImage = true;
+				message.attachments.forEach(attachment => {
+		    		if (message.attachments.size === 1) {
+		      			if (attachment.url && hasNotAddedImage){
+		      				quote.setImage(`${attachment.url}`);
+		      				hasNotAddedImage = false;
+		      			}
+		    		}
+		  		});
+				bot.channels.cache.get(config.serverInfo.channels.quotes).send(quote);
+			});
+		}catch(e){
+			channel.send("Please make sure you have entered it correctly!");
+		}
+		message.reply("Done!");
+	}else{
+		message.reply("Please make sure you have entered the correct message ID :)");
 	}
 }
 
