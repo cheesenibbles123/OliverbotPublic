@@ -16,7 +16,7 @@ exports.handler = function handler(message,commands,args){
 	}
 }
 
-function playAudio(message){
+async function playAudio(message){
 	let voiceChannel = message.member.voice.channel;
 	if (!voiceChannel){
 		message.reply("You must be in a voice channel!");
