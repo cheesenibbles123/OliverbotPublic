@@ -290,6 +290,7 @@ exports.handleRandomReactions = function handleRandomReactions(message){
 }
 
 exports.handleRandomCommand = function handleRandomCommand(message,level){
+	let item;
 	if (db.levelchecker(message,level)){
 		type = glob.getRandomInt(10);
 		switch (type){
@@ -315,11 +316,11 @@ exports.handleRandomCommand = function handleRandomCommand(message,level){
 				message.channel.send(file.Responses.gif[getRandomInt(file.Responses.gif.length)]);
 				break;
 			case 7:
-				let item = glob.getRandomInt(file.Responses.vid.length);
+				item = glob.getRandomInt(file.Responses.vid.length);
 				message.channel.send(file.Responses.vid[item]);
 				break;
 			case 8:
-				let item = glob.getRandomInt(file.Responses.img.length);
+				item = glob.getRandomInt(file.Responses.img.length);
 				message.channel.send(file.Responses.img[item]);
 				break;
 			default:
