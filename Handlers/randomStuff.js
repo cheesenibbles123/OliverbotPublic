@@ -1,10 +1,14 @@
 const glob = require("./globalFunctions");
-var { adjustableConfig } = require("./databaseSetup.js");
+var adjustableConfig;
 const Discord = require("discord.js");
 const fetch = require("node-fetch");
 const db = require("./databaseSetup");
 const issueEmbeds = require("./issueEmbed");
 const fs = require("fs");
+
+exports.init = function init(){
+	djustableConfig = require("./databaseSetup.js").adjustableConfig;
+}
 
 function randomGif(message,content){
 	let yay = glob.getRandomInt(5);

@@ -2,8 +2,12 @@ const issueEmbed = require("./issueEmbed");
 const config = require("./../config.json");
 const db = require("./databaseSetup");
 const Discord = require("discord.js");
-const { bot } = require("../oliverbot.js");
+var bot;
 const issueEmbeds = require("./issueEmbed");
+
+exports.init = function init(){
+	bot = require("../oliverbot.js").bot;
+}
 
 exports.handler = function handler(message,command,args){
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){

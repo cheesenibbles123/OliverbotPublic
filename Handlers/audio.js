@@ -1,11 +1,15 @@
 const ytdl = require("ytdl-core");
 const Discord = require("discord.js");
 
-var { adjustableConfig } = require("./../oliverbot.js");
+var adjustableConfig;
 var isPlaying = false;
 var currentDispatcher = null;
 
 exports.isPlaying = isPlaying;
+
+exports.init = function init(){
+	adjustableConfig = require("./../oliverbot.js").adjustableConfig;
+}
 
 exports.handler = function handler(message,commands,args){
 	switch (command){

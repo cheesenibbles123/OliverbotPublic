@@ -1,11 +1,12 @@
 const fs = require("fs");
 const glob = require("./globalFunctions");
-const { bot } = require("./../oliverbot.js");
+var bot;
 
 exports.initStatus = function initStatus(){
 	setInterval(() =>{
 		Status();
 	}, 30000000);
+	bot = require("./../oliverbot.js").bot;
 }
 
 function Status(){

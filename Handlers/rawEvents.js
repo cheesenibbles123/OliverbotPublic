@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const config = require("./../config.json");
-const { bot } = require("../oliverbot");
+var bot;
 
 var embedColours = {
 	"channels" : config.embedColours.channels,
@@ -9,6 +9,10 @@ var embedColours = {
 }
 
 exports.embedColours = embedColours;
+
+exports.init = function init(){
+	bot = require("./../oliverbot").bot;
+}
 
 exports.manageRawEmbeds = async function manageRawEmbeds(event){
 

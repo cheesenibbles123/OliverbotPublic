@@ -6,6 +6,12 @@ const fetch = require("node-fetch");
 const Discord = require("discord.js");
 const blackwake = require("./blackwake");
 const miscCommands = require("./smallCommands");
+const rawEmbeds = require("./rawEvents");
+const pd2 = require("./payday2");
+const mod = require("./modOnly");
+const glob = require("./globalFunctions");
+const audio = require("./audio");
+const admin = require("./adminOnly");
 
 var bot;
 
@@ -16,6 +22,12 @@ exports.init = function init(){
 	
 	blackwake.init();
 	miscCommands.init();
+	rawEmbeds.init();
+	pd2.init();
+	mod.init();
+	glob.init();
+	audio.init();
+	admin.init();
 
 	bot = require("./../oliverbot.js").bot;
 	

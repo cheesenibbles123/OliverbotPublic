@@ -1,9 +1,13 @@
 const db = require("./databaseSetup");
 const glob = require("./globalFunctions");
 const Discord = require("discord.js");
-const { bot } = require("./../oliverbot.js");
+var bot;
 const config = require("./../config.json");
 const audio = require("./audio");
+
+exports.init = function init(){
+	bot = require("./../oliverbot.js").bot;
+}
 
 exports.handler = function handler(message,command,args){
 	if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){

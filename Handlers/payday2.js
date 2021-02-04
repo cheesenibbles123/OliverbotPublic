@@ -1,6 +1,6 @@
 const config = require("./../config.json");
 const fetch = require("node-fetch");
-var { adjustableConfig } = require("./databaseSetup.js");
+var adjustableConfig;
 const Discord = require("discord.js");
 const embedGrabber = require("./issueEmbed");
 
@@ -33,6 +33,9 @@ function convertToRoman(num) {
 
 var isAllowed = true;
 
+exports.init = function init(){
+	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
+}
 
 exports.checkIfAllowed = function checkIfAllowed(){
 	if (isAllowed){
