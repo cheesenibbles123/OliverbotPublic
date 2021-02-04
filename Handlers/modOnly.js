@@ -21,8 +21,10 @@ exports.handler = function handler(message,command,args){
 				saveQuote(message.channel,args[0]);
 				break;
 			case "mute":
+				mute(message);
 				break;
 			case "unmute":
+				unmute(message);
 				break;
 		}
 	}else{
