@@ -20,7 +20,7 @@ exports.handler = function handler(message,command,args){
 	}
 }
 
-function restart(message){
+async function restart(message){
 	await message.channel.send("Restarting....");
 	mainDatabaseConnectionPool.end(function (err){
 		if (err) console.log(err);
