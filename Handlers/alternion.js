@@ -694,8 +694,6 @@ function updateLocalCache(discord_id,filepath){
 				alternionJsonFile.users[i].hammerSkinName = rows[0].ham.split("_")[1];
 				alternionJsonFile.users[i].atlas01SkinName = rows[0].atl.split("_")[1];
 				notFoundUser = false;
-				console.log("###########################################################");
-				console.log(alternionJsonFile.users[i]);
 				break;
 			}
 		}
@@ -752,7 +750,6 @@ function updateJsonFile(filepath){
 		}
 	}
 	fs.writeFile(filepath, writeString.toString(), function(err){});
-	console.log(`Written to JSON file`);
 }
 
 exports.globalJsonUpdate = function globalJsonUpdate(){
@@ -792,7 +789,6 @@ exports.globalJsonUpdate = function globalJsonUpdate(){
 					alternionJsonFile.users[i].hammerSkinName = rows[s].ham.split("_")[1];
 					alternionJsonFile.users[i].atlas01SkinName = rows[s].atl.split("_")[1];
 					notFoundUser = false;
-					console.log(`Updated user ${s}`);
 					break;
 				}
 			}

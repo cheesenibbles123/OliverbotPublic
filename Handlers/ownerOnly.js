@@ -22,10 +22,10 @@ exports.handler = function handler(message,command,args){
 
 async function restart(message){
 	await message.channel.send("Restarting....");
-	mainDatabaseConnectionPool.end(function (err){
+	db.mainDatabaseConnectionPool.end(function (err){
 		if (err) console.log(err);
 	});
-	configurationDatabaseConnectionPool.end(function (err){
+	db.configurationDatabaseConnectionPool.end(function (err){
 		if (err) console.log(err);
 	});
 	process.exit();
