@@ -43,7 +43,7 @@ exports.handler = function handler(message,command,args){
 exports.initEconomy = function initEconomy(){
 	updateleaderboard();
 	setTimeout(()=>{
-		bot = require("./../oliverbot.js");
+		bot = require("./../oliverbot.js").bot;
 	});
 }
 

@@ -12,7 +12,7 @@ exports.init = function init(){
 	db.setupDatabase();
 	economy.initEconomy();
 	setTimeout(()=>{
-		bot = require("./../oliverbot.js");
+		bot = require("./../oliverbot.js").bot;
 	});
 	setInterval(() =>{
 		getSteamGroupData();

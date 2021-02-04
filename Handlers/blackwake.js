@@ -8,7 +8,7 @@ const db = require("./databaseSetup");
 
 exports.init = function init(){
 	setTimeout(()=>{
-		bot = require("./../oliverbot.js");
+		bot = require("./../oliverbot.js").bot;
 	});
 }
 
