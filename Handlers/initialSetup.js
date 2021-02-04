@@ -11,6 +11,7 @@ const mod = require("./modOnly");
 const glob = require("./globalFunctions");
 const audio = require("./audio");
 const admin = require("./adminOnly");
+const rand = require("./randomStuff");
 
 var bot;
 
@@ -27,6 +28,7 @@ exports.init = function init(){
 	glob.init();
 	audio.init();
 	admin.init();
+	rand.init();
 
 	bot = require("./../oliverbot.js").bot;
 	
