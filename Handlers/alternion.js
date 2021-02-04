@@ -1,5 +1,6 @@
 const db = require("./databaseSetup");
 const Discord = require("discord.js");
+const config = require("./config.json");
 
 var alternionJsonFile = null;
 
