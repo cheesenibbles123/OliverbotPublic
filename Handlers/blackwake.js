@@ -2,14 +2,13 @@ const Discord = require("discord.js");
 var bot;
 const config = require("./../config.json");
 const fetch = require("node-fetch");
-var { adjustableConfig } = require("./databaseSetup.js");
+var adjustableConfig;
 const issueEmbeds = require("./issueEmbed");
 const db = require("./databaseSetup");
 
 exports.init = function init(){
-	setTimeout(()=>{
-		bot = require("./../oliverbot.js").bot;
-	});
+	bot = require("./../oliverbot.js").bot;
+	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
 }
 
 exports.handler = function handler(message,command,args){

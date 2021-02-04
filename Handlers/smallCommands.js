@@ -2,9 +2,13 @@ const fetch = require("node-fetch");
 const config = require("./../config.json");
 const Discord = require("discord.js");
 const issueEmbed = require("./issueEmbed");
-var { adjustableConfig } = require("./../oliverbot.js");
+var adjustableConfig;
 const db = require("./databaseSetup");
 const glob = require("./globalFunctions");
+
+exports.init = function init(){
+	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
+}
 
 exports.handler = function handler(message,command,args){
 	switch (command){

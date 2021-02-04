@@ -4,6 +4,7 @@ const db = require("./databaseSetup");
 //const {bot} = require("./../oliverbot.js");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
+const blackwake = require("./blackwake");
 
 var bot;
 
@@ -11,9 +12,10 @@ exports.init = function init(){
 	statusHandler.initStatus();
 	db.setupDatabase();
 	economy.initEconomy();
-	setTimeout(()=>{
-		bot = require("./../oliverbot.js").bot;
-	});
+	blackwake.init();
+	
+	bot = require("./../oliverbot.js").bot;
+	
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);
