@@ -1,6 +1,6 @@
 const db = require("./databaseSetup");
 const Discord = require("discord.js");
-const config = require("./config.json");
+const config = require("./../config.json");
 const fs = require('fs');
 const issueEmbed = require("./issueEmbed");
 
@@ -109,7 +109,7 @@ exports.alternionMainhandler = function alternionHandler(message,args){
 			teamLeaderBadgeHandler(message,args[1],args[2],args[3],alternionHandlerEmbed);
 			break;
 
-		
+
 
 		default:
 			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Blackwake Alternion Help` to get a list of supported commands!");
