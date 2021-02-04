@@ -3,37 +3,37 @@ const glob = require("./globalFunctions");
 var bot;
 
 exports.initStatus = function initStatus(){
+	bot = require("./../oliverbot.js").bot;
 	Status();
 	setInterval(() =>{
 		Status();
 	}, 30000000);
-	bot = require("./../oliverbot.js").bot;
 }
 
 function Status(){
 	let file = fs.readFileSync("./datafile.json").toString();
 	file = JSON.parse(file);
-	let a = getRandomInt(4);
+	let a = glob.getRandomInt(4);
 	let b;
 	switch (a){
 		case 0:
-			b = getRandomInt(file.status.PLAYING.length+1);
+			b = glob.getRandomInt(file.status.PLAYING.length+1);
 			bot.user.setActivity(`${file.status.PLAYING[b]}`);
 			break;
 		case 1:
-			b = getRandomInt(file.status.WATCHING.length+1);
+			b = glob.getRandomInt(file.status.WATCHING.length+1);
 			bot.user.setActivity(`${file.status.WATCHING[b]}`,{
 				type : "WATCHING"
 			});
 			break;
 		case 2:
-			b = getRandomInt(file.status.STREAMING.length+1);
+			b = glob.getRandomInt(file.status.STREAMING.length+1);
 			bot.user.setActivity(`${file.status.STREAMING[b]}`,{
 				type: "STREAMING"
 			});
 			break;
 		case 3:
-			b = getRandomInt(file.status.LISTENING.length+1);
+			b = glob.getRandomInt(file.status.LISTENING.length+1);
 			bot.user.setActivity(`${file.status.LISTENING[b]}`,{
 				type: "LISTENING"
 			});
