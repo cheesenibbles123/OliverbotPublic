@@ -906,7 +906,7 @@ bot.on("message", async message => {
 		}
 	}
 	
-	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != "337541914687569920" && isNotAllowed)
+	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed)
 	{
 		return;
 	}
