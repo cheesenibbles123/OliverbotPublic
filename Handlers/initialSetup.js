@@ -3,6 +3,7 @@ const statusHandler = require("./statusHandler");
 const db = require("./databaseSetup");
 const { bot } = require("./../oliverbot.js");
 const fetch = require("node-fetch");
+const Discord = require("discord.js");
 
 exports.init = function init(){
 	statusHandler.initStatus();
