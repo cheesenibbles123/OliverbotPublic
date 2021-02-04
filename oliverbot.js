@@ -9,7 +9,7 @@ const btoa = require("btoa");
 const commands = require("./Handlers/mainCommandHandler");
 const glob = require("./Handlers/globalFunctions");
 const db = require("./Handlers/databaseSetup");
-const raw = require("./rawEvents");
+const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./initialSetup");
 
 var serverStatus = {
