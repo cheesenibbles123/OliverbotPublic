@@ -261,7 +261,7 @@ function updateShopWindow(){
 					break;
 			}
 		}
-			configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
+			db.configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
 
 				let shopWindowChannel = "";
 
