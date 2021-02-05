@@ -47,7 +47,6 @@ function generalError(info){
 function disabled(){
 	let embed = new Discord.MessageEmbed()
 		.setDescription("This command is currently disabled.");
-	console.log(info);
 	return embed;
 }
 
