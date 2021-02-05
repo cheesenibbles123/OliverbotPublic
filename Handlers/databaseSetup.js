@@ -250,3 +250,13 @@ function permanentCommands(message,command){
 		}
 	}
 }
+
+exports.updateNWordCounter = function updateNWordCounter(message){
+	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}'`, (err,rows, fields) => {
+		if (rows.length === 0){
+			mainDatabaseConnectionPool.query(`INSERT INTO nWordCount VALUES ('${message.author.id}', '1', '${message.guild.id}')`);
+		}else{
+			mainDatabaseConnectionPool.query(`UPDATE nWordCount SET counter='${parseInt(rows[0].counter) + 1}' WHERE ID='${message.author.id}'`);
+		}
+	});
+}

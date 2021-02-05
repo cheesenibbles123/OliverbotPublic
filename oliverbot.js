@@ -264,20 +264,6 @@ function craftItem(message,args){
 	});
 }
 
-//Not yet complete
-
-function updateNWordCounter(message){
-	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}'`, (err,rows, fields) => {
-		if (rows.length === 0){
-			mainDatabaseConnectionPool.query(`INSERT INTO nWordCount VALUES ('${message.author.id}', '1', '${message.guild.id}')`);
-		}else{
-			mainDatabaseConnectionPool.query(`UPDATE nWordCount SET counter='${parseInt(rows[0].counter) + 1}' WHERE ID='${message.author.id}'`);
-		}
-	});
-
-	return;
-}
-
 allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147","722204531538002020"];
 allowedCommands = ["savequote"];
 
@@ -339,7 +325,7 @@ bot.on("message", async message => {
 			message.channel.send(message.author+" Please dont use that language!");
 			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
 		}
-		updateNWordCounter(message);
+		db.updateNWordCounter(message);
 		return;
 	}
 
