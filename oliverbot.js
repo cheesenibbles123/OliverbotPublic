@@ -332,10 +332,10 @@ bot.on("message", async message => {
 	if (adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
 		if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
 			if (message.channel.name.toLowerCase().includes("support")){
+				// Ignore
 			}else
 			if (glob.getRandomInt(adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
 				saveQuoteAutomatic(message);
-			}else{
 			}
 		}
 	}
