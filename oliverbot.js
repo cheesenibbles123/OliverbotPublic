@@ -387,28 +387,6 @@ function craftItem(message,args){
 	});
 }
 
-function checkOrRemoveResources(check,list,checkForName,checkForAmount){
-	if (check){
-		for (let s=0; s<list.length;s++){
-			if (list[i].type === "constructionResources" && list[i].name === checkForName){
-				if (list[i].amount < checkForAmount){
-					return 0;
-				}else{
-					return 1;
-				}
-			}
-		}
-		return 2;
-	}else{
-		for (let s=0; s<list.length;s++){
-			if (list[i].type === "constructionResources" && list[i].name === checkForName){
-				list[i].amount -= checkForAmount
-			}
-		}
-		return list;
-	}
-}
-
 //Not yet complete
 
 function editMsg(contents,channelID,msgID){
