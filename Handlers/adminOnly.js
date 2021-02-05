@@ -45,12 +45,12 @@ exports.handler = function handler(message,command,args){
 	}
 }
 
-async function updateDBConfig(message,args){
+function updateDBConfig(message,args){
 
 	let commandName = args[0];
 	let newValue = args[1];
 
-	await db.configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows, fields) =>{
+	db.configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows, fields) =>{
 		let notFound = true;
 		let type;
 		for (i=0;i<rows.length;i++){
@@ -62,17 +62,21 @@ async function updateDBConfig(message,args){
 
 		let correctInput = false;
 		if (notFound){
-			message.reply("Config option not found!");
+			message.channel.send("Config option not found!");
 		}else{
 			if (type === 'int'){
 				newValue = parseInt(newValue);
 				if (!isNaN(newValue)){
 					correctInput = true;
+				}else{
+					message.channel.send("Please check you have entered it correcty.")''
 				}
 			}else
 			if (type === 'bool'){
 				if (newValue === 'false' || newValue === 'true'){
 					correctInput = true;
+				}else{
+					message.channel.send("Please check you have entered it correcty.")''
 				}
 			}
 
@@ -84,12 +88,11 @@ async function updateDBConfig(message,args){
 					}else{
 						message.channel.send("Done!");
 					}
+					db.loadConfigFromDB();
 				});
 			}
 		}
 	});
-
-	db.loadConfigFromDB();
 }
 
 function getNwordCount(message,args){
