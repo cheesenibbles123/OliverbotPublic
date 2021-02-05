@@ -260,3 +260,18 @@ exports.updateNWordCounter = function updateNWordCounter(message){
 		}
 	});
 }
+
+exports.updateTracking = function updateTracking(command){
+	mainDatabaseConnectionPool.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
+		if(err) console.log(err);
+		let sql;
+		if(rows.length < 1){
+			sql = `INSERT INTO commandUsageOliverBot (command,TimesUsed) VALUES ('${command}',1)`;
+			mainDatabaseConnectionPool.query(sql);
+		} else {
+			let used = parseInt(rows[0].TimesUsed) + 1;
+			sql = `UPDATE commandUsageOliverBot SET TimesUsed = ${used} WHERE command = '${command}'`;
+			mainDatabaseConnectionPool.query(sql);
+		}
+	});
+}

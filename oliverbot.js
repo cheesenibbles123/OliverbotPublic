@@ -457,6 +457,7 @@ bot.on("message", async message => {
 	let command = messagearray[0].substring(1);
 	command = command.toLowerCase();
 
+	// Certain commands are allowed in all channels
 	let isNotAllowed = true;
 	for (let i = 0; i< allowedCommands.length;i++){
 		if (allowedCommands[i] === command){
@@ -472,25 +473,8 @@ bot.on("message", async message => {
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 	let serverid = message.channel.guild.id;
-	TrackingCommand = true;
 
 	commands.handler(message,command,args);
-
-	//If command is being tracked, update table
-	if (TrackingCommand && adjustableConfig.misc.trackingCommandUsage){
-		mainDatabaseConnectionPool.query(`SELECT * FROM commandUsageOliverBot WHERE command = '${command}'`, (err,rows) => {
-			if(err) console.log(err);
-			let sql;
-			if(rows.length < 1){
-				sql = `INSERT INTO commandUsageOliverBot (command,TimesUsed) VALUES ('${command}',1)`;
-				mainDatabaseConnectionPool.query(sql);
-			} else {
-				let used = parseInt(rows[0].TimesUsed) + 1;
-				sql = `UPDATE commandUsageOliverBot SET TimesUsed = ${used} WHERE command = '${command}'`;
-				mainDatabaseConnectionPool.query(sql);
-			}
-		});
-	}
 
 	/////Custom Commands
 	//customCommands(message,command);

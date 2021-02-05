@@ -131,9 +131,9 @@ exports.handler = function handler(message,command,args){
     		break;
 	}
 
-	if (notFound){
-		if(!db.handler(message,command)){
-			message.react("🤔");
-		}
+	if (notFound && !db.handler(message,command)){
+		message.react("🤔");
+	}else{
+		db.updateTracking(command);
 	}
 }
