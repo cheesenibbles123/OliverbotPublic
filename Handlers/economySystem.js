@@ -876,3 +876,126 @@ function checkOrRemoveResources(check,list,checkForName,checkForAmount){
 		return list;
 	}
 }
+
+async function displayRichestUsers(){
+	
+	return;
+	let guild = await bot.guilds.cache.get("401924028627025920");
+
+	db.configurationDatabaseConnectionPool.query(`SELECT * FROM economyInformation`, (err, rows2) => {
+		let economyBoardsChannel;
+		let richetsUsersMesg;
+		let poorestUsersMsg;
+		for (let s = 0; s < rows2.length; s++){
+			if (rows2[s].name == "shopBoardsChannel")
+			{
+				economyBoardsChannel = rows2[s].channelID;
+			}else if (rows2[s].name == "richestUsers")
+			{
+				richetsUsersMesg = rows2[s].messageID;
+			}else if (rows2[s].name == "poorestUsers")
+			{
+				poorestUsersMsg = rows2[s].messageID;
+			}
+		}
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 desc limit 30`, (err,rows) => {
+			let newRichest = "```TEXT\nThe Richest Users!\nUsername            |Coins in Bank\n";
+			let factor = 100;
+			for (i=0;i<30;i++){
+				let name;
+				bot.users.cache.get(rows[i].ID).then(user => {
+					try
+					{
+						console.log("ID: " + rows[i].ID);
+						if (rows[i].ID === 'thereserve'){
+							name = "Federal Reserve";
+						}else {
+							
+							//let member = getUserFromID(rows[i].ID);
+							//console.log(member);
+							if (user.username === undefined){
+								name = "REPLACEMENT";
+							}else{
+								name = user.username;
+							}
+						}
+					}catch(e)
+					{
+						console.log("Richest: " + e);
+						name = "REPLACEMENT";
+					}
+
+					if (name.length < leaderboardlimits.usernameEco){
+						let x = leaderboardlimits.usernameEco - name.length;
+						name = name + new Array(x + 1).join(' ');
+					}else{
+						name = name.split(0,leaderboardlimits.usernameEco);
+					}
+					let coins = parseInt(parseFloat(rows[i].giraffeCoins).toFixed(2) * factor);
+					if (coins >= (1000000000 * factor)){
+						coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
+					}else if (coins >= (1000000 * factor)){
+						coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
+					}else if (coins >= (1000 * factor)){
+						coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
+					}else{
+						coins = coins / factor;
+					}
+					newRichest = newRichest + name +"|"+ coins +"\n";
+				});
+			}
+			newRichest += "```";
+			bot.channels.cache.get(economyBoardsChannel).messages.fetch(richetsUsersMesg).then(msg => {
+				msg.edit(newRichest);
+			});
+		});
+
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT order by giraffeCoins * 1 limit 30`, (err,rows) => {
+			let newPoorest = "```TEXT\nThe Poorest Users!\nUsername            |Coins in Bank\n";
+			let factor = 100;
+			for (s=0;s<30;s++){
+				let name;
+
+				try
+				{
+					//let member = bot.guilds.cache.get("401924028627025920").members.cache.get(rows3[s].ID).user;
+					let member = getUserFromID(rows[i].ID);
+					if (rows[s].ID === 'thereserve'){
+						name = "Federal Reserve";
+					}else if (member.username === undefined){
+						name = "REPLACEMENT";
+					}else{
+						name = member.username;
+					}
+				}catch(e)
+				{
+					console.log("Poorest: " + e);
+					name = "REPLACEMENT";
+				}
+
+				if (name.length < leaderboardlimits.usernameEco){
+					let x = leaderboardlimits.usernameEco - name.length;
+					name = name + new Array(x + 1).join(' ');
+				}else{
+					name = name.split(0,leaderboardlimits.usernameEco);
+				}
+				let coins = parseInt(parseFloat(rows[s].giraffeCoins).toFixed(2) * factor);
+				if (coins >= (1000000000 * factor)){
+					coins = parseFloat(coins / (1000000000 * factor)).toFixed(2) + "B";
+				}else if (coins >= (1000000 * factor)){
+					coins = parseFloat(coins / (1000000 * factor)).toFixed(2) + "M";
+				}else if (coins >= (1000 * factor)){
+					coins = parseFloat(coins / (1000 * factor)).toFixed(2) + "K";
+				}else{
+					coins = coins / factor;
+				}
+				newPoorest = newPoorest + name +"|"+ coins +"\n";
+			}
+			newPoorest += "```";
+			bot.channels.cache.get(economyBoardsChannel).messages.fetch(poorestUsersMsg).then(msg => {
+				msg.edit(newPoorest);
+			});
+		});
+	});
+	return;
+}
