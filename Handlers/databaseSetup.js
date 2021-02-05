@@ -275,3 +275,48 @@ exports.updateTracking = function updateTracking(command){
 		}
 	});
 }
+
+exports.xpGainHandler = function xpGainHandler(message){
+	try{
+		if (!message.content.startsWith(";work")){
+			db.mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
+				if(err) console.log(err);
+				let sql;
+				if(rows.length < 1){
+					sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${economy.genXp()}, 0, '"n"', '1')`;
+					db.mainDatabaseConnectionPool.query(sql);
+				} else {
+					let eligible = rows[0].canget;
+					if (eligible === '"y"'){
+						let level = parseInt(rows[0].level);
+						let newxp = parseInt(rows[0].xp) + economy.genXp();
+						let go = economy.levelsystem(newxp,level);
+						if (go) {
+							level = level+1;
+							newxp = 0;
+						}
+						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
+						db.mainDatabaseConnectionPool.query(sql);
+						giveUserMoney(0.2,message.author.id);
+					}else{
+						db.mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+					}
+				}
+			});
+
+			db.mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+				if (rows.length < 1){
+					db.mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+				}else{
+					db.mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
+				}
+			});
+
+			setTimeout(function(){
+				db.mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
+			}, 180000);
+		}
+	}catch (e){
+		console.log(e);
+	}
+}
