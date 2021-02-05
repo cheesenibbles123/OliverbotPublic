@@ -3,6 +3,7 @@ const config = require("./../config.json");
 const Discord = require("discord.js");
 const adminCommands = require("./adminOnly");
 const main = require("./../oliverbot");
+const economy = require("./economySystem");
 
 var mainDatabaseConnectionPool = mysql.createPool({
 	connectionLimit : 30,
@@ -32,7 +33,7 @@ var xpdetails = {
 	"max" : 0
 }
 
-var adjustableConfig = {
+const adjustableConfig = {
 	"reactions" : {
 		"randomReactions" : true,
 	},
@@ -48,11 +49,13 @@ var adjustableConfig = {
 	"apis" : {
 		"checkNudity" : true,
 	}
-}
+};
 
-var customCommandList;
-var miniCommands;
-var reactionRoles;
+let customCommandList;
+let miniCommands;
+let reactionRoles;
+
+exports.adjustableConfig = adjustableConfig;
 
 exports.customCommandList = customCommandList;
 exports.miniCommands = miniCommands;
@@ -139,6 +142,8 @@ function loadConfigFromDB(){
 	});
 }
 
+exports.loadConfigFromDB = loadConfigFromDB;
+
 function checkIfBool(toCheck){
 	let val = false;
 	if (toCheck.toLowerCase() === 'true'){
@@ -159,7 +164,7 @@ exports.levelChecker = function levelChecker(msg,reqlvl){
 	return response;
 }
 
-exports.giveUserMoney = function giveUserMoney(amount,ID){
+function giveUserMoney(amount,ID){
 	mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 		if(err) console.log(err);
 		let sql;
@@ -172,6 +177,8 @@ exports.giveUserMoney = function giveUserMoney(amount,ID){
 		//displayRichestUsers();
 	});
 }
+
+exports.giveUserMoney = giveUserMoney;
 
 exports.handler = function handler(message,command,args){
 	if (!customCommands(message,command)){
@@ -279,12 +286,12 @@ exports.updateTracking = function updateTracking(command){
 exports.xpGainHandler = function xpGainHandler(message){
 	try{
 		if (!message.content.startsWith(";work")){
-			db.mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
+			mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${message.author.id}'`, (err,rows) => {
 				if(err) console.log(err);
 				let sql;
 				if(rows.length < 1){
 					sql = `INSERT INTO xp (id,username,xp,level,canget,message_count) VALUES ('${message.author.id}','${btoa(message.author.username)}', ${economy.genXp()}, 0, '"n"', '1')`;
-					db.mainDatabaseConnectionPool.query(sql);
+					mainDatabaseConnectionPool.query(sql);
 				} else {
 					let eligible = rows[0].canget;
 					if (eligible === '"y"'){
@@ -296,24 +303,24 @@ exports.xpGainHandler = function xpGainHandler(message){
 							newxp = 0;
 						}
 						sql = `UPDATE xp SET xp = ${newxp}, level = ${level}, canget = '"n"', message_count='${parseInt(rows[0].message_count) + 1}' WHERE id = '${message.author.id}'`;
-						db.mainDatabaseConnectionPool.query(sql);
+						mainDatabaseConnectionPool.query(sql);
 						giveUserMoney(0.2,message.author.id);
 					}else{
-						db.mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
+						mainDatabaseConnectionPool.query(`UPDATE xp SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE id='${message.author.id}'`);
 					}
 				}
 			});
 
-			db.mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
+			mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
 				if (rows.length < 1){
-					db.mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
+					mainDatabaseConnectionPool.query(`INSERT INTO channel_messages (channel_id,message_count) VALUES ('${message.channel.id}', '1')`);
 				}else{
-					db.mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
+					mainDatabaseConnectionPool.query(`UPDATE channel_messages SET message_count='${parseInt(rows[0].message_count) + 1}' WHERE channel_id='${message.channel.id}'`);
 				}
 			});
 
 			setTimeout(function(){
-				db.mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
+				mainDatabaseConnectionPool.query(`UPDATE xp SET canget = '"y"' WHERE id = '${message.author.id}'`);
 			}, 180000);
 		}
 	}catch (e){

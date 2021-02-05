@@ -10,7 +10,7 @@ const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./Handlers/initialSetup");
 const random = require("./Handlers/randomStuff");
-const economy = require("./Handlers/economySystem")
+const economy = require("./Handlers/economySystem");
 
 var serverStatus = {
 	"active" : false,
@@ -26,26 +26,7 @@ var cooldowns = {
 	}
 };
 
-var adjustableConfig = {
-	"reactions" : {
-		"randomReactions" : true,
-	},
-	"quotes" : {
-		"active" : true,
-	},
-	"misc" : {
-		"nWordFilter" : true,
-	},
-	"music" : {
-		"pingCommand" : true,
-	},
-	"apis" : {
-		"checkNudity" : true,
-	}
-};
-
 exports.bot = bot;
-exports.adjustableConfig = adjustableConfig;
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
@@ -317,9 +298,10 @@ bot.on("message", async message => {
 	}
 
 	//N word filter
-	if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ")){
-		if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){}
-		else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
+	if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ") && db.adjustableConfig.misc.nWordFilter){
+		if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+			// Ignore
+		}else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
 			message.delete();
 			message.channel.send(message.author+" Please dont use that language!");
 			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
@@ -329,7 +311,7 @@ bot.on("message", async message => {
 	}
 
 	//Prevents autoquote from taking from sensitive channels
-	if (adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
+	if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
 		if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
 			if (message.channel.name.toLowerCase().includes("support")){
 				// Ignore
@@ -465,46 +447,46 @@ async function manageJoinReaction(event){
 //Pure Logging of events for administrative purposes
 bot.on('raw', async event => {
 	if (event.d){
-	if (event.d.guild_id){
-	if (event.d.guild_id !== config.serverInfo.serverId) return;
-	let member;
+		if (event.d.guild_id){
+			if (event.d.guild_id !== config.serverInfo.serverId) return;
+			let member;
 
-	if ((event.t === "CHANNEL_CREATE" && event.d.type !== 'dm') || (event.t === "CHANNEL_DELETE" && event.d.type !== 'dm') || (event.t !== "CHANNEL_CREATE" && event.t !== "CHANNEL_DELETE")){
-		raw.manageRawEmbeds(event);
-	}
+			if ((event.t === "CHANNEL_CREATE" && event.d.type !== 'dm') || (event.t === "CHANNEL_DELETE" && event.d.type !== 'dm') || (event.t !== "CHANNEL_CREATE" && event.t !== "CHANNEL_DELETE")){
+				raw.manageRawEmbeds(event);
+			}
 
-	switch (event.t){
-		case "MESSAGE_REACTION_ADD":
-			if (event.d.channel_id === "762401591180525608"){
-				// manageJoinReaction(event);
-			}else if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
-        		break;
-    		}
-			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-			reactionRoles.forEach(roleInfo => {
-				if (event.d.emoji.name === roleInfo.EmojiName){ 
-					let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-					member.roles.add(role);
-				}
-			});
-			break;
-		case "MESSAGE_REACTION_REMOVE":
-			if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
-        		break;; 
-    		}
-			member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-			reactionRoles.forEach(roleInfo => {
-				if (event.d.emoji.name === roleInfo.EmojiName){ 
-					let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-					member.roles.remove(role);
-				}
-			});
-			break;
-		default:
-			break;
-	}
+			switch (event.t){
+				case "MESSAGE_REACTION_ADD":
+					if (event.d.channel_id === "762401591180525608"){
+						// manageJoinReaction(event);
+					}else if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+		        		break;
+		    		}
+					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
+					reactionRoles.forEach(roleInfo => {
+						if (event.d.emoji.name === roleInfo.EmojiName){ 
+							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
+							member.roles.add(role);
+						}
+					});
+					break;
+				case "MESSAGE_REACTION_REMOVE":
+					if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+		        		break;; 
+		    		}
+					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
+					reactionRoles.forEach(roleInfo => {
+						if (event.d.emoji.name === roleInfo.EmojiName){ 
+							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
+							member.roles.remove(role);
+						}
+					});
+					break;
+				default:
+					break;
+			}
 
-	}
+		}
 	}
 
 	return;
