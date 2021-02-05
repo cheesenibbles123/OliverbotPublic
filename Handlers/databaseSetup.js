@@ -2,6 +2,7 @@ const mysql = require("mysql");
 const config = require("./../config.json");
 const Discord = require("discord.js");
 const adminCommands = require("./adminOnly");
+const main = require("./../oliverbot");
 
 var mainDatabaseConnectionPool = mysql.createPool({
 	connectionLimit : 30,
@@ -49,9 +50,9 @@ var adjustableConfig = {
 	}
 }
 
-var customCommandList = [];
-var miniCommands = [];
-var reactionRoles = [];
+var customCommandList;
+var miniCommands;
+var reactionRoles;
 
 exports.customCommandList = customCommandList;
 exports.miniCommands = miniCommands;
@@ -68,6 +69,12 @@ exports.mainDatabaseConnectionPool = mainDatabaseConnectionPool;
 exports.setupDatabase = function setupDatabase(){
 	loadXpDataFromDB();
 	loadConfigFromDB();
+	loadPermanentCommandsFromDB();
+	loadCustomCommandsFromDB();
+	loadReactionRolesFromDB();
+	setTimeout(function(){
+		main.initDBStuff();
+	},6000);
 }
 
 function loadXpDataFromDB(){
@@ -166,6 +173,15 @@ exports.giveUserMoney = function giveUserMoney(amount,ID){
 	});
 }
 
+exports.handler = function handler(message,command,args){
+	if (!customCommands(message,command)){
+		if (!permanentCommands(message,command)){
+			return false;
+		}
+	}
+	return true;
+}
+
 //Ones that the owner makes, and thus only the owner can remove
 function loadPermanentCommandsFromDB(){
 	miniCommands = [];
@@ -209,4 +225,28 @@ function loadReactionRolesFromDB(){
 		}
 	});
 	adminCommands.displayReactionRoles();
+}
+
+function customCommands(message,command){
+	if (customCommandList.length < 1){return false;}
+	else{
+		for (i=0;i<customCommandList.length;i++){
+			if (customCommandList[i].command === command){
+				message.channel.send(customCommandList[i].response);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+function permanentCommands(message,command){
+	if (miniCommands.length < 1){return;}
+	else{
+		for (i=0;i<miniCommands.length;i++){
+			if (miniCommands[i].command === command){
+				message.channel.send(miniCommands[i].response);
+			}
+		}
+	}
 }

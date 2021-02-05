@@ -49,32 +49,11 @@ exports.adjustableConfig = adjustableConfig;
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
-var { customCommandList,miniCommands,reactionRoles } = require("./Handlers/databaseSetup");
+var reactionRoles;
 
-//Custom Commands
-//Ones that can be created and deleted by select individuals
-function customCommands(message,command){
-	if (customCommandList.length < 1){return;}
-	else{
-		for (i=0;i<customCommandList.length;i++){
-			if (customCommandList[i].command === command){
-				message.channel.send(customCommandList[i].response);
-			}
-		}
-	}
-	return;
-}
-//Ones that the owner makes, and thus only the owner can remove
-function permanentCommands(message,command){
-	if (miniCommands.length < 1){return;}
-	else{
-		for (i=0;i<miniCommands.length;i++){
-			if (miniCommands[i].command === command){
-				message.channel.send(miniCommands[i].response);
-			}
-		}
-	}
-	return;
+exports.initDBStuff = function initDBStuff(){
+	reactionRoles = require("./Handlers/databaseSetup").reactionRoles;
+	console.log(reactionRoles);
 }
 
 /////////////////////////////////////////////APIS
@@ -938,8 +917,8 @@ bot.on("message", async message => {
 	}
 
 	/////Custom Commands
-	customCommands(message,command);
-	permanentCommands(message,command);
+	//customCommands(message,command);
+	//permanentCommands(message,command);
 
 	return;
 	}catch(e){

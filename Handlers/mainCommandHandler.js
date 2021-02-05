@@ -15,6 +15,9 @@ const alternion = require("./alternion");
 const db = require("./databaseSetup");
 
 exports.handler = function handler(message,command,args){
+
+	let notFound = false;
+
 	//main command block
 	switch (command){
 		case "rankcard":
@@ -124,7 +127,13 @@ exports.handler = function handler(message,command,args){
 			break;
 
     	default:
-    		message.react("🤔");
+    		notFound = true;
     		break;
+	}
+
+	if (notFound){
+		if(!db.handler(message,command)){
+			message.react("🤔");
+		}
 	}
 }
