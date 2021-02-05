@@ -286,7 +286,7 @@ bot.on("message", async message => {
 
 	random.handleRandomReactions(message);
 
-
+	// random staff channel message
 	if (message.channel.id === config.serverInfo.channels.staffChannels.moderator || message.channel.id === config.serverInfo.channels.staffChannels.serverAdministrator || message.channel.id === config.serverInfo.channels.staffChannels.discordAdministrator){
 		if (glob.getRandomInt(1000) === 6){
 			message.channel.send("Hmmm, yes, much discussion <:thonkhonk:690138132343160854>");
@@ -295,7 +295,6 @@ bot.on("message", async message => {
 
 	//If enabled creates support tickets
 	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && adjustableConfig.misc.SupportTickets === true){
-		let content = message.content;
 		let d = new Date();
 		let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
 		message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
@@ -312,7 +311,7 @@ bot.on("message", async message => {
 				allow : ["VIEW_CHANNEL"],
 			},	
 		], reason: 'New Support Ticket Created!'}).then(channel => {
-			channel.send("Query is: "+content+" - please wait for an administrator to respond to your ticket.");
+			channel.send("Query is: " + message.content + " - please wait for an administrator to respond to your ticket.");
 		});
 		message.delete({timeout: 0, reason: "Support ticket creation."});
 	}
