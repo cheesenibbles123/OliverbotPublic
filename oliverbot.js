@@ -84,13 +84,6 @@ function GetMarsWeatherData(message){
 	return;
 }
 
-function NumbersTrivia(message){
-	fetch("http://numbersapi.com/random").then(res => res.text()).then(response =>{
-		message.channel.send("```"+`${response}`+"```");
-	});
-	return;
-}
-
 function saveQuoteAutomatic(message){
 	try{
 		let AutoQuote = new Discord.MessageEmbed()
