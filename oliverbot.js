@@ -290,8 +290,6 @@ allowedCommands = ["savequote"];
 bot.on("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
 	initialSetup.init();
-
-	displayRichestUsers();
 });
 
 bot.on("message", async message => {

@@ -51,6 +51,7 @@ exports.initEconomy = function initEconomy(){
 		updateleaderboard();
 	},delays.xpLb);
 	updateShopWindow();
+	displayRichestUsers();
 }
 
 async function updateleaderboard(){
