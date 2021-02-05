@@ -476,11 +476,6 @@ bot.on("message", async message => {
 
 	commands.handler(message,command,args);
 
-	/////Custom Commands
-	//customCommands(message,command);
-	//permanentCommands(message,command);
-
-	return;
 	}catch(e){
 		console.log("###########################################################");
 		console.log("##################### START OF ERROR ######################");
