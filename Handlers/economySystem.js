@@ -561,6 +561,53 @@ function giftUserCoins(gifterID,recieverID,amount,message){
 	}
 }
 
+function giftUserItem(gifterID,reciever,item,message){
+	let user = glob.getUserFromMention(reciever);
+	user = user.id;
+	if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
+		message.channel.send("Please enter an appropriate item!");
+	}
+
+	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
+		if(err) console.log(err);
+		if(rows.length < 1){
+			message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
+		}else if(rows.length > 1){
+			message.channel.send(`Something has gone wrong, please message <@${config.ownerId}>`);
+		}else{
+			let inventory = JSON.parse(rows[0].inventory);
+			let notFound = true;
+			let tempList = [];
+			let worth;
+			for (i=0; i < inventory.length; i++){
+				if (inventory[i].name !== item){
+					tempList.push(inventory[i]);
+				}else{
+					notFound = false;
+				}
+			}
+
+			if (!notFound){
+				db.mainDatabaseConnectionPool.query(`select * from shop where name='${item}'`, (err,rows2) => {
+					if(err) console.log(err);
+					if (JSON.stringify(inventory).includes("null")){
+						inventory = '[]';
+					}
+					db.mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
+					db.mainDatabaseConnectionPool.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
+					let itemInfo = JSON.parse(rows2[0].info);
+					message.channel.send(`Item: ${itemInfo.name} has been sold for ${worth}.`);
+					updateShopWindow();
+				});
+			}
+
+			if (notFound){
+				message.channel.send("You cannot gift this item as you do not own it!");
+			}
+		}
+	});
+}
+
 function gambleMoney(amount,message,args){
 	if (args[0] && (args.length === 1)){
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
