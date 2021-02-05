@@ -31,7 +31,7 @@ exports.init = function init(){
 	rand.init();
 
 	bot = require("./../oliverbot.js").bot;
-	
+
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);
