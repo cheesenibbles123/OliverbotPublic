@@ -856,6 +856,12 @@ function updateShopWindow(){
 	});
 }
 
+function editMsg(contents,channelID,msgID){
+	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
+		msg.edit(contents);
+	});
+}
+
 function checkOrRemoveResources(check,list,checkForName,checkForAmount){
 	if (check){
 		for (let s=0; s<list.length;s++){

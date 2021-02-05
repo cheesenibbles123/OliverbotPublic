@@ -266,12 +266,6 @@ function craftItem(message,args){
 
 //Not yet complete
 
-function editMsg(contents,channelID,msgID){
-	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
-		msg.edit(contents);
-	});
-}
-
 function updateNWordCounter(message){
 	mainDatabaseConnectionPool.query(`SELECT * FROM nWordCount WHERE ID='${message.author.id}'`, (err,rows, fields) => {
 		if (rows.length === 0){
