@@ -15,7 +15,7 @@ var leaderboardlimits = {
 }
 
 var delays = {
-	xpLb = 300000;
+	"xpLb" : 300000
 }
 
 exports.handler = function handler(message,command,args){

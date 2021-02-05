@@ -10,38 +10,42 @@ exports.init = function init(){
 }
 
 exports.handler = function handler(message,command,args){
-	if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
-		switch (command){
-			case "createcommand":
-				createCommand(message,args);
-				break;
-			case "deletecommand":
-				deleteCommand(message,args);
-				break;
-			case "userinfo":
-				getUserInformation(message,args);
-				break;
-			case "savequote":
-				saveQuote(message.channel,args[0]);
-				break;
-			case "mute":
-				mute(message);
-				break;
-			case "unmute":
-				unmute(message);
-				break;
-			case "totalusers":
-				message.channel.send(message.guild.members.cache.filter(member => !member.user.bot).size);
-				break;
-			case "warn":
-				warn(message,args);
-				break;
-			case "tempmute":
-				tempMute(message);
-				break;
+	if (db.adjustableConfig.misc.moderatorCommands){
+		if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
+			switch (command){
+				case "createcommand":
+					createCommand(message,args);
+					break;
+				case "deletecommand":
+					deleteCommand(message,args);
+					break;
+				case "userinfo":
+					getUserInformation(message,args);
+					break;
+				case "savequote":
+					saveQuote(message.channel,args[0]);
+					break;
+				case "mute":
+					mute(message);
+					break;
+				case "unmute":
+					unmute(message);
+					break;
+				case "totalusers":
+					message.channel.send(message.guild.members.cache.filter(member => !member.user.bot).size);
+					break;
+				case "warn":
+					warn(message,args);
+					break;
+				case "tempmute":
+					tempMute(message);
+					break;
+			}
+		}else{
+			message.channel.send(issueEmbeds.grabEmbed(0,null));
 		}
 	}else{
-		message.channel.send(issueEmbeds.grabEmbed(0,null));
+		message.channel.send(issueEmbeds.grabEmbed(4,null));
 	}
 }
 
