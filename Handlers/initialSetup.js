@@ -37,7 +37,7 @@ exports.init = function init(){
 	}, 15000000);
 	setInterval(() =>{
 		ISSLocation();
-	}, 10000);
+	}, 20000);
 	//setInterval(() =>{
 	//	displayBotInfo();
 	//}, 6000);
@@ -83,6 +83,6 @@ function ISSLocation(){
 			bot.channels.cache.get("641373050281132034").messages.fetch("668646281752739851").then(msg => { msg.edit(ISSembed);});
 		});
 	}catch(e){
-		console.log(e);
+		//console.log(e);
 	}
 }
