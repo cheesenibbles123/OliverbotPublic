@@ -392,11 +392,6 @@ bot.on("message", async message => {
 		message.react("452064991688916995");
 	}
 
-	//Pre declaration for usage in the switch case below
-	let TrackingCommand = false;
-	let member;
-	let awnser;
-
 	//Ping Oliverbot
 	if (message.content.startsWith("<@!556545106468012052>")){
 		TrackingCommand = true;
@@ -472,7 +467,6 @@ bot.on("message", async message => {
 
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
-	let serverid = message.channel.guild.id;
 
 	commands.handler(message,command,args);
 
