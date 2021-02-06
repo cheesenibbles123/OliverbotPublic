@@ -260,7 +260,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 			fieldName = "Pike_ID";
 			table2Field = "Allowed_Weapon_Skin_ID";
 			break;
-		case "tomohawk":
+		case "tomahawk":
 			table1Name = "WeaponSkin";
 			table2Name = "LimitedWeaponSkins";
 			fieldName = "Tomohawk_ID";
@@ -321,14 +321,14 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	}
 
 	if (table1Name != "NA"){
-		db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID="${message.author.id}"`, (err, rows) => {
+		db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
 			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True`, (err, rows2) => {
 				let found = false;
 				let assignedBadge = "";
 				if (rows){
 					for (let i = 0; i < rows.length; i++){
 						if (args[2] === rows[i].Name){
-							db.lternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID="${message.author.id}"`);
+							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${message.author.id}'`);
 							console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
 							assignedBadge = rows[i].Display_Name;
 							found = true;
@@ -340,7 +340,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 				if (rows2){
 					for (let i = 0; i < rows2.length; i++){
 						if (args[2] === rows2[i].Name){
-							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID="${message.author.id}"`);
+							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${message.author.id}'`);
 							console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
 							assignedBadge = rows2[i].Display_Name;
 							found = true;
@@ -352,7 +352,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 				if (!found){
 					alternionHandlerEmbed.setDescription("You cannot assign that Item!");
 				}else{
-					alternionHandlerEmbed.setDescription(`Assigned badge: **${assignedBadge}**`);
+					alternionHandlerEmbed.setDescription(`Assigned skin: **${assignedBadge}**`);
 				}
 
 				sendAlternionEmbed(message,alternionHandlerEmbed,true);
@@ -394,7 +394,7 @@ function getAlternionOverview(message,alternionHandlerEmbed){
 						+	`Bottle      : **${rows[0].bot}**\n`
 						+	`Cutlass     : **${rows[0].cut}**\n`
 						+	`Pike        : **${rows[0].pik}**\n`
-						+	`Tomohawk    : **${rows[0].tom}**\n`
+						+	`Tomahawk    : **${rows[0].tom}**\n`
 						+	`Spyglass    : **${rows[0].spy}**\n`
 						+	`Grenade     : **${rows[0].gre}**\n`
 						+	`Rum         : **${rows[0].hea}**\n`
@@ -504,6 +504,7 @@ function getNormalSails(message,ID,pubPriv,alternionHandlerEmbed){
 					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
 				}
 				alternionHandlerEmbed.setDescription(returnString);
+				alternionHandlerEmbed.setTitle("Available Public Sails");
 			}
 
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
@@ -541,6 +542,7 @@ function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
 					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
 				}
 				alternionHandlerEmbed.setDescription(returnString);
+				alternionHandlerEmbed.setTitle("Available Public Main Sails");
 			}
 
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
@@ -578,6 +580,7 @@ function getBadges(message,ID,pubPriv,alternionHandlerEmbed){
 					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
 				}
 				alternionHandlerEmbed.setDescription(returnString);
+				alternionHandlerEmbed.setTitle("Available Public Badges");
 			}
 
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
