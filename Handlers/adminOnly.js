@@ -69,14 +69,14 @@ function updateDBConfig(message,args){
 				if (!isNaN(newValue)){
 					correctInput = true;
 				}else{
-					message.channel.send("Please check you have entered it correcty.")''
+					message.channel.send("Please check you have entered it correcty.");
 				}
 			}else
 			if (type === 'bool'){
 				if (newValue === 'false' || newValue === 'true'){
 					correctInput = true;
 				}else{
-					message.channel.send("Please check you have entered it correcty.")''
+					message.channel.send("Please check you have entered it correcty.");
 				}
 			}
 
