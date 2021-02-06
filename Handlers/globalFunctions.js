@@ -1,9 +1,11 @@
 var adjustableConfig;
+var bot;
 const db = require("./databaseSetup");
 const fs = require('fs');
 
 exports.init = function init(){
 	adjustableConfig = require("./../oliverbot.js").adjustableConfig;
+	bot = require("./../oliverbot.js").bot;
 }
 
 function getRandomInt(max) {
