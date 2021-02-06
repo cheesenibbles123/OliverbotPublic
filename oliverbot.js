@@ -2,8 +2,6 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const btoa = require("btoa");
-
 const commands = require("./Handlers/mainCommandHandler");
 const glob = require("./Handlers/globalFunctions");
 const db = require("./Handlers/databaseSetup");
@@ -316,7 +314,7 @@ bot.on("message", async message => {
 			if (message.channel.name.toLowerCase().includes("support")){
 				// Ignore
 			}else
-			if (glob.getRandomInt(adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
+			if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
 				saveQuoteAutomatic(message);
 			}
 		}
@@ -459,7 +457,7 @@ bot.on('raw', async event => {
 				case "MESSAGE_REACTION_ADD":
 					if (event.d.channel_id === "762401591180525608"){
 						// manageJoinReaction(event);
-					}else if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
+					}else if ((parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
 		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
@@ -471,8 +469,8 @@ bot.on('raw', async event => {
 					});
 					break;
 				case "MESSAGE_REACTION_REMOVE":
-					if (parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu){
-		        		break;; 
+					if ((parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
+		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
 					reactionRoles.forEach(roleInfo => {
