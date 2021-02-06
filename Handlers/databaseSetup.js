@@ -4,6 +4,7 @@ const Discord = require("discord.js");
 const adminCommands = require("./adminOnly");
 const main = require("./../oliverbot");
 const economy = require("./economySystem");
+const btoa = require("btoa");
 
 var mainDatabaseConnectionPool = mysql.createPool({
 	connectionLimit : 30,
@@ -81,11 +82,10 @@ exports.setupDatabase = function setupDatabase(){
 }
 
 function loadXpDataFromDB(){
-	configurationDatabaseConnectionPool.query(`SELECT * FROM xpGainData`, (err,rows,fields) =>{
+	configurationDatabaseConnectionPool.query(`SELECT * FROM xpGainData`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
-		}
-		else{
+		}else{
 			for (i=0;i<rows.length;i++){
 				xpdetails[`${rows[i].factorName}`] = rows[i].val;
 			}
@@ -94,7 +94,7 @@ function loadXpDataFromDB(){
 }
 
 function loadConfigFromDB(){
-	configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows,fields) => {
+	configurationDatabaseConnectionPool.query(`SELECT * FROM config`, (err,rows) => {
 		if (rows.length < 1){
 			console.log("------ERROR LOADING CONFIG------");
 		}else{
