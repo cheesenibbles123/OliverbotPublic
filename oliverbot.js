@@ -109,7 +109,6 @@ function displayBotInfo(){
 	}catch(e){
 		console.log(e);
 	}
-	return;
 }
 
 async function getUserFromID(ID){
@@ -457,7 +456,7 @@ bot.on('raw', async event => {
 				case "MESSAGE_REACTION_ADD":
 					if (event.d.channel_id === "762401591180525608"){
 						// manageJoinReaction(event);
-					}else if ((parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
+					}else if ((parseInt(event.d.channel_id) !== 607491352598675457 && db.adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
 		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
@@ -469,7 +468,7 @@ bot.on('raw', async event => {
 					});
 					break;
 				case "MESSAGE_REACTION_REMOVE":
-					if ((parseInt(event.d.channel_id) !== 607491352598675457 && adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
+					if ((parseInt(event.d.channel_id) !== 607491352598675457 && db.adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
 		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
