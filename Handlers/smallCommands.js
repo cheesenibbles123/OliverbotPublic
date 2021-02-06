@@ -392,7 +392,12 @@ function urbanDict(message,args){
 	if (adjustableConfig.apis.urban){
 		let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
 		fetch(api).then(response => response.json()).then(resp => {
-			let option = resp.list[getRandomInt(resp.list.length)];
+			let option;
+			if (resp.list.length > 1){
+				option = resp.list[glob.getRandomInt(resp.list.length)];
+			}else{
+				option = resp.list[0];
+			}
 			let embed = new Discord.MessageEmbed()
 			.setTitle("Urban Response")
 			.setColor(0x008000)

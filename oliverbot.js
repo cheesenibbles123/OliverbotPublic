@@ -249,7 +249,7 @@ bot.on("message", async message => {
 	}
 
 	//If enabled creates support tickets
-	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && adjustableConfig.misc.SupportTickets === true){
+	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && db.adjustableConfig.misc.SupportTickets === true){
 		let d = new Date();
 		let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
 		message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
@@ -314,7 +314,7 @@ bot.on("message", async message => {
 		let voiceChannel = message.member.voice.channel;
 		if (!voiceChannel){ return; }
 		else if (isPlaying){ return message.reply("I am currently busy, please wait :)"); }
-		else if (!adjustableConfig.music.pingCommand){
+		else if (!db.adjustableConfig.music.pingCommand){
 			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
 		}else{
 			let file = fs.readFileSync("./datafile.json").toString();
