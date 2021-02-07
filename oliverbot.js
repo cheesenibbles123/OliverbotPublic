@@ -10,13 +10,13 @@ const initialSetup = require("./Handlers/initialSetup");
 const random = require("./Handlers/randomStuff");
 const economy = require("./Handlers/economySystem");
 
-var serverStatus = {
+let serverStatus = {
 	"active" : false,
 	"msg" : null,
 	"channel" : "663524428092538920"
 };
 
-var cooldowns = {
+let cooldowns = {
 	"steamApi" : true,
 	"quiz" : {
 		"allowed" : true,
@@ -28,11 +28,10 @@ exports.bot = bot;
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
-var reactionRoles;
+var adjustableConfig;
 
 exports.initDBStuff = function initDBStuff(){
-	reactionRoles = require("./Handlers/databaseSetup").reactionRoles;
-	console.log(reactionRoles);
+	adjustableConfig = require("./Handlers/databaseSetup").adjustableConfig;
 }
 
 /////////////////////////////////////////////APIS
@@ -437,7 +436,7 @@ bot.on('raw', async event => {
 		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-					reactionRoles.forEach(roleInfo => {
+					adjustableConfig.reactionRoles.forEach(roleInfo => {
 						if (event.d.emoji.name === roleInfo.EmojiName){ 
 							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
 							member.roles.add(role);
@@ -449,7 +448,7 @@ bot.on('raw', async event => {
 		        		break;
 		    		}
 					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-					reactionRoles.forEach(roleInfo => {
+					adjustableConfig.reactionRoles.forEach(roleInfo => {
 						if (event.d.emoji.name === roleInfo.EmojiName){ 
 							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
 							member.roles.remove(role);

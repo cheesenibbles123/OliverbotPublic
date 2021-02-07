@@ -49,20 +49,19 @@ const adjustableConfig = {
 	},
 	"apis" : {
 		"checkNudity" : true,
-	}
+	},
+	'reactions' : undefined
 };
 
 let customCommandList;
 let miniCommands;
-let reactionRoles;
+//let reactionRoles;
 
 exports.adjustableConfig = adjustableConfig;
 
 exports.customCommandList = customCommandList;
 exports.miniCommands = miniCommands;
-exports.reactionRoles = reactionRoles;
-
-exports.adjustableConfig = adjustableConfig;
+//exports.reactionRoles = reactionRoles;
 
 exports.xpdetails = xpdetails;
 
@@ -220,14 +219,14 @@ function loadCustomCommandsFromDB(){
 }
 
 function loadReactionRolesFromDB(){
-	reactionRoles = [];
+	adjustableConfig.reactionRoles = [];
 	configurationDatabaseConnectionPool.query(`SELECT * FROM reactionRoles`, (err,rows) =>{
 		if (rows.length < 1){
 			return;
 		}
 		else{
 			for (i=0;i<rows.length;i++){
-				reactionRoles.push( {"EmojiName" : rows[i].emojiName, "EmojiID" : rows[i].emojiID, "EmojiType" : rows[i].emojiType, "RoleID" : rows[i].RoleID} );
+				adjustableConfig.reactionRoles.push( {"EmojiName" : rows[i].emojiName, "EmojiID" : rows[i].emojiID, "EmojiType" : rows[i].emojiType, "RoleID" : rows[i].RoleID} );
 			}
 		}
 	});
