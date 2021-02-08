@@ -119,6 +119,10 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 			teamLeaderHandler(message,args[1],args[2],alternionHandlerEmbed);
 			break;
 
+		case "listmembers":
+			teamLeaderFetchList(message,message.author.id,alternionHandlerEmbed);
+			break;
+
 		default:
 			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Blackwake Alternion Help` to get a list of supported commands!");
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
@@ -706,6 +710,26 @@ function teamLeaderUpdateUser(message,team,tlTeam,userID,action,alternionHandler
 					sendAlternionEmbed(message,alternionHandlerEmbed,false);
 				});
 			}
+		}
+	});
+}
+
+function teamLeaderFetchList(message,tlID,alternionHandlerEmbed){
+	db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id=${tlID}`, (err,rows) => {
+		if (rows.length === 1 && rows[0].Team_Leader !== 0){
+			db.alternionConnectionPool.query(`SELECT ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
+				let list = "";
+				for (let i=0; i < rows2.length; i++){
+					list += `\`${rows2[i].ID}\` <@${rows2[i].Discord_ID}>\n`;
+				}
+				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${rows[0].Team_ID}`, (err,rows3) => {
+					alternionHandlerEmbed.setTitle(rows3[0].Name)
+						.setDescription(list);
+					sendAlternionEmbed(message,alternionHandlerEmbed,false);
+				});
+			});
+		}else{
+			message.channel.send("This command is for Team Leaders only!");
 		}
 	});
 }
