@@ -48,6 +48,3 @@ Incase the title of the files wasn't clear enough, the included config and dataf
  - Lang: Js
  - Environment: nodeJs
  - PM: PM2
-
-**Current Line Count:**
- - 1320
