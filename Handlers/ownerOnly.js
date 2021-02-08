@@ -1,6 +1,7 @@
 const issueEmbed = require("./issueEmbed");
 const config = require("./../config.json");
 const db = require("./databaseSetup");
+const alt = require("./alternion");
 
 exports.handler = function handler(message,command,args){
 	if (message.author.id === config.ownerId){
@@ -13,6 +14,9 @@ exports.handler = function handler(message,command,args){
 				break;
 			case "database":
 				datbase(message,args);
+				break;
+			case "updatealternion":
+				fullForceAlternion();
 				break;
 		}
 	}else{
@@ -107,4 +111,8 @@ function runDatabaseCommand(message,database,query){
 			}
 		}
 	});
+}
+
+function fullForceAlternion(){
+	alt.globalJsonUpdate();
 }
