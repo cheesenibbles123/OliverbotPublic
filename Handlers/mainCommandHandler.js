@@ -77,6 +77,7 @@ exports.handler = function handler(message,command,args){
 		case "database":
 		case "do":
 		case "restart":
+		case "updatealternion":
 			ownerOnly.handler(message,command,args);
 			break;
 		case "quiz":
