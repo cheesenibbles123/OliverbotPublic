@@ -674,12 +674,13 @@ function teamLeaderHandler(message,action,user_id,alternionHandlerEmbed){
 }
 
 function teamLeaderUpdateUser(message,team,user_id,action,alternionHandlerEmbed){
-	db.alternionConnectionPool.query(`SELECT ID FROM User WHERE ID='${user_id}'`, (err,rows) => {
+	db.alternionConnectionPool.query(`SELECT ID,Team_ID FROM User WHERE ID='${user_id}'`, (err,rows) => {
+		console.log(rows);
 		if (rows.length < 1){
 			message.channel.send("That user is not in the database!");
-		}else if (action === "remove" && team != rows[0].Team_ID){
+		}else if (action === "remove" && team !== rows[0].Team_ID){
 			message.channel.send("You cannot remove members that are not on your team!");
-		}else if (action === "add" && rows[0].Team_ID != 0){
+		}else if (action === "add" && rows[0].Team_ID !== 0){
 			message.channel.send("You cannot add members that are on a team!");
 		}else{
 			db.alternionConnectionPool.query(`UPDATE User SET Team_ID=${team} WHERE ID=${rows[0].ID}`);
