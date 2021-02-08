@@ -76,7 +76,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 			break;
 
 		case "whatsmyid":
-			alternionHandlerEmbed.setTitle("Your Info");
+			alternionHandlerEmbed.setTitle("Your ID");
 			getUserID(message,alternionHandlerEmbed);
 			break;
 
@@ -129,7 +129,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 }
 
 function getUserID(message,embed){
-	db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID="${message.author.id}`, (err,rows) => {
+	db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${message.author.id}'`, (err,rows) => {
 		if (rows){
 			if (rows.length < 1){
 				message.channel.send("You are currently not in the database.");
@@ -137,7 +137,7 @@ function getUserID(message,embed){
 				message.channel.send("There seems to be an issue, you are recorded multiple times.");
 			}else{
 				embed.setDescription("`" + rows[0].ID + "`");
-				sendAlternionEmbed(embed);
+				sendAlternionEmbed(message,embed,false);
 			}
 		}else{
 			message.channel.send(issueEmbed.grabEmbed(5,"GETUSERID : No rows found."));
@@ -651,7 +651,6 @@ function sendAlternionEmbed(message,embed,needsUpdate){
 	if (needsUpdate){
 		getLocalJson(message.author.id);
 	}
-	return;
 }
 
 function teamLeaderBadgeHandler(message,user_id,action,badgeID,alternionHandlerEmbed){
