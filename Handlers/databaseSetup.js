@@ -50,7 +50,7 @@ const adjustableConfig = {
 	"apis" : {
 		"checkNudity" : true,
 	},
-	'reactions' : undefined
+	'reactionRoles' : undefined
 };
 
 let customCommandList;
@@ -98,7 +98,6 @@ function loadConfigFromDB(){
 			console.log("------ERROR LOADING CONFIG------");
 		}else{
 			for (i=0;i<rows.length;i++){
-
 				if (rows[i].category === 'reactions'){
 					//Determines if the data for the specific reaction type is a bool or int, for example some are singular true/false events, some are a X in Y chance event
 					if (rows[i].boolInt === 'bool'){
@@ -135,7 +134,6 @@ function loadConfigFromDB(){
 						adjustableConfig.apis[`${rows[i].name}`] = parseInt(rows[i].currentval);
 					}
 				}
-
 			}
 		}
 	});
