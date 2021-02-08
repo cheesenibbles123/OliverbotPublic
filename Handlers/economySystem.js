@@ -37,7 +37,7 @@ exports.handler = function handler(message,command,args){
 			break;
 		case "giftcoins":
 			let user = glob.getUserFromMention(args[0]);
-			giftUserCoins(message.author.id,user.id,args[1],message);
+			giftUserCoins(message.author.id,user.id,args[1],message,args);
 			break;
 		case "gamble":
 			gambleMoney(args[0],message,args);
@@ -507,10 +507,9 @@ function sellItem(ID,item,message){
 	}
 }
 
-function giftUserCoins(gifterID,recieverID,amount,message){
+function giftUserCoins(gifterID,recieverID,amount,message,args){
 
 	if (args.length < 3){
-		let user = glob.getUserFromMention(args[0]);
 
 		if (isNaN(amount)){
 			message.channel.send("Please enter a correct value!");
