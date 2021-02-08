@@ -116,7 +116,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 
 		case "manage":
 			alternionHandlerEmbed.setTitle("Managing User...");
-			teamLeaderBadgeHandler(message,args[1],args[2],alternionHandlerEmbed);
+			teamLeaderHandler(message,args[1],args[2],alternionHandlerEmbed);
 			break;
 
 		default:
