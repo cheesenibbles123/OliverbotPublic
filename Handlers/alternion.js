@@ -660,9 +660,9 @@ function teamLeaderHandler(message,action,user_id,alternionHandlerEmbed){
 				message.channel.send("Something went wrong, you appear to be in the DB twice.");
 			}else{
 				if (action === "remove"){
-					teamLeaderUpdateUser(message,0,user_id,action,alternionHandlerEmbed);
+					teamLeaderUpdateUser(message,0,rows[0].tl_ID,user_id,action,alternionHandlerEmbed);
 				}else if (action === "add"){
-					teamLeaderUpdateUser(message,rows[0].tl_ID,user_id,action,alternionHandlerEmbed);
+					teamLeaderUpdateUser(message,rows[0].tl_ID,null,user_id,action,alternionHandlerEmbed);
 				}else{
 					message.channel.send("Invalid action");
 				}
@@ -673,23 +673,24 @@ function teamLeaderHandler(message,action,user_id,alternionHandlerEmbed){
 	});
 }
 
-function teamLeaderUpdateUser(message,team,user_id,action,alternionHandlerEmbed){
+function teamLeaderUpdateUser(message,team,tl_team,user_id,action,alternionHandlerEmbed){
 	db.alternionConnectionPool.query(`SELECT ID,Team_ID FROM User WHERE ID='${user_id}'`, (err,rows) => {
 		console.log(rows);
 		if (rows.length < 1){
 			message.channel.send("That user is not in the database!");
-		}else if (action === "remove" && team !== rows[0].Team_ID){
+		}else if (action === "remove" && tl_team !== rows[0].Team_ID){
+			console.log(`Team: ${tl_team}, ID: ${rows[0].Team_ID}`);
 			message.channel.send("You cannot remove members that are not on your team!");
 		}else if (action === "add" && rows[0].Team_ID !== 0){
 			message.channel.send("You cannot add members that are on a team!");
 		}else{
 			db.alternionConnectionPool.query(`UPDATE User SET Team_ID=${team} WHERE ID=${rows[0].ID}`);
-			if (team != 0){
-				alternionHandlerEmbed.setDescription(`User of ID \`${rows2[0].ID}\`updated!\nThey are now free (for the time being)`);
+			if (team === 0){
+				alternionHandlerEmbed.setDescription(`User of ID \`${rows[0].ID}\` updated!\nThey are now free (for the time being)`);
 				sendAlternionEmbed(message,alternionHandlerEmbed,false);
 			}else{
 				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${team}`, (err,rows2) => {
-					alternionHandlerEmbed.setDescription(`User of ID \`${rows2[0].ID}\`updated!\nNew Team: **${rows2[0].Name}**`);
+					alternionHandlerEmbed.setDescription(`User of ID \`${user_id}\` updated!\nNew Team: **${rows2[0].Name}**`);
 					sendAlternionEmbed(message,alternionHandlerEmbed,false);
 				});
 			}
