@@ -116,10 +116,8 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 
 		case "manage":
 			alternionHandlerEmbed.setTitle("Managing User...");
-			teamLeaderBadgeHandler(message,args[1],args[2],args[3],alternionHandlerEmbed);
+			teamLeaderBadgeHandler(message,args[0],args[1],alternionHandlerEmbed);
 			break;
-
-
 
 		default:
 			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Blackwake Alternion Help` to get a list of supported commands!");
