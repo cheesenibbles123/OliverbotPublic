@@ -439,18 +439,20 @@ function checkifInDatabase(message,args){
 }
 
 function getWeaponSkins(message,ID,alternionHandlerEmbed){
-	db.alternionConnectionPool.query(`SELECT WeaponSkin.Name, WeaponSkin.Display_Name FROM LimitedWeaponSkins INNER JOIN User ON User_ID = User.ID INNER JOIN WeaponSkin ON Allowed_Weapon_Skin_ID = WeaponSkin.ID WHERE User.Discord_ID='${ID}'`, (err,rows) => {
-		if (rows.length < 1){
-			alternionHandlerEmbed.setDescription("No Weapon Skins found.");
-		}else{
-			let returnString = "";
-			for (let i = 0; i < rows.length; i++){
-				returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+	db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
+		db.alternionConnectionPool.query(`(SELECT WeaponSkin.Name, WeaponSkin.Display_Name FROM LimitedWeaponSkins INNER JOIN User ON User_ID = User.ID INNER JOIN WeaponSkin ON Allowed_Weapon_Skin_ID = WeaponSkin.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM WeaponSkin WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			if (rows.length < 1){
+				alternionHandlerEmbed.setDescription("No Weapon Skins found.");
+			}else{
+				let returnString = "";
+				for (let i = 0; i < rows.length; i++){
+					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+				}
+				alternionHandlerEmbed.setDescription(returnString);
 			}
-			alternionHandlerEmbed.setDescription(returnString);
-		}
 
-		sendAlternionEmbed(message,alternionHandlerEmbed,false);
+			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+		});
 	});
 }
 
