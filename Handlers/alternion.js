@@ -534,18 +534,20 @@ function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
 		pubPriv = "private";
 	}
 	if (pubPriv.toLowerCase() === "private"){
-		db.alternionConnectionPool.query(`SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID="${ID}"`, (err,rows) => {
-			if (rows.length < 1){
-				alternionHandlerEmbed.setDescription("No Sails found.");
-			}else{
-				let returnString = "";
-				for (let i = 0; i < rows.length; i++){
-					returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
+			db.alternionConnectionPool.query(`(SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM MainSail WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+				if (rows.length < 1){
+					alternionHandlerEmbed.setDescription("No Sails found.");
+				}else{
+					let returnString = "";
+					for (let i = 0; i < rows.length; i++){
+						returnString += `\`${rows[i].Name}\` : ${rows[i].Display_Name}\n`;
+					}
+					alternionHandlerEmbed.setDescription(returnString);
 				}
-				alternionHandlerEmbed.setDescription(returnString);
-			}
 
-			sendAlternionEmbed(message,alternionHandlerEmbed,false);
+				sendAlternionEmbed(message,alternionHandlerEmbed,false);
+			});
 		});
 	}else if (pubPriv.toLowerCase() === "public"){
 		db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM MainSail WHERE Limited!=1`, (err,rows) => {
@@ -573,7 +575,7 @@ function getBadges(message,ID,pubPriv,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM Badge WHERE Badge.Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM Badge WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No badges found.");
 				}else{
