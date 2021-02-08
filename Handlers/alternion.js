@@ -653,7 +653,7 @@ function sendAlternionEmbed(message,embed,needsUpdate){
 	}
 }
 
-function teamLeaderBadgeHandler(message,user_id,action,badgeID,alternionHandlerEmbed){
+function teamLeaderHandler(message,action,user_id,alternionHandlerEmbed){
 	db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User where discord_ID="${message.author.id}"`, (err,rows) => {
 		if (rows){
 			if (rows[0].tl_ID === 0){
@@ -661,42 +661,39 @@ function teamLeaderBadgeHandler(message,user_id,action,badgeID,alternionHandlerE
 			}else if (rows.length > 1){
 				message.channel.send("Something went wrong, you appear to be in the DB twice.");
 			}else{
-				db.alternionConnectionPool.query(`SELECT ID,Limited,Team_ID from Badge WHERE Name="${badgeID}"`, (err,rows2) => {
-					if (rows){
-						if (rows[0].tl_ID !== rows2[0].Team_ID){
-							message.channel.send("Please ensure you entered the correct badge ID.");
-						}else{
-							db.alternionConnectionPool.query(`SELECT * FROM LimitedBadges WHERE User_ID=${user_id} and Allowed_badge_ID=${rows2[0].ID}`, (err,rows3) => {
-								if (action.toLowerCase() === "assign"){
-									if (rows3){
-										if (rows3[0].User_ID){
-											message.channel.send("This user already has access to this badge!");
-										}
-									}else{
-										db.alternionConnectionPool.query(`INSERT INTO LimitedBadges Values (${user_id},${rows2[0].ID})`);
-										alternionHandlerEmbed.setDescription("Inserted user into DB");
-										sendAlternionEmbed(message,alternionHandlerEmbed);
-									}
-								}else if (action.toLowerCase() === "revoke"){
-									if (rows3){
-										if (rows3[0].User_ID){
-											db.alternionConnectionPool.query(`DELETE FROM LimitedBadges WHERE User_ID=${user_id} and Allowed_Badge_ID=${badgeID}`);
-											alternionHandlerEmbed.setDescription("Removed user into DB");
-											sendAlternionEmbed(message,alternionHandlerEmbed);
-										}
-									}
-								}else {
-									message.channel.send("That is not a valid action!");
-								}
-							});
-						}
-					}else{
-						message.channel.send("Please ensure you entered the correct badge ID.");
-					}
-				});
+				if (action === "remove"){
+					teamLeaderUpdateUser(message,0,user_id,action,alternionHandlerEmbed);
+				}else if (action === "add"){
+					teamLeaderUpdateUser(message,rows[0].tl_ID,user_id,action,alternionHandlerEmbed);
+				}else{
+					message.channel.send("Invalid action");
+				}
 			}
 		}else{
 			message.channel.send("You are not in the database, please contact Archie.");
+		}
+	});
+}
+
+function teamLeaderUpdateUser(message,team,user_id,action,alternionHandlerEmbed){
+	db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Discord_ID='${user_id}'`, (err,rows) => {
+		if (rows.length < 1){
+			message.channel.send("That user is not in the database!");
+		}else if (action === "remove" && team !== rows[0].Team_ID){
+			message.channel.send("You cannot remove members that are not on your team!");
+		}else if (action === "add" && rows[0].Team_ID !== 0){
+			message.channel.send("You cannot add members that are on a team!");
+		}else{
+			db.alternionConnectionPool.query(`UPDATE User SET Team_ID=${team} WHERE ID=${rows[0].ID}`);
+			if (team != 0){
+				alternionHandlerEmbed.setDescription(`User of ID \`${rows2[0].ID}\`updated!\nThey are now free (for the time being)`);
+				sendAlternionEmbed(message,alternionHandlerEmbed,false);
+			}else{
+				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${team}`, (err,rows2) => {
+					alternionHandlerEmbed.setDescription(`User of ID \`${rows2[0].ID}\`updated!\nNew Team: **${rows2[0].Name}**`);
+					sendAlternionEmbed(message,alternionHandlerEmbed,false);
+				});
+			}
 		}
 	});
 }
