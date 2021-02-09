@@ -123,6 +123,14 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 			teamLeaderFetchList(message,message.author.id,alternionHandlerEmbed);
 			break;
 
+		case "forceupdate":
+			teamLeaderForceLoadout(message,message.author.id,args[1],args[2],alternionHandlerEmbed);
+			break;
+
+		case "searchuser":
+			teamLeaderSearch(message,args[1],args[2],alternionHandlerEmbed);
+			break;
+
 		default:
 			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Alternion Help` to get a list of supported commands!");
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
@@ -736,22 +744,109 @@ function teamLeaderFetchList(message,tlID,alternionHandlerEmbed){
 	});
 }
 
-function teamLeaderForceLoadout(message,tlID,alternionHandlerEmbed){
-	db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id=${tlID}`, (err,rows) => {
-		if (rows.length === 1 && rows[0].Team_Leader !== 0){
-			db.alternionConnectionPool.query(`SELECT ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
-				let list = "";
-				for (let i=0; i < rows2.length; i++){
-					list += `\`${rows2[i].ID}\` <@${rows2[i].Discord_ID}>\n`;
-				}
-				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${rows[0].Team_ID}`, (err,rows3) => {
-					alternionHandlerEmbed.setTitle(rows3[0].Name)
-						.setDescription(list);
-					sendAlternionEmbed(message,alternionHandlerEmbed,false);
+function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
+	let field;
+	let table;
+	switch (item){
+		case "badge":
+			field = "Badge_ID";
+			table = "Badge";
+			break;
+		case "mainsail":
+			field = "Main_Sail_ID";
+			table = "MainSail";
+			break;
+		case "sail":
+			field = "Sails_ID";
+			table = "NormalSail";
+			break;
+		case "flag":
+			field = "Flag_ID";
+			table = "Flag";
+			break;
+		default:
+			field = "NA";
+			break;
+	}
+	if (field != "NA"){
+		db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id='${tlID}'`, (err,rows) => {
+			if (rows.length === 1 && rows[0].Team_Leader !== 0){
+				db.alternionConnectionPool.query(`SELECT ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
+					db.alternionConnectionPool.query(`SELECT ID, Name, Display_Name FROM ${table} WHERE Team_ID=${rows[0].Team_ID}`, (err,rows3) => {
+						let hasNotFound = true;
+						for (let s=0; s < rows3.length; s++){
+							if (rows3[s].Name === itemID){
+								hasNotFound = false;
+								for (let i=0; i < rows2.length; i++){
+									db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[0].ID} WHERE ID=${rows2[i].ID}`);
+								}
+
+								alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
+									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: `);
+
+								sendAlternionEmbed(message,alternionHandlerEmbed,false);
+								break;
+							}
+						}
+
+						if (hasNotFound){
+							message.channel.send(`Could not find any **${item}(s)** with ID \`${itemID}\``);
+						}
+					});
 				});
-			});
+			}else{
+				message.channel.send("This command is for Team Leaders only!");
+			}
+		});
+	}else{
+		message.channel.send("Incorrect input, double check your inputs.");
+	}
+}
+
+function teamLeaderSearch(message, type, ID, alternionHandlerEmbed){
+	db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Discord_ID='${message.author.id}'`, (err,rows) => {
+		if (rows){
+			if (rows.length < 1){
+				message.channel.send("You are currently not in the database.");
+			}else if (rows.length > 1){
+				message.channel.send("There seems to be an issue, you are recorded multiple times.");
+			}else if (rows[0].Team_Leader === 0){
+				message.channel.send("You must be a team leader to use this command!");
+			}else{
+				if (type === "discord"){
+					db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Discord_ID='${ID}'`, (err,rows) => {
+						if (rows){
+							if (rows.length < 1){
+								message.channel.send("User is currently not in the database.");
+							}else if (rows.length > 1){
+								message.channel.send("There seems to be an issue, this user is recorded multiple times.");
+							}else{
+								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
+								sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							}
+						}else{
+							message.channel.send(issueEmbed.grabEmbed(5,"GETUSERID : No rows found."));
+						}
+					});
+				}else if (type === "steam"){
+					db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Steam_ID='${ID}'`, (err,rows) => {
+						if (rows){
+							if (rows.length < 1){
+								message.channel.send("User is currently not in the database.");
+							}else if (rows.length > 1){
+								message.channel.send("There seems to be an issue, this user is recorded multiple times.");
+							}else{
+								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
+								sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							}
+						}else{
+							message.channel.send(issueEmbed.grabEmbed(5,"GETUSERID : No rows found."));
+						}
+					});
+				}
+			}
 		}else{
-			message.channel.send("This command is for Team Leaders only!");
+			message.channel.send(issueEmbed.grabEmbed(5,"GETUSERID : No rows found."));
 		}
 	});
 }
