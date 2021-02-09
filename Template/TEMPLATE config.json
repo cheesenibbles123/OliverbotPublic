@@ -2,6 +2,7 @@
 	"token": "INSERTTOKEN",
 	"prefix": "INSERTPREFIX",
 	"ownerId" : "INSERTOWNERDISCORDID",
+	"botID" : "INSERTBOTIDHERE",
 	"apiKeys":{
 		"steam":"INSERTSTEAMAPIKEY",
 		"nasa":"INSERTNASAAPITKEY",
@@ -49,6 +50,12 @@
 	"embedColours" : {
 		"channels" : "INSERTHEXCOLOUR",
 		"bans" : "INSERTHEXCOLOUR",
-		"roles" : "INSERTHEXCOLOUR"
-	}
+		"roles" : "INSERTHEXCOLOUR",
+		"warningAdmin" : "INSERTHEXCOLOUR",
+		"warningMod" : "INSERTHEXCOLOUR"
+	},
+	"alternion" : {
+		"jsonFilePath" : "INSERTFILEPATHHERE"
+	},
+	"eloBoardURL" : "INSERTURLHERE"
 }
