@@ -124,7 +124,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 			break;
 
 		default:
-			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Blackwake Alternion Help` to get a list of supported commands!");
+			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Alternion Help` to get a list of supported commands!");
 			sendAlternionEmbed(message,alternionHandlerEmbed,false);
 			break;
 	}
@@ -340,41 +340,43 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	}
 
 	if (table1Name != "NA"){
-		db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value, User.Team_ID AS teamID FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
-			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR Team_ID=${rows[0].teamID}`, (err, rows2) => {
-				let found = false;
-				let assignedBadge = "";
-				if (rows){
-					for (let i = 0; i < rows.length; i++){
-						if (args[2] === rows[i].Name){
-							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${message.author.id}'`);
-							console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
-							assignedBadge = rows[i].Display_Name;
-							found = true;
-							break;
+		db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${message.author.id}`, (err,userRow) => {
+			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
+				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR Team_ID=${userRow[0].Team_ID}`, (err, rows2) => {
+					let found = false;
+					let assignedBadge = "";
+					if (rows){
+						for (let i = 0; i < rows.length; i++){
+							if (args[2] === rows[i].Name){
+								db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${message.author.id}'`);
+								console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
+								assignedBadge = rows[i].Display_Name;
+								found = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if (rows2){
-					for (let i = 0; i < rows2.length; i++){
-						if (args[2] === rows2[i].Name){
-							db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${message.author.id}'`);
-							console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
-							assignedBadge = rows2[i].Display_Name;
-							found = true;
-							break;
+					if (rows2){
+						for (let i = 0; i < rows2.length; i++){
+							if (args[2] === rows2[i].Name){
+								db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${message.author.id}'`);
+								console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
+								assignedBadge = rows2[i].Display_Name;
+								found = true;
+								break;
+							}
 						}
 					}
-				}
 
-				if (!found){
-					alternionHandlerEmbed.setDescription("You cannot assign that Item!");
-				}else{
-					alternionHandlerEmbed.setDescription(`Assigned skin: **${assignedBadge}**`);
-				}
+					if (!found){
+						alternionHandlerEmbed.setDescription("You cannot assign that Item!");
+					}else{
+						alternionHandlerEmbed.setDescription(`Assigned skin: **${assignedBadge}**`);
+					}
 
-				sendAlternionEmbed(message,alternionHandlerEmbed,true);
+					sendAlternionEmbed(message,alternionHandlerEmbed,true);
+				});
 			});
 		});
 	}
@@ -715,6 +717,26 @@ function teamLeaderUpdateUser(message,team,tlTeam,userID,action,alternionHandler
 }
 
 function teamLeaderFetchList(message,tlID,alternionHandlerEmbed){
+	db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id=${tlID}`, (err,rows) => {
+		if (rows.length === 1 && rows[0].Team_Leader !== 0){
+			db.alternionConnectionPool.query(`SELECT ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
+				let list = "";
+				for (let i=0; i < rows2.length; i++){
+					list += `\`${rows2[i].ID}\` <@${rows2[i].Discord_ID}>\n`;
+				}
+				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${rows[0].Team_ID}`, (err,rows3) => {
+					alternionHandlerEmbed.setTitle(rows3[0].Name)
+						.setDescription(list);
+					sendAlternionEmbed(message,alternionHandlerEmbed,false);
+				});
+			});
+		}else{
+			message.channel.send("This command is for Team Leaders only!");
+		}
+	});
+}
+
+function teamLeaderForceLoadout(message,tlID,alternionHandlerEmbed){
 	db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id=${tlID}`, (err,rows) => {
 		if (rows.length === 1 && rows[0].Team_Leader !== 0){
 			db.alternionConnectionPool.query(`SELECT ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
