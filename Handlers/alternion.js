@@ -124,7 +124,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 			break;
 
 		case "forceupdate":
-			teamLeaderForceLoadout(message,message.author.id,args[1],args[2],alternionHandlerEmbed);
+			teamLeaderForceLoadout(message,message.author.id,args[1].toLowerCase(),args[2],alternionHandlerEmbed);
 			break;
 
 		case "searchuser":
@@ -782,7 +782,7 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 								}
 
 								alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
-									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: `);
+									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[0].Display_Name}`);
 
 								sendAlternionEmbed(message,alternionHandlerEmbed,false);
 								break;
