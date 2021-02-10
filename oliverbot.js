@@ -228,7 +228,6 @@ bot.on("ready", () => {
 
 bot.on("message", async message => {
 
-
 	try{
 
 	//dont respond to bots
@@ -242,50 +241,53 @@ bot.on("message", async message => {
 
 	random.handleRandomReactions(message);
 
-	// random staff channel message
-	if (message.channel.id === config.serverInfo.channels.staffChannels.moderator || message.channel.id === config.serverInfo.channels.staffChannels.serverAdministrator || message.channel.id === config.serverInfo.channels.staffChannels.discordAdministrator){
-		if (glob.getRandomInt(1000) === 6){
-			message.channel.send("Hmmm, yes, much discussion <:thonkhonk:690138132343160854>");
-		}
-	}
-
-	//If enabled creates support tickets
-	if (message.channel.id === config.serverInfo.channels.supportTicketChannel && db.adjustableConfig.misc.SupportTickets === true){
-		let d = new Date();
-		let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
-		message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
-			{
-				id : config.serverInfo.serverId,
-				deny : ['VIEW_CHANNEL'],
-			},
-			{
-				id : `${message.author.id}`,
-				allow : ["VIEW_CHANNEL"],
-			},
-			{
-				id : config.serverInfo.roles.serverAdministrator,
-				allow : ["VIEW_CHANNEL"],
-			},	
-		], reason: 'New Support Ticket Created!'}).then(channel => {
-			channel.send("Query is: " + message.content + " - please wait for an administrator to respond to your ticket.");
-		});
-		message.delete({timeout: 0, reason: "Support ticket creation."});
-	}
-
-	//N word filter
-	if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ") && db.adjustableConfig.misc.nWordFilter){
-		if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-			// Ignore
-		}else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
-			message.delete();
-			message.channel.send(message.author+" Please dont use that language!");
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
-		}
-		db.updateNWordCounter(message);
-		return;
-	}
-
+	// If in a server
 	if (message.guild){
+
+		// random staff channel message
+		if (message.channel.id === config.serverInfo.channels.staffChannels.moderator || message.channel.id === config.serverInfo.channels.staffChannels.serverAdministrator || message.channel.id === config.serverInfo.channels.staffChannels.discordAdministrator){
+			if (glob.getRandomInt(1000) === 6){
+				message.channel.send("Hmmm, yes, much discussion <:thonkhonk:690138132343160854>");
+			}
+		}
+
+		//If enabled creates support tickets
+		if (message.channel.id === config.serverInfo.channels.supportTicketChannel && db.adjustableConfig.misc.SupportTickets === true){
+			let d = new Date();
+			let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
+			message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
+				{
+					id : config.serverInfo.serverId,
+					deny : ['VIEW_CHANNEL'],
+				},
+				{
+					id : `${message.author.id}`,
+					allow : ["VIEW_CHANNEL"],
+				},
+				{
+					id : config.serverInfo.roles.serverAdministrator,
+					allow : ["VIEW_CHANNEL"],
+				},	
+			], reason: 'New Support Ticket Created!'}).then(channel => {
+				channel.send("Query is: " + message.content + " - please wait for an administrator to respond to your ticket.");
+			});
+			message.delete({timeout: 0, reason: "Support ticket creation."});
+		}
+
+
+		//N word filter
+		if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ") && db.adjustableConfig.misc.nWordFilter){
+			if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
+				// Ignore
+			}else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
+				message.delete();
+				message.channel.send(message.author+" Please dont use that language!");
+				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
+			}
+			db.updateNWordCounter(message);
+			return;
+		}
+
 		//Prevents autoquote from taking from sensitive channels
 		if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
 			if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
@@ -336,32 +338,32 @@ bot.on("message", async message => {
 				});
 			}
 		}
+
+		//check content of any pictures sent for nudity
+		message.attachments.forEach(attachment => {
+	    	if (message.attachments.size > 0) {
+	      		if (attachment.url){
+	        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
+	          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
+	          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
+	            			if (result.nudity.raw > 0.65){
+	              				let nudityEmbed = new Discord.MessageEmbed()
+	                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
+	             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
+	            			}
+	          			}).catch(function(err){
+	            			console.log(err);
+	          			});
+	        		}
+	      		}
+	    	}
+	  	});
 	}
 
 	//Old larry reference (RIP Larry)
 	if (message.content.startsWith("...") && message.content.length === 3){
 		message.react("452064991688916995");
 	}
-
-	//check content of any pictures sent for nudity
-	message.attachments.forEach(attachment => {
-    	if (message.attachments.size > 0) {
-      		if (attachment.url){
-        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
-          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
-          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-            			if (result.nudity.raw > 0.65){
-              				let nudityEmbed = new Discord.MessageEmbed()
-                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
-             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
-            			}
-          			}).catch(function(err){
-            			console.log(err);
-          			});
-        		}
-      		}
-    	}
-  	});
 
 	if (!message.content.startsWith(config.prefix)) return;
 
@@ -377,15 +379,14 @@ bot.on("message", async message => {
 		}
 	}
 	
-	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed)
-	{
+	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed){
 		return;
 	}
 
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 
-	commands.handler(message,command,args);
+	commands.handler(message,command,args, message.channel.type === "dm");
 
 	}catch(e){
 		console.log("###########################################################");
