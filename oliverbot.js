@@ -222,8 +222,8 @@ allowChannels = ["512331083493277706","577180597521350656","440525025452490752",
 allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
-	console.log('Bot '+bot.user.username+' is ready!');
 	initialSetup.init();
+	console.log('Bot '+bot.user.username+' is ready!');
 });
 
 bot.on("message", async message => {
@@ -233,10 +233,12 @@ bot.on("message", async message => {
 
 	//dont respond to bots
 	if (message.author.bot) return;
-	if (message.channel.type === "dm") return;
+	//if (message.channel.type === "dm") return;
 
 	//this situation specific, if running your own just remove
-	if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
+	if (message.guild){
+		if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
+	}
 
 	random.handleRandomReactions(message);
 
@@ -283,60 +285,62 @@ bot.on("message", async message => {
 		return;
 	}
 
-	//Prevents autoquote from taking from sensitive channels
-	if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
-		if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
-			if (message.channel.name.toLowerCase().includes("support")){
-				// Ignore
-			}else
-			if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
-				saveQuoteAutomatic(message);
+	if (message.guild){
+		//Prevents autoquote from taking from sensitive channels
+		if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
+			if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
+				if (message.channel.name.toLowerCase().includes("support")){
+					// Ignore
+				}else
+				if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
+					saveQuoteAutomatic(message);
+				}
 			}
 		}
-	}
 
-	//XP Gain
-	if (message.guild.id === config.serverInfo.serverId){
-		db.xpGainHandler(message);
+		//XP Gain
+		if (message.guild.id === config.serverInfo.serverId){
+			db.xpGainHandler(message);
+		}
+
+		//Ping Oliverbot
+		if (message.content.startsWith("<@!556545106468012052>")){
+			TrackingCommand = true;
+			message.react("🤔");
+
+			let voiceChannel = message.member.voice.channel;
+			if (!voiceChannel){ return; }
+			else if (isPlaying){ return message.reply("I am currently busy, please wait :)"); }
+			else if (!db.adjustableConfig.music.pingCommand){
+				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
+			}else{
+				let file = fs.readFileSync("./datafile.json").toString();
+				file = JSON.parse(file);
+				isPlaying = true;
+				let a = glob.getRandomInt(file.pingedSounds.length);
+				let randomsong = file.pingedSounds[a].toString();
+				voiceChannel.join().then(connection => {
+				currentDispatcher = connection
+					.play(
+	           	 		ytdl(randomsong)
+	        		)
+	        		.on("finish",() =>{
+	        			voiceChannel.leave();
+	        			isPlaying = false;
+	        		})
+	        		.on("error",e=>{
+	        			console.error(e);
+	       		 		voiceChannel.leave();
+	       		 		isPlaying = false;
+	       		 	});
+				});
+			}
+		}
 	}
 
 	//Old larry reference (RIP Larry)
 	if (message.content.startsWith("...") && message.content.length === 3){
 		message.react("452064991688916995");
-	}
-
-	//Ping Oliverbot
-	if (message.content.startsWith("<@!556545106468012052>")){
-		TrackingCommand = true;
-		message.react("🤔");
-
-		let voiceChannel = message.member.voice.channel;
-		if (!voiceChannel){ return; }
-		else if (isPlaying){ return message.reply("I am currently busy, please wait :)"); }
-		else if (!db.adjustableConfig.music.pingCommand){
-			message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-		}else{
-			let file = fs.readFileSync("./datafile.json").toString();
-			file = JSON.parse(file);
-			isPlaying = true;
-			let a = glob.getRandomInt(file.pingedSounds.length);
-			let randomsong = file.pingedSounds[a].toString();
-			voiceChannel.join().then(connection => {
-			currentDispatcher = connection
-				.play(
-           	 		ytdl(randomsong)
-        		)
-        		.on("finish",() =>{
-        			voiceChannel.leave();
-        			isPlaying = false;
-        		})
-        		.on("error",e=>{
-        			console.error(e);
-       		 		voiceChannel.leave();
-       		 		isPlaying = false;
-       		 	});
-			});
-		}
 	}
 
 	//check content of any pictures sent for nudity
