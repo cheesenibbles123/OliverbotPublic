@@ -386,7 +386,7 @@ bot.on("message", async message => {
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 
-	commands.handler(message,command,args, message.channel.type === "dm");
+	commands.handler(message,command,args);
 
 	}catch(e){
 		console.log("###########################################################");

@@ -3,6 +3,7 @@ const Discord = require("discord.js");
 const config = require("./../config.json");
 const fs = require('fs');
 const issueEmbed = require("./issueEmbed");
+const sendSystem = require("./sendMessage.js");
 
 var alternionJsonFile = null;
 

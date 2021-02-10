@@ -14,7 +14,7 @@ const blackwake = require("./blackwake");
 const alternion = require("./alternion");
 const db = require("./databaseSetup");
 
-exports.handler = function handler(message,command,args,isDm){
+exports.handler = function handler(message,command,args){
 
 	let notFound = false;
 
@@ -124,7 +124,7 @@ exports.handler = function handler(message,command,args,isDm){
 
 		// Alternion
 		case "alternion":
-			alternion.alternionMainhandler(message,command,args,isDm);
+			alternion.alternionMainhandler(message,command,args);
 			break;
 
     	default:
