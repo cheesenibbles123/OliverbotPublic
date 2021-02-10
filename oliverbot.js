@@ -379,7 +379,7 @@ bot.on("message", async message => {
 		}
 	}
 	
-	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed){
+	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed && message.guild !== null){
 		return;
 	}
 
