@@ -235,7 +235,7 @@ bot.on("message", async message => {
 	if (message.author.bot) return;
 	//if (message.channel.type === "dm") return;
 
-	//this situation specific, if running your own just remove
+	//this is situation specific, if running your own just remove
 	if (message.guild){
 		if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
 	}
