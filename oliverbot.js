@@ -367,7 +367,7 @@ bot.on("message", async message => {
 
 	if (!message.content.startsWith(config.prefix)) return;
 
-	let messagearray = message.content.split(" ");
+	let messagearray = message.content.split(/[ ]+/);
 	let command = messagearray[0].substring(1);
 	command = command.toLowerCase();
 
