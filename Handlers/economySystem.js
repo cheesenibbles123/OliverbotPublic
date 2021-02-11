@@ -127,7 +127,7 @@ exports.genXp = function genXp(){
 	return Math.floor(Math.random()*(db.xpdetails.max+db.xpdetails.min+1))+db.xpdetails.max;
 }
 
-function beg(){
+function beg(message){
 	let num = blob.getRandomInt(300);
 	if (num == 243){
 		let amount = glob.getRandomInt(20);
