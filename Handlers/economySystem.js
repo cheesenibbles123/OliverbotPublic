@@ -42,6 +42,9 @@ exports.handler = function handler(message,command,args){
 		case "gamble":
 			gambleMoney(args[0],message,args);
 			break;
+		case "search":
+			searchForItem(message,args);
+			break;
 	}
 }
 
@@ -354,8 +357,9 @@ function purchaseItem(ID,item,message,args){
 	}
 }
 
-function searchForItem(item,message){
-	if (args){
+function searchForItem(message,args){
+	if (typeof(args) !== 'string' && args.length >= 1){
+		let item = args[0];
 		if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
 			message.channel.send("Please enter an appropriate search term!");
 		}
@@ -397,7 +401,7 @@ function searchForItem(item,message){
 			}
 		});
 	}else{
-		message.channel.send("Please enter the correct format:\n`;search` `Item Name`");
+		message.channel.send("Please enter the correct format:\n`;search` `Item {ID}/{Name}`");
 	}
 }
 
