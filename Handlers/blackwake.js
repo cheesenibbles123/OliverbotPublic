@@ -347,251 +347,251 @@ function checkifInDatabaseBW(message,args,type){
 }
 
 async function getBlackwakeStats(message,args){
-		fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[1]}`).then(resp => resp.text()).then(response => {
+	fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[1]}`).then(resp => resp.text()).then(response => {
 
-			if (response.includes("500 Internal Server Error")){
-				message.channel.send("Steam API error, code 500");
-			}else if (response.includes("Unknown problem determining WebApi request destination.")) {
-				message.channel.send("Please ensure you have entered the correct terms! Terms can be found using `;help` `blackwake`.\nThe format is as followed:\n`;blackwake` `term` `steamID64`");
-			}else if(response[0] == '<') {
-				console.log("BW RESPONSE ISSUE");
-				console.log(response);
-				console.log("END OF RESPONSE");
-				message.channel.send("Error - Please ping @Archie so he checks the console in time!");
-			}else{
-				let bwStatsEmbed = new Discord.MessageEmbed().setTimestamp();
-				response = JSON.parse(response);
-				let stats = response.playerstats.stats;
+		if (response.includes("500 Internal Server Error")){
+			message.channel.send("Steam API error, code 500");
+		}else if (response.includes("Unknown problem determining WebApi request destination.")) {
+			message.channel.send("Please ensure you have entered the correct terms! Terms can be found using `;help` `blackwake`.\nThe format is as followed:\n`;blackwake` `term` `steamID64`");
+		}else if(response[0] == '<') {
+			console.log("BW RESPONSE ISSUE");
+			console.log(response);
+			console.log("END OF RESPONSE");
+			message.channel.send("Error - Please ping @Archie so he checks the console in time!");
+		}else{
+			let bwStatsEmbed = new Discord.MessageEmbed().setTimestamp();
+			response = JSON.parse(response);
+			let stats = response.playerstats.stats;
 
-				let weapons = ["acc_mus","acc_blun","acc_nock","acc_ann","acc_rev","acc_pis","acc_duck","acc_mpis","acc_cut","acc_dag","acc_bot","acc_tomo","acc_gren","acc_rap"];
-				let substituteNames = ["Musket","Blunderbuss","Nockgun","Annley","Revolver","Pistol","Duckfoot","Short Pistol","Cutlass","Dagger","Bottle","Tomohawk","Grenade","Rapier"];
-				let allWeaponStats = [];
+			let weapons = ["acc_mus","acc_blun","acc_nock","acc_ann","acc_rev","acc_pis","acc_duck","acc_mpis","acc_cut","acc_dag","acc_bot","acc_tomo","acc_gren","acc_rap"];
+			let substituteNames = ["Musket","Blunderbuss","Nockgun","Annley","Revolver","Pistol","Duckfoot","Short Pistol","Cutlass","Dagger","Bottle","Tomohawk","Grenade","Rapier"];
+			let allWeaponStats = [];
 
-				let shipWeaponry = ["acc_can","acc_swiv","acc_grape","acc_arson","acc_ram"];
-				let shipWeaponrySubNames = ["Cannonball","Swivel","Grapeshot","Fireshot","Ramming"];
-				let shipWeaponryStats = [];
+			let shipWeaponry = ["acc_can","acc_swiv","acc_grape","acc_arson","acc_ram"];
+			let shipWeaponrySubNames = ["Cannonball","Swivel","Grapeshot","Fireshot","Ramming"];
+			let shipWeaponryStats = [];
 
-				let ships = ["acc_winHoy","acc_winJunk","acc_winSchoon","acc_cutt","acc_bombk","acc_carr","acc_gunb","acc_winGal","acc_brig","acc_xeb","acc_cru","acc_bombv"];
-				let subShipNames = ["Hoy","Junk","Schooner","Cutter","Bomb Ketch","Carrack","Gunboat","Galleon","Brig","Xebec","Cruiser","Bomb Vessel"];
-				let shipStats = [];
+			let ships = ["acc_winHoy","acc_winJunk","acc_winSchoon","acc_cutt","acc_bombk","acc_carr","acc_gunb","acc_winGal","acc_brig","acc_xeb","acc_cru","acc_bombv"];
+			let subShipNames = ["Hoy","Junk","Schooner","Cutter","Bomb Ketch","Carrack","Gunboat","Galleon","Brig","Xebec","Cruiser","Bomb Vessel"];
+			let shipStats = [];
 
-				let maintenance = ["acc_rep","acc_pump","acc_sail","acc_noseRep"];
-				let subMaintain = ["Hole Repairs","Pumping","Sail Repairs","Nose Repairs"];
-				let maintain = [];
+			let maintenance = ["acc_rep","acc_pump","acc_sail","acc_noseRep"];
+			let subMaintain = ["Hole Repairs","Pumping","Sail Repairs","Nose Repairs"];
+			let maintain = [];
 
-				let miscList = ["acc_head","acc_sup"];
-				let subMiscList = ["Headshots","Supplies"];
-				let misc = [];
+			let miscList = ["acc_head","acc_sup"];
+			let subMiscList = ["Headshots","Supplies"];
+			let misc = [];
 
-				let unassigned = true;
-				let faveWeap = {}; //"name" : "", "value": ""
-				let kills = 0;
-				let deaths = 0;
-				let captainWins = 0;
-				let captainLosses = 0;
-				let crewHits = 0;
-				let score = 0;
-				let rating = 0;
-				let statScoreGs = 0;
-				let prestige = 0;
+			let unassigned = true;
+			let faveWeap = {}; //"name" : "", "value": ""
+			let kills = 0;
+			let deaths = 0;
+			let captainWins = 0;
+			let captainLosses = 0;
+			let crewHits = 0;
+			let score = 0;
+			let rating = 0;
+			let statScoreGs = 0;
+			let prestige = 0;
 
-				for (i=0;i<stats.length;i++){
+			for (i=0;i<stats.length;i++){
 
-					// fav weapon
-					if (weapons.indexOf(stats[i].name) !== -1){
-						if (unassigned){
+				// fav weapon
+				if (weapons.indexOf(stats[i].name) !== -1){
+					if (unassigned){
+						faveWeap = stats[i];
+						unassigned = false;
+					}else{
+						if (faveWeap.value < stats[i].value){
 							faveWeap = stats[i];
-							unassigned = false;
-						}else{
-							if (faveWeap.value < stats[i].value){
-								faveWeap = stats[i];
-							}
 						}
-						allWeaponStats.push(stats[i]);
 					}
-					
-										if (ships.indexOf(stats[i].name) !== -1){
-						shipStats.push(stats[i]);
-					}else
-					if (maintenance.indexOf(stats[i].name) !== -1){
-						maintain.push(stats[i]);
-					}else
-					if (shipWeaponry.indexOf(stats[i].name) !== -1){
-						shipWeaponryStats.push(stats[i]);
-					}else
-					if (miscList.indexOf(stats[i].name) !== -1){
-						misc.push(stats[i]);
-					}
-
-					switch (stats[i].name){
-						case "acc_kills":
-							kills = stats[i].value;
-							break;
-						case "acc_deaths":
-							deaths = stats[i].value;
-							break;
-						case "acc_capWins":
-							captainWins = stats[i].value;
-							break;
-						case "acc_capLose":
-							captainLosses = stats[i].value;
-							break;
-						case "stat_score":
-							score = stats[i].value;
-							break;
-						case "stat_rating":
-							rating = stats[i].value;
-							break;
-						case "stat_score_gs":
-							statScoreGs = stats[i].value;
-							break;
-						case "stat_pres":
-							prestige = stats[i].value;
-							break;
-						case "acc_capHit":
-							crewHits = stats[i].value;
-							break;
-						default:
-							break;
-					}
+					allWeaponStats.push(stats[i]);
+				}
+				
+									if (ships.indexOf(stats[i].name) !== -1){
+					shipStats.push(stats[i]);
+				}else
+				if (maintenance.indexOf(stats[i].name) !== -1){
+					maintain.push(stats[i]);
+				}else
+				if (shipWeaponry.indexOf(stats[i].name) !== -1){
+					shipWeaponryStats.push(stats[i]);
+				}else
+				if (miscList.indexOf(stats[i].name) !== -1){
+					misc.push(stats[i]);
 				}
 
-				let BwShipsEmbed;
-				switch (args[0]){
-					case "overview":
-						let achieves = "";
-						if (JSON.stringify(response).includes("achievements")){
-							achieves = response.playerstats.achievements.length.toString();
-						}else{
-							achieves = "NA";
-						}
-
-						let level = levelProgress(score, prestige);
-
-						let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nLevel: (${prestige}) ${level}\nAchievements: ${achieves}/39`;
-						if (statScoreGs != 0){
-							playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
-						}
-						fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-							response2 = response2.response.games;
-							for (i=0;i<response2.length;i++){
-								if (parseInt(response2[i].appid) === 420290){
-									playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
-								}
-							}	
-							bwStatsEmbed.setTitle(`${args[1]}`)
-								.addField(`General`,`${playerStatsCombined}`,true)
-								.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}\nCrew Hits: ${crewHits}`,true)
-								.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true);
-							sendBWStatsEmbed(message,bwStatsEmbed);
-						});
+				switch (stats[i].name){
+					case "acc_kills":
+						kills = stats[i].value;
 						break;
-					case "weaponstats":
-						let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills",true);
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.setDescription(WeaponStats);
-						sendBWStatsEmbed(message,bwStatsEmbed);
+					case "acc_deaths":
+						deaths = stats[i].value;
 						break;
-					case "shipstats":
-						let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins",true);
-						let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.addField("Ships",`${ShipStats}`,true)
-							.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true);
-						sendBWStatsEmbed(message,bwStatsEmbed);
+					case "acc_capWins":
+						captainWins = stats[i].value;
 						break;
-					case "shipweaponry":
-						let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills",true);
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.setDescription(`${shipWeap}`);
-						sendBWStatsEmbed(message,bwStatsEmbed);
+					case "acc_capLose":
+						captainLosses = stats[i].value;
 						break;
-					case "maintenance":
-						let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"",false);
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.setDescription(maintainStats);
-						sendBWStatsEmbed(message,bwStatsEmbed);
+					case "stat_score":
+						score = stats[i].value;
 						break;
-					case "misc":
-						let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"",false);
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.addField("Misc",`${miscStats}`,true);
-						sendBWStatsEmbed(message,bwStatsEmbed);
+					case "stat_rating":
+						rating = stats[i].value;
 						break;
-					case "compare":
-						let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-						if (statScoreGs != 0){
-							playerStatsCombinedP1 = playerStatsCombinedP1 +`\nScore Gs: ${statScoreGs}`;
-						}
-						fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-							response2 = response2.response.games;
-							for (i=0;i<response2.length;i++){
-								if (parseInt(response2[i].appid) === 420290){
-									playerStatsCombinedP1 = playerStatsCombinedP1 + `\n${(response2[i].playtime_forever)/60}hrs`;
-								}
-							}
-							fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[2]}`).then(resp=>resp.json()).then(response => {
-								stats = response.playerstats.stats;
-								for (i=0;i<stats.length;i++){
-
-									switch (stats[i].name){
-										case "acc_kills":
-											kills = stats[i].value;
-											break;
-										case "acc_deaths":
-											deaths = stats[i].value;
-											break;
-										case "acc_capWins":
-											captainWins = stats[i].value;
-											break;
-										case "acc_capLose":
-											captainLosses = stats[i].value;
-											break;
-										case "stat_score":
-											score = stats[i].value;
-											break;
-										case "stat_score_gs":
-											statScoreGs = stats[i].value;
-											break;
-										case "stat_rating":
-											rating = stats[i].value;
-											break;
-										default:
-											break;
-									}
-
-								}
-
-								let playerStatsCombinedP2 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-								if (statScoreGs != 0){
-									playerStatsCombinedP2 = playerStatsCombinedP2 +`\nScore Gs: ${statScoreGs}`;
-								}
-								fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[2]}`).then(resp => resp.json()).then(response2 =>{
-									response2 = response2.response.games;
-									for (i=0;i<response2.length;i++){
-										if (parseInt(response2[i].appid) === 420290){
-											playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
-										}
-									}
-									bwStatsEmbed.setTitle(`${args[1]} VS ${args[2]}`)
-										.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
-										.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true);
-									sendBWStatsEmbed(message,bwStatsEmbed);
-								});
-							});
-						});
+					case "stat_score_gs":
+						statScoreGs = stats[i].value;
+						break;
+					case "stat_pres":
+						prestige = stats[i].value;
+						break;
+					case "acc_capHit":
+						crewHits = stats[i].value;
 						break;
 					default:
-						message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
 						break;
 				}
 			}
-		}).catch(err => {
-			if (err) {
-				console.error(err);
-				message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:");
-			};
-		});
+
+			let BwShipsEmbed;
+			switch (args[0]){
+				case "overview":
+					let achieves = "";
+					if (JSON.stringify(response).includes("achievements")){
+						achieves = response.playerstats.achievements.length.toString();
+					}else{
+						achieves = "NA";
+					}
+
+					let level = levelProgress(score, prestige);
+
+					let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nLevel: (${prestige}) ${level}\nAchievements: ${achieves}/39`;
+					if (statScoreGs != 0){
+						playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
+					}
+					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
+						response2 = response2.response.games;
+						for (i=0;i<response2.length;i++){
+							if (parseInt(response2[i].appid) === 420290){
+								playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
+							}
+						}	
+						bwStatsEmbed.setTitle(`${args[1]}`)
+							.addField(`General`,`${playerStatsCombined}`,true)
+							.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}\nCrew Hits: ${crewHits}`,true)
+							.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true);
+						sendBWStatsEmbed(message,bwStatsEmbed);
+					});
+					break;
+				case "weaponstats":
+					let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills",true);
+					bwStatsEmbed.setTitle(`${args[1]}`)
+						.setDescription(WeaponStats);
+					sendBWStatsEmbed(message,bwStatsEmbed);
+					break;
+				case "shipstats":
+					let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins",true);
+					let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
+					bwStatsEmbed.setTitle(`${args[1]}`)
+						.addField("Ships",`${ShipStats}`,true)
+						.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true);
+					sendBWStatsEmbed(message,bwStatsEmbed);
+					break;
+				case "shipweaponry":
+					let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills",true);
+					bwStatsEmbed.setTitle(`${args[1]}`)
+						.setDescription(`${shipWeap}`);
+					sendBWStatsEmbed(message,bwStatsEmbed);
+					break;
+				case "maintenance":
+					let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"",false);
+					bwStatsEmbed.setTitle(`${args[1]}`)
+						.setDescription(maintainStats);
+					sendBWStatsEmbed(message,bwStatsEmbed);
+					break;
+				case "misc":
+					let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"",false);
+					bwStatsEmbed.setTitle(`${args[1]}`)
+						.addField("Misc",`${miscStats}`,true);
+					sendBWStatsEmbed(message,bwStatsEmbed);
+					break;
+				case "compare":
+					let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
+					if (statScoreGs != 0){
+						playerStatsCombinedP1 = playerStatsCombinedP1 +`\nScore Gs: ${statScoreGs}`;
+					}
+					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
+						response2 = response2.response.games;
+						for (i=0;i<response2.length;i++){
+							if (parseInt(response2[i].appid) === 420290){
+								playerStatsCombinedP1 = playerStatsCombinedP1 + `\n${(response2[i].playtime_forever)/60}hrs`;
+							}
+						}
+						fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[2]}`).then(resp=>resp.json()).then(response => {
+							stats = response.playerstats.stats;
+							for (i=0;i<stats.length;i++){
+
+								switch (stats[i].name){
+									case "acc_kills":
+										kills = stats[i].value;
+										break;
+									case "acc_deaths":
+										deaths = stats[i].value;
+										break;
+									case "acc_capWins":
+										captainWins = stats[i].value;
+										break;
+									case "acc_capLose":
+										captainLosses = stats[i].value;
+										break;
+									case "stat_score":
+										score = stats[i].value;
+										break;
+									case "stat_score_gs":
+										statScoreGs = stats[i].value;
+										break;
+									case "stat_rating":
+										rating = stats[i].value;
+										break;
+									default:
+										break;
+								}
+
+							}
+
+							let playerStatsCombinedP2 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
+							if (statScoreGs != 0){
+								playerStatsCombinedP2 = playerStatsCombinedP2 +`\nScore Gs: ${statScoreGs}`;
+							}
+							fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[2]}`).then(resp => resp.json()).then(response2 =>{
+								response2 = response2.response.games;
+								for (i=0;i<response2.length;i++){
+									if (parseInt(response2[i].appid) === 420290){
+										playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
+									}
+								}
+								bwStatsEmbed.setTitle(`${args[1]} VS ${args[2]}`)
+									.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
+									.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true);
+								sendBWStatsEmbed(message,bwStatsEmbed);
+							});
+						});
+					});
+					break;
+				default:
+					message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
+					break;
+			}
+		}
+	}).catch(err => {
+		if (err) {
+			console.error(err);
+			message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:");
+		};
+	});
 }
 
 function WeaponSorter(weaponsArray){
