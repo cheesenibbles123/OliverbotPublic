@@ -8,7 +8,6 @@ const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./Handlers/initialSetup");
 const random = require("./Handlers/randomStuff");
-const economy = require("./Handlers/economySystem");
 
 let serverStatus = {
 	"active" : false,
