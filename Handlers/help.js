@@ -14,7 +14,7 @@ exports.handler = function handler(message,command,args){
 
 function listTheCommands(message){
    let embed = new Discord.MessageEmbed()
-   .setTitle("General Commands")
+      .setTitle("General Commands")
       .setColor(0x008000)
       .addField(`Prefix:`,`;`)
       .addField(`Translate:`,`translate en (words) --- this translates from russian to english\ntranslate ru (words) --- this translates from english to russian`)
@@ -33,7 +33,7 @@ function listTheCommands(message){
    message.author.send(embed);
 
    let embed2 = new Discord.MessageEmbed()
-   .setTitle("Blackwake Commands")
+      .setTitle("Blackwake Commands")
       .setColor(0x008000)
       .addField(`Main Features`,`Used in the following context:\n\`;Blackwake\` \`Feature\` \`SteamID\`\n - Overview\n - Weaponstats\n - Maintenance\n - ShipWeaponry\n - ShipStats\n - Compare\n - Monthly\n - Elo\n - Alternion`)
       .addField(`Alternion Features`,`Used in the following context:\n\`;Blackwake\` \`Alternion\` \`Feature\`\n - ListBadges\n - ListSails\n - ListMainSails\n - ListCannons\n - ListWeapons\n - Overview\n - Assign\n - Help`)
@@ -41,7 +41,7 @@ function listTheCommands(message){
    message.author.send(embed2);
 
    let dembed = new Discord.MessageEmbed()
-   .setTitle("Currently Unavailable Commands")
+      .setTitle("Currently Unavailable Commands")
       .setColor(0x008000)
       .addField(`Misc:`,` - math`)
       .setTimestamp();
@@ -50,7 +50,7 @@ function listTheCommands(message){
    if (message.member.roles.cache.has(config.serverInfo.roles.serverModerator)){
 
       let Membed = new Discord.MessageEmbed()
-      .setTitle("Moderator Commands")
+         .setTitle("Moderator Commands")
          .setColor(0xeecd17)
          .addField(`Mute::`,`Mute @user`)
          .addField(`Unmute:`,`Unmute @user`)
@@ -67,7 +67,7 @@ function listTheCommands(message){
    if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
 
       let Aembed = new Discord.MessageEmbed()
-      .setTitle("Admin Commands")
+         .setTitle("Admin Commands")
          .setColor(0xdb1a1a)
          .addField(`Ban:`,`Ban @user`)
          .addField(`ServerInfo:`,`Gives information about the server`)
