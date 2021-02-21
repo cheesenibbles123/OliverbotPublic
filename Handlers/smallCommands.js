@@ -40,7 +40,7 @@ exports.handler = function handler(message,command,args){
 			cat(message);
 			break;
 		case "trump":
-			trump(message);
+			trump(message,args);
 			break;
 		case "rolldie":
 			message.channel.send(glob.getRandomInt(7));
@@ -172,13 +172,13 @@ function cat(message){
 	});
 }
 
-function trump(message){
+function trump(message,args){
 	if (message.content.includes("everyone") || message.content.includes("here"))
 	{
 		message.channel.send("nah.");
 	}else{
 		fetch(`https://api.whatdoestrumpthink.com/api/v1/quotes`).then(resp=>resp.json()).then(response => {
-			message.channel.send(`${args.join(" ")} ${response.messages.personalized[getRandomInt(response.messages.personalized.length)]}`);
+			message.channel.send(`${args.join(" ")} ${response.messages.personalized[glob.getRandomInt(response.messages.personalized.length)]}`);
 		});
 	}
 }
@@ -217,7 +217,7 @@ function BaconIpsum(message){
 		}
 		fetch(content).then(res => res.json()).then(response => {
 			let BaconEmbed = new Discord.MessageEmbed()
-				.setDescription(`${response[getRandomInt(response.length)]}`)
+				.setDescription(`${response[glob.getRandomInt(response.length)]}`)
 				.setTimestamp();
 			message.channel.send(BaconEmbed);
 		});
@@ -289,13 +289,13 @@ function TodayInHistory(message,argument){
 				let date = new Date();
 				fetch(`http://history.muffinlabs.com/date/${parseInt(date.getMonth()) + 1}/${date.getDate()}`).then(res => res.json()).then(response => {
 					if (argument === "events"){
-				 		let num = getRandomInt(response.data.Events.length);
+				 		let num = glob.getRandomInt(response.data.Events.length);
 						message.channel.send("```"+`${response.data.Events[num].year} - ${response.data.Events[num].text}`+"```");
 					}else if (argument === "births"){
-						let num = getRandomInt(response.data.Births.length);
+						let num = glob.getRandomInt(response.data.Births.length);
 						message.channel.send("```"+`${response.data.Births[num].year} - ${response.data.Births[num].text}`+"```");
 					}else if (argument === "deaths"){
-						let num = getRandomInt(response.data.Deaths.length);
+						let num = glob.getRandomInt(response.data.Deaths.length);
 						message.channel.send("```"+`${response.data.Deaths[num].year} - ${response.data.Deaths[num].text}`+"```");
 					}
 				});
@@ -311,8 +311,8 @@ function TodayInHistory(message,argument){
 }
 
 function playDie(message){
-	let user = getRandomInt(7);
-	let botroll = getRandomInt(7);
+	let user = glob.getRandomInt(7);
+	let botroll = glob.getRandomInt(7);
 	message.channel.send("🎲").then((msg)=>{
 		msg.edit("..🎲").then((msg)=>{
 			msg.edit("You: "+user+", Bot: "+botroll+" ....🎲");
