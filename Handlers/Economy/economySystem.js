@@ -1,7 +1,7 @@
-const db = require("./databaseSetup");
+const db = require("./../databaseSetup");
 const config = require("./../config.json");
-const glob = require("./globalFunctions");
-const issueEmbed = require("./issueEmbed");
+const glob = require("./../globalFunctions");
+const issueEmbed = require("./../issueEmbed");
 const Discord = require("discord.js");
 var bot;
 
@@ -115,10 +115,10 @@ async function updateleaderboard(){
 }
 
 exports.levelsystem = function levelsystem(xp,currentlevel){
-	if (currentlevel === 0 & xp > 400){
+	if (currentlevel === 0 && xp > 400){
 		return true;
 	}else{
-		if ( xp >= (currentlevel*db.xpdetails.levelupfactor)){
+		if ( xp >= ( currentlevel * db.xpdetails.levelupfactor )){
 			return true;
 		}else{
 			return false;
