@@ -3,7 +3,7 @@ const config = require("./../config.json");
 const Discord = require("discord.js");
 const adminCommands = require("./adminOnly");
 const main = require("./../oliverbot");
-const economy = require("./economySystem");
+const economy = require("./Economy/economySystem");
 const btoa = require("btoa");
 
 var mainDatabaseConnectionPool = mysql.createPool({
@@ -28,6 +28,14 @@ var alternionConnectionPool = mysql.createPool({
 	user : config.databaseInfo.user,
 	password : config.databaseInfo.password,
 	database : "Alternion"
+});
+
+var craftingConnectionPool = mysql.createPool({
+	connectionLimit : 30,
+	host : config.databaseInfo.host,
+	user : config.databaseInfo.user,
+	password : config.databaseInfo.password,
+	database : "crafting"
 });
 
 var xpdetails = {
