@@ -2,6 +2,10 @@ const db = require("./../databaseSetup");
 const config = require("./../config.json");
 var bot;
 
+var delays = {
+	"xpLb" : 300000
+}
+
 exports.initDisplays = function initDisplays(){
 	bot = require("./../oliverbot.js").bot;
 	setInterval(function(){

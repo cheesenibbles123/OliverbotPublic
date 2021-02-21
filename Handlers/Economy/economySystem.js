@@ -16,10 +16,6 @@ var leaderboardlimits = {
 	"usernameEco" : 20
 }
 
-var delays = {
-	"xpLb" : 300000
-}
-
 exports.handler = function handler(message,command,args){
 	switch (command){
 		case "beg":
