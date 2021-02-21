@@ -10,7 +10,7 @@ exports.handler = function handler(message,command,args){
 				restart(message);
 				break;
 			case "do":
-				execute(message);
+				execute(message,args);
 				break;
 			case "database":
 				datbase(message,args);
@@ -35,7 +35,7 @@ async function restart(message){
 	process.exit();
 }
 
-async function execute(message){
+async function execute(message,args){
 	try{
 		let code = args.join(" ");
 		let evaled = eval(code);
