@@ -15,12 +15,19 @@ exports.init = function init(){
 
 exports.handler = function handler(message,command,args){
 	switch (command){
-		case "playaudio":
+		case "play":
 			setupTune(message,args,args === null ? true : false);
+			break;
+		case "pause":
+			pauseAudio(message);
 			break;
 		case "stopaudio":
 			stopAudio(message);
 			break;
+		case "volume":
+			setVolume(message,parseFloat(args[0]).toFixed(3));
+			break;
+
 	}
 }
 
@@ -43,18 +50,24 @@ async function setupTune(message,args,fromFile){
 			song = args.join("");
 			if (song.includes("https://www.youtube.com/watch?v=")){
 				let songInfo = await ytdl.getInfo(song);
+				//console.log(Object.keys(songInfo));
+
+				songInfo = songInfo.player_response.videoDetails;
+				console.log(Object.keys(songInfo));
+
 				playAudio(message,song,voiceChannel);
-				console.log(songInfo);
+				//console.log(songInfo.videoDetails);
+
 				let embed = new Discord.MessageEmbed()
 					.setTitle("Now Playing")
 					.setColor('#add8e6')
-					.addField(`Song Info:`,`${songInfo.title}\n${songInfo.video_url}\n${Math.floor(songInfo.length_seconds / 3600)}h ${Math.floor(((songInfo.length_seconds / 3600) - Math.floor(songInfo.length_seconds / 3600)) * 60)}m ${songInfo.length_seconds % 60}s\n${songInfo.player_response.videoDetails.author}`)
+					.addField(`Song Info:`,`${songInfo.title}\n${song}\n${Math.floor(songInfo.lengthSeconds / 3600)}h ${Math.floor(((songInfo.lengthSeconds / 3600) - Math.floor(songInfo.lengthSeconds / 3600)) * 60)}m ${songInfo.lengthSeconds % 60}s\n${songInfo.author}`)
 					.setThumbnail(`${message.author.displayAvatarURL()}`)
 					.setTimestamp();
 				message.channel.send(embed).then(msg => {
 					setTimeout(function(){
 						msg.delete();
-					},songInfo.length_seconds * 1000);
+					},songInfo.lengthSeconds * 1000);
 				});
 			}else{
 				message.reply("Please enter a valid youtube link!");
@@ -105,4 +118,26 @@ async function playAudio(message,song,voiceChannel){
      		});
      	currentDispatcher.setVolumeLogarithmic(1);
     });
+}
+
+function setVolume(message,volume){
+	if (!isPlaying){
+		message.reply("I am not playing any music!");
+	}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		message.channel.send("You must be in the same voice channel!");
+	}else if (volume < 0.2){
+		message.channel.send("I cannot go quieter than 0.2!");
+	}else if (volume > 5){
+		message.channel.send("I cannot go louder than 5!");
+	}else {
+		currentDispatcher.setVolumeLogarithmic(volume);
+	}
+}
+
+function pauseAudio(message){
+	if (!isPlaying){
+		message.reply("I am not playing any music!");
+	}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		message.channel.send("You must be in the same voice channel!");
+	}
 }

@@ -27,8 +27,9 @@ exports.handler = function handler(message,command,args){
 		case "help":
 			help.handler(message,command,args);
 			break;
-		case "playaudio":
+		case "play":
     	case "stopaudio":
+    	case "volume":
     		audio.handler(message,command,args);
     		break;
     	case "payday2":
