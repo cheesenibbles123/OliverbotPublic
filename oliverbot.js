@@ -309,8 +309,9 @@ bot.on("message", async message => {
 		if (message.content.startsWith("<@!556545106468012052>")){
 			TrackingCommand = true;
 			message.react("🤔");
-
-			audio.handler(message, "playaudio", null);
+			if(message.member.voice.channel){
+				audio.handler(message, "play", null);
+			}
 		}
 
 		//check content of any pictures sent for nudity

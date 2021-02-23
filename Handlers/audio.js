@@ -1,9 +1,12 @@
 const ytdl = require("ytdl-core");
 const Discord = require("discord.js");
+const fs = require("fs");
+const glob = require("./globalFunctions")
 
 var adjustableConfig;
 var isPlaying = false;
 var currentDispatcher = null;
+var currentSongInfo;
 var bot;
 
 exports.isPlaying = isPlaying;
@@ -20,6 +23,9 @@ exports.handler = function handler(message,command,args){
 			break;
 		case "pause":
 			pauseAudio(message);
+			break;
+		case "resume":
+			resumeAudio(message);
 			break;
 		case "stopaudio":
 			stopAudio(message);
@@ -50,13 +56,10 @@ async function setupTune(message,args,fromFile){
 			song = args.join("");
 			if (song.includes("https://www.youtube.com/watch?v=")){
 				let songInfo = await ytdl.getInfo(song);
-				//console.log(Object.keys(songInfo));
 
 				songInfo = songInfo.player_response.videoDetails;
-				console.log(Object.keys(songInfo));
 
 				playAudio(message,song,voiceChannel);
-				//console.log(songInfo.videoDetails);
 
 				let embed = new Discord.MessageEmbed()
 					.setTitle("Now Playing")
@@ -116,7 +119,7 @@ async function playAudio(message,song,voiceChannel){
      		 	isPlaying = false;
      		 	currentDispatcher.destroy();
      		});
-     	currentDispatcher.setVolumeLogarithmic(1);
+     	currentDispatcher.setVolumeLogarithmic(0.5);
     });
 }
 
@@ -131,6 +134,7 @@ function setVolume(message,volume){
 		message.channel.send("I cannot go louder than 5!");
 	}else {
 		currentDispatcher.setVolumeLogarithmic(volume);
+		embedHandler(message,2,volume);
 	}
 }
 
@@ -139,5 +143,40 @@ function pauseAudio(message){
 		message.reply("I am not playing any music!");
 	}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
 		message.channel.send("You must be in the same voice channel!");
+	}else{
+		currentDispatcher.pause();
+		embedHandler(message,0,null);
 	}
+}
+
+function resumeAudio(message){
+	if (!isPlaying){
+		message.reply("I am not playing any music!");
+	}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		message.channel.send("You must be in the same voice channel!");
+	}else{
+		currentDispatcher.resume();
+		embedHandler(message,1,null);
+	}
+}
+
+function embedHandler(message, type, additionInfo){
+	let embed = new Discord.MessageEmbed()
+		.setColor('#add8e6');
+	switch (type){
+		case 0:
+			embed.setTitle("Pause");
+			break;
+		case 1:
+			embed.setTitle("Resume");
+			break;
+		case 2:
+			embed.setTitle("SetVolume: " + additionInfo);
+			break;
+	}
+	message.channel.send(embed);
+}
+
+function getCurrentInfo(){
+	currentSongInfo
 }

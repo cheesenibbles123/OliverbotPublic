@@ -30,6 +30,8 @@ exports.handler = function handler(message,command,args){
 		case "play":
     	case "stopaudio":
     	case "volume":
+    	case "pause":
+    	case "resume":
     		audio.handler(message,command,args);
     		break;
     	case "payday2":
