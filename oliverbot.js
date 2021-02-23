@@ -8,6 +8,7 @@ const db = require("./Handlers/databaseSetup");
 const raw = require("./Handlers/rawEvents");
 const initialSetup = require("./Handlers/initialSetup");
 const random = require("./Handlers/randomStuff");
+const audio = require("./Handlers/audio");
 
 let serverStatus = {
 	"active" : false,
@@ -309,33 +310,7 @@ bot.on("message", async message => {
 			TrackingCommand = true;
 			message.react("🤔");
 
-			let voiceChannel = message.member.voice.channel;
-			if (!voiceChannel){ return; }
-			else if (isPlaying){ return message.reply("I am currently busy, please wait :)"); }
-			else if (!db.adjustableConfig.music.pingCommand){
-				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-			}else{
-				let file = fs.readFileSync("./datafile.json").toString();
-				file = JSON.parse(file);
-				isPlaying = true;
-				let a = glob.getRandomInt(file.pingedSounds.length);
-				let randomsong = file.pingedSounds[a].toString();
-				voiceChannel.join().then(connection => {
-				currentDispatcher = connection
-					.play(
-	           	 		ytdl(randomsong)
-	        		)
-	        		.on("finish",() =>{
-	        			voiceChannel.leave();
-	        			isPlaying = false;
-	        		})
-	        		.on("error",e=>{
-	        			console.error(e);
-	       		 		voiceChannel.leave();
-	       		 		isPlaying = false;
-	       		 	});
-				});
-			}
+			audio.handler(message, "playaudio", null);
 		}
 
 		//check content of any pictures sent for nudity
