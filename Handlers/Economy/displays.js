@@ -37,7 +37,7 @@ async function updateleaderboard(){
 			var user;
 			let username = "";
 			try{
-				user = bot.users.cache.get(rows[i].id);
+				user = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(rows[i].id);
 				username = user.username;
 			}catch(e){
 				username = rows[i].id;
@@ -66,6 +66,7 @@ async function updateleaderboard(){
 			}
 			finalmsg = finalmsg + `${rank} | ${username} | ${level} | ${xp}\n`;
 			i++;
+			sleep();
 		}
 		finalmsg = finalmsg+"```";
 		bot.channels.cache.get(config.serverInfo.channels.xpLeaderboard).messages.fetch(config.serverInfo.messages.xpLeaderboard).then(msg => {msg.edit(finalmsg);});
