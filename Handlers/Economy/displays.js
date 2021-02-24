@@ -66,7 +66,6 @@ async function updateleaderboard(){
 			}
 			finalmsg = finalmsg + `${rank} | ${username} | ${level} | ${xp}\n`;
 			i++;
-			sleep();
 		}
 		finalmsg = finalmsg+"```";
 		bot.channels.cache.get(config.serverInfo.channels.xpLeaderboard).messages.fetch(config.serverInfo.messages.xpLeaderboard).then(msg => {msg.edit(finalmsg);});
