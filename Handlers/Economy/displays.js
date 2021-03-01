@@ -1,13 +1,23 @@
 const db = require("./../databaseSetup");
-const config = require("./../config.json");
+const config = require("./../../config.json");
+const Discord = require("discord.js");
 var bot;
 
 var delays = {
 	"xpLb" : 300000
 }
 
+var leaderboardlimits = {
+	"listsizelimit" : 30,
+	"rank" : 2,
+	"username" : 20,
+	"level" : 7,
+	"xp" : 10,
+	"usernameEco" : 20
+}
+
 exports.initDisplays = function initDisplays(){
-	bot = require("./../oliverbot.js").bot;
+	bot = require("./../../oliverbot.js").bot;
 	setInterval(function(){
 		updateleaderboard();
 	},delays.xpLb);
@@ -38,9 +48,9 @@ async function updateleaderboard(){
 			let username = "";
 			try{
 				user = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(rows[i].id);
-				username = user.username;
+				username += user.username;
 			}catch(e){
-				username = rows[i].id;
+				username += rows[i].id;
 				//console.log(user);
 				//console.log(e);
 			}
@@ -388,4 +398,10 @@ async function displayRichestUsers(){
 		});
 	});
 	return;
+}
+
+function editMsg(contents,channelID,msgID){
+	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
+		msg.edit(contents);
+	});
 }
