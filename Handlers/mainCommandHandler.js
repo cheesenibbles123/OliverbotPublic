@@ -5,7 +5,7 @@ const miscCommands = require("./smallCommands");
 const glob = require("./globalFunctions");
 const ownerOnly = require("./ownerOnly");
 const quiz = require("./quizQuestions");
-const economy = require("./economySystem");
+const economy = require("./Economy/economySystem");
 const modCommands = require("./modOnly");
 const adminCommands = require("./adminOnly");
 const payday2 = require("./payday2");
@@ -32,6 +32,9 @@ exports.handler = function handler(message,command,args){
     	case "volume":
     	case "pause":
     	case "resume":
+    	case "queue":
+    	case "current":
+    	case "clear":
     		audio.handler(message,command,args);
     		break;
     	case "payday2":
