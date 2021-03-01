@@ -8,6 +8,7 @@ var isPlaying = false;
 var currentDispatcher = null;
 var currentSongInfo;
 var bot;
+var songQueue = [];
 
 exports.isPlaying = isPlaying;
 
@@ -33,7 +34,15 @@ exports.handler = function handler(message,command,args){
 		case "volume":
 			setVolume(message,parseFloat(args[0]).toFixed(3));
 			break;
-
+		case "queue":
+			getCurrentQueue(message);
+			break;
+		case "current":
+			getCurrentInfo(message);
+			break;
+		case "clear":
+			clearQueue(message);
+			break;
 	}
 }
 
@@ -43,10 +52,8 @@ async function setupTune(message,args,fromFile){
 		message.reply("You must be in a voice channel!");
 	//}else if (!adjustableConfig.music.generalAudio){
 	//	message.channel.send(issueEmbed.grabEmbed(4,null));
-	}else if (isPlaying){
-		message.reply("I'm already playing!");
 	}else{
-		if (fromFile){
+		if (fromFile && !isPlaying){
 			let file = fs.readFileSync("./datafile.json").toString();
 			file = JSON.parse(file);
 			let a = glob.getRandomInt(file.pingedSounds.length);
@@ -59,19 +66,16 @@ async function setupTune(message,args,fromFile){
 
 				songInfo = songInfo.player_response.videoDetails;
 
-				playAudio(message,song,voiceChannel);
-
-				let embed = new Discord.MessageEmbed()
-					.setTitle("Now Playing")
-					.setColor('#add8e6')
-					.addField(`Song Info:`,`${songInfo.title}\n${song}\n${Math.floor(songInfo.lengthSeconds / 3600)}h ${Math.floor(((songInfo.lengthSeconds / 3600) - Math.floor(songInfo.lengthSeconds / 3600)) * 60)}m ${songInfo.lengthSeconds % 60}s\n${songInfo.author}`)
-					.setThumbnail(`${message.author.displayAvatarURL()}`)
-					.setTimestamp();
-				message.channel.send(embed).then(msg => {
-					setTimeout(function(){
-						msg.delete();
-					},songInfo.lengthSeconds * 1000);
+				songQueue.push({
+					"title" : songInfo.title,
+					"url" : song,
+					"lengthSeconds" : songInfo.lengthSeconds,
+					"author" : songInfo.author
 				});
+
+				if (!isPlaying){
+					playAudio(message,null,voiceChannel);
+				}
 			}else{
 				message.reply("Please enter a valid youtube link!");
 			}
@@ -102,6 +106,21 @@ function stopAudio(message){
 
 async function playAudio(message,song,voiceChannel){
 	isPlaying = true;
+
+	if (song === null){
+		let embed = new Discord.MessageEmbed()
+			.setTitle("Now Playing")
+			.setColor('#add8e6')
+			.addField(`Song Info:`,`${songQueue[0].title}\n${songQueue[0].url}\n${Math.floor(songQueue[0].lengthSeconds / 3600)}h ${Math.floor(((songQueue[0].lengthSeconds / 3600) - Math.floor(songQueue[0].lengthSeconds / 3600)) * 60)}m ${songQueue[0].lengthSeconds % 60}s\n${songQueue[0].author}`);
+		message.channel.send(embed).then(msg => {
+			setTimeout(function(){
+				msg.delete();
+			},songQueue[0].lengthSeconds * 1000);
+		});
+
+		song = songQueue[0].url;
+	}
+
 	voiceChannel.join().then(connection =>{
 		connection.voice.setSelfDeaf(true);
 		currentDispatcher = connection
@@ -110,8 +129,15 @@ async function playAudio(message,song,voiceChannel){
       		)
       		.on("finish",() =>{
       			voiceChannel.leave();
-      			isPlaying = false;
-      			currentDispatcher.destroy();
+      			songQueue.shift();
+      			if (songQueue.length < 1){
+      				isPlaying = false;
+      				currentDispatcher.destroy();
+      			}else{
+      				setTimeout(() => {
+      					playAudio(message,null,voiceChannel);
+      				}, 1000);
+      			}
       		})
       		.on("error",e=>{
       			console.error(e);
@@ -177,6 +203,31 @@ function embedHandler(message, type, additionInfo){
 	message.channel.send(embed);
 }
 
-function getCurrentInfo(){
-	currentSongInfo
+function getCurrentInfo(message){
+	if (isPlaying){
+		let embed = new Discord.MessageEmbed()
+			.setTitle("Now Playing")
+			.setColor('#add8e6')
+			.addField(`Song Info:`,`${songQueue[0].title}\n${songQueue[0].url}\n${Math.floor(songQueue[0].lengthSeconds / 3600)}h ${Math.floor(((songQueue[0].lengthSeconds / 3600) - Math.floor(songQueue[0].lengthSeconds / 3600)) * 60)}m ${songQueue[0].lengthSeconds % 60}s\n${songQueue[0].author}`);
+		message.channel.send(embed);
+	}
+}
+
+function getCurrentQueue(message){
+	let finalMsg = "```\n";
+	for (let i=0; i < songQueue.length; i++){
+		if (finalMsg.length < 500){
+			finalMsg += `${i} : ${songQueue[i].title}\n`;
+		}
+	}
+	message.channel.send(finalMsg + "```");
+}
+
+function clearQueue(message){
+	if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		message.channel.send("You must be in the same voice channel!");
+	}else{
+		songQueue = [];
+		message.channel.send("Cleared the queue!");
+	}
 }
