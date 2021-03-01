@@ -1,20 +1,11 @@
 const db = require("./../databaseSetup");
-const config = require("./../config.json");
+const config = require("./../../config.json");
 const glob = require("./../globalFunctions");
 const issueEmbed = require("./../issueEmbed");
 const displays = require("./displays");
 
 const Discord = require("discord.js");
 var bot;
-
-var leaderboardlimits = {
-	"listsizelimit" : 30,
-	"rank" : 2,
-	"username" : 20,
-	"level" : 7,
-	"xp" : 10,
-	"usernameEco" : 20
-}
 
 exports.handler = function handler(message,command,args){
 	switch (command){
@@ -48,7 +39,7 @@ exports.handler = function handler(message,command,args){
 
 exports.initEconomy = function initEconomy(){
 	displays.initDisplays();
-	bot = require("./../oliverbot.js").bot;
+	bot = require("./../../oliverbot.js").bot;
 }
 
 exports.levelsystem = function levelsystem(xp,currentlevel){
@@ -110,7 +101,8 @@ function work(message){
 
 			}else
 			{
-				if ( (parseInt(rows[0].lastWorked) + 86400000) < (new Date().getTime()) )
+				let timeDelay = 82800000;
+				if ( (parseInt(rows[0].lastWorked) + timeDelay) < (new Date().getTime()) )
 				{
 					let income = 10;
 					for (let i = 0; i < inv.length; i++)
@@ -136,25 +128,21 @@ function work(message){
  				 		'Sat'
 					]
 
-					let time = new Date(parseInt(rows[0].lastWorked)).getTime() + 86400000;
+					let time = new Date(parseInt(rows[0].lastWorked)).getTime() + timeDelay;
 					let date = new Date(time);
-					let hrs = date.getHours();
-					if (parseInt(hrs) < 10)
-					{
-						hrs = '0' + hrs;
-					}
-					let min = date.getMinutes();
-					if (parseInt(min) < 10)
-					{
-						min = '0' + min;
-					}
-					let sec = date.getSeconds();
-					if (parseInt(sec) < 10)
-					{
-						sec = '0' + sec;
-					}
+					let timeLeft = new Date(time - new Date());
+
+					let hrs = checkIfLessThan10(date.getHours());
+					let min = checkIfLessThan10(date.getMinutes());
+					let sec = checkIfLessThan10(date.getSeconds());
+					
+					let hrsLeft = checkIfLessThan10(timeLeft.getHours());
+					let minLeft = checkIfLessThan10(timeLeft.getMinutes());
+					let secLeft = checkIfLessThan10(timeLeft.getSeconds());
+
 					let finalDate = `${days[date.getDay()]} ${hrs} : ${min} : ${sec}`;
-					workingEmbed.setDescription(`You cannot work yet! You must wait until ${finalDate} CEST`);
+					let remainingTime = `${hrsLeft} : ${minLeft} : ${secLeft}`;
+					workingEmbed.setDescription(`You cannot work yet! You must wait until ${finalDate} CEST\nTime Remaining:  ${remainingTime}`);
 				}
 			}
 			message.channel.send(workingEmbed);
@@ -165,6 +153,18 @@ function work(message){
 	});
 
 	return;
+}
+
+function checkIfLessThan10(input){
+	let returnResult = "";
+	if (parseInt(input) < 10)
+	{
+		returnResult += '0' + input;
+	}else{
+		returnResult += input;
+	}
+
+	return returnResult;
 }
 
 function purchaseItem(ID,item,message,args){
