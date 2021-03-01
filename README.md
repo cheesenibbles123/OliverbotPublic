@@ -27,7 +27,7 @@ Incase the title of the files wasn't clear enough, the included config and dataf
  - The config + datafile must be within the same directory as the main oliverbot.js file (see Templates)
  - Please note idk wtf im doing with github.
  - Adding comments to the code to help readability (I'll get round to it some day)
- - [Website link](http://www.archiesbots.com/index.html)
+ - [Website link](http://www.archiesbots.com/DiscordBots/Home.html)
  - Release version: 1.7.0
 
 **Dependencies:**
