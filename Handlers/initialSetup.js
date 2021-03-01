@@ -1,4 +1,4 @@
-const economy = require("./economySystem");
+const economy = require("./Economy/economySystem");
 const statusHandler = require("./statusHandler");
 const db = require("./databaseSetup");
 const fetch = require("node-fetch");
