@@ -14,7 +14,7 @@ exports.handler = function handler(message,command,args){
 				quizQuestions2(message,false);
 				break;
 			default:
-				quizQuestions(message,false);
+				getRandomQuizQuestion(message,false);
 				break;
 		}
 	}
@@ -44,7 +44,7 @@ function checkQuizAllowances(message,args){
 	});
 }
 
-function quizQuestions(message,isGainingIncome){
+function getRandomQuizQuestion(message,isGainingIncome){
 	db.mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
 		let num = glob.getRandomInt(rows.length - 1);
 		if (rows[num].format === "text"){
@@ -148,8 +148,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 }
 
 function specificQuiz(message,type){
-	switch (type)
-	{
+	switch (type){
 		case "flags":
 			glob.mainDatabaseConnectionPool.query("SELECT * FROM quiz WHERE type='flags'", (err,rows,fields) => {
 				let num = glob.getRandomInt(rows.length - 1);
