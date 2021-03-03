@@ -60,7 +60,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 
 		let filter = response => {
 			if (response.attachments.size > 0){
-				response.channel.send("Attachements are not supported as awnsers.");
+				response.channel.send("Attachments are not supported as awnsers.");
 				return false;
 			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1){
 				return true;
@@ -75,7 +75,8 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 			// console.log('Got answer for: ' + msg.content);
 			if (list.indexOf(msg.author) === -1){
 				list.push(msg.author);
-				message.channel.send(`${message.author} got the correct awnser!`);
+				msg.delete();
+				message.channel.send(`${msg.author} got the correct awnser!`);
 			}
 		});
 
@@ -93,7 +94,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 				let allUsers = "";
 				for (let i=0; i < list.length; i++){
 					if (isGainingIncome){
-						let income = parseFloat(worth * (1/i)).toFixed(2);
+						let income = parseFloat(worth * (1/(i + 1))).toFixed(2);
 						allUsers += `${i + 1} : ${list[i]} : ${income}GC\n`;
 						db.giveUserMoney(income, list[i].id);
 					}else{
