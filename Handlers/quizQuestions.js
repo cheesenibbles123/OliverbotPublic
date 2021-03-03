@@ -24,12 +24,12 @@ function checkQuizAllowances(message,args){
 
 			if (rows[0].lastQuiz === null){
 
-				quizQuestions(message,true);
+				getRandomQuizQuestion(message,true);
 				db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastQuiz='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
 
 			}else if ((parseInt(rows[0].lastQuiz) + rows2[0].duration) < (new Date().getTime())){
 
-				quizQuestions(message,true);
+				getRandomQuizQuestion(message,true);
 				db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastQuiz='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
 
 			}else{
@@ -46,15 +46,6 @@ function getRandomQuizQuestion(message,isGainingIncome){
 		let num = glob.getRandomInt(rows.length - 1);
 		if (rows[num].format === "text"){
 			textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome);
-		}
-	});
-}
-
-function quizQuestions2(message,isGainingIncome){
-	db.mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
-		let num = glob.getRandomInt(rows.length - 1);
-		if (rows[num].format === "text"){
-			textQuizQuestions2(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome);
 		}
 	});
 }
@@ -117,30 +108,6 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 
 			isNotLocked = true;
 		});
-	});
-}
-
-async function textQuizQuestionsOld(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
-	let baseIncome = 5;
-	let filter = response => {
-		return (awnsers.indexOf(response.content.toLowerCase()) !== -1);
-	};
-	isNotLocked = false;
-	message.channel.send(question).then(() => {
-		message.channel.awaitMessages(filter, {max: 1, time: (15000 * timeFactor), errors: ['time']})
-			.then(collected => {
-				if (isGainingIncome){
-					message.channel.send(`${collected.first().author} got the correct awnser, and has earned themselves ${baseIncome * worthFactor}GC!`);
-					db.giveUserMoney(baseIncome * worthFactor, collected.first().author.id);
-				}else{
-					message.channel.send(`${collected.first().author} got the correct awnser!`);
-				}
-				isNotLocked = true;
-			})
-			.catch(collected => {
-				message.channel.send('Sadly, right now, is not the moment we find out the answer to this question.');
-				isNotLocked = true;
-			});
 	});
 }
 
