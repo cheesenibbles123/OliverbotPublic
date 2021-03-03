@@ -1,5 +1,6 @@
 const glob = require("./globalFunctions");
 const db = require("./databaseSetup");
+const Discord = require("discord.js");
 
 isNotLocked = true;
 
@@ -8,6 +9,9 @@ exports.handler = function handler(message,command,args){
 		switch (args[0]){
 			case "income":
 				checkQuizAllowances(message,args);
+				break;
+			case "test":
+				quizQuestions2(message,false);
 				break;
 			default:
 				quizQuestions(message,false);
@@ -46,6 +50,76 @@ function quizQuestions(message,isGainingIncome){
 		if (rows[num].format === "text"){
 			textQuizQuestions(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome);
 		}
+	});
+}
+
+function quizQuestions2(message,isGainingIncome){
+	db.mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
+		let num = glob.getRandomInt(rows.length - 1);
+		if (rows[num].format === "text"){
+			textQuizQuestions2(message,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome);
+		}
+	});
+}
+
+async function textQuizQuestions2(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
+	let baseIncome = 5;
+	isNotLocked = false;
+
+	message.channel.send(question).then(() => {
+
+		let list = [];
+
+		let filter = response => {
+			if (response.attachments.size > 0){
+				response.channel.send("Attachements are not supported as awnsers.");
+				return false;
+			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1){
+				return true;
+			}else{
+				return false;
+			}
+		};
+
+		let collector = message.channel.createMessageCollector(filter, { max: maxAttempts, time: 15000 * timeFactor });
+
+		collector.on('collect', msg => {
+			console.log('Got answer for: ' + msg.content);
+			if (list.indexOf(msg.author) === -1){
+				list.push(msg.author);
+				message.channel.send(`${message.author} got the correct awnser!`);
+			}
+		});
+
+		collector.on('end', collected => {
+			if (list.length > 0){
+				let embed = new Discord.MessageEmbed();
+				let worth = baseIncome * worthFactor;
+
+				if (isGainingIncome){
+					embed.setTitle(`Income`);
+				}else{
+					embed.setTitle(`Ranking`);
+				}
+
+				let allUsers = "";
+				for (let i=0; i < list.length; i++){
+					if (isGainingIncome){
+						let income = parseFloat(1 / worth).toFixed(2);
+						allUsers += `${i + 1} : ${list[i]} : ${income}GC\n`;
+						db.giveUserMoney(income, list[i].id);
+					}else{
+						allUsers += `${i + 1} : ${list[i]}\n`;
+					}
+				}
+				embed.setDescription(allUsers);
+				message.channel.send(embed);
+			}else{
+				message.channel.send('Sadly, right now, is not the moment we find out the answer to this question.');
+			}
+
+			isNotLocked = true;
+		});
 	});
 }
 
