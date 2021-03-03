@@ -10,9 +10,6 @@ exports.handler = function handler(message,command,args){
 			case "income":
 				checkQuizAllowances(message,args);
 				break;
-			case "test":
-				quizQuestions2(message,false);
-				break;
 			default:
 				getRandomQuizQuestion(message,false);
 				break;
@@ -62,7 +59,7 @@ function quizQuestions2(message,isGainingIncome){
 	});
 }
 
-async function textQuizQuestions2(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
+async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
 	let baseIncome = 5;
 	isNotLocked = false;
 
@@ -84,7 +81,7 @@ async function textQuizQuestions2(message,question,awnsers,timeFactor,worthFacto
 		let collector = message.channel.createMessageCollector(filter, { max: maxAttempts, time: 15000 * timeFactor });
 
 		collector.on('collect', msg => {
-			console.log('Got answer for: ' + msg.content);
+			// console.log('Got answer for: ' + msg.content);
 			if (list.indexOf(msg.author) === -1){
 				list.push(msg.author);
 				message.channel.send(`${message.author} got the correct awnser!`);
@@ -123,7 +120,7 @@ async function textQuizQuestions2(message,question,awnsers,timeFactor,worthFacto
 	});
 }
 
-async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
+async function textQuizQuestionsOld(message,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome){
 	let baseIncome = 5;
 	let filter = response => {
 		return (awnsers.indexOf(response.content.toLowerCase()) !== -1);
