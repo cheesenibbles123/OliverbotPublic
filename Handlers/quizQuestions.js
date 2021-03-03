@@ -93,7 +93,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 				let allUsers = "";
 				for (let i=0; i < list.length; i++){
 					if (isGainingIncome){
-						let income = parseFloat(1 / worth).toFixed(2);
+						let income = parseFloat(worth * (1/i)).toFixed(2);
 						allUsers += `${i + 1} : ${list[i]} : ${income}GC\n`;
 						db.giveUserMoney(income, list[i].id);
 					}else{
