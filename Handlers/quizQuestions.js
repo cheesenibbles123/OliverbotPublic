@@ -62,7 +62,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 			if (response.attachments.size > 0){
 				response.channel.send("Attachments are not supported as awnsers.");
 				return false;
-			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1){
+			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1 && !response.author.bot){
 				return true;
 			}else{
 				return false;
