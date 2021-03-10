@@ -8,133 +8,141 @@ var alternionJsonFile = null;
 
 exports.alternionMainhandler = function alternionHandler(message,command,args){
 	let alternionHandlerEmbed = new Discord.MessageEmbed();
-	switch (args[0].toLowerCase()){
+	if (args[0]){
+		switch (args[0].toLowerCase()){
 
-		case "listbadges":
-			alternionHandlerEmbed.setTitle("Available Restricted Badges")
-				.setFooter("The formatting is: - `badge_id` : Badge Name -");
-			getBadges(message,message.author.id,args[1],alternionHandlerEmbed);
-			break;
+			case "listbadges":
+				alternionHandlerEmbed.setTitle("Available Restricted Badges")
+					.setFooter("The formatting is: - `badge_id` : Badge Name -");
+				getBadges(message,message.author.id,args[1],alternionHandlerEmbed);
+				break;
 
-		case "help":
-			if (args[1]){
-				switch (args[1].toLowerCase()){
-					case "listbadges":
-						alternionHandlerEmbed.setDescription("Lists all limited badges that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "listsails":
-						alternionHandlerEmbed.setDescription("Lists all limited sails that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "listmainsails":
-						alternionHandlerEmbed.setDescription("Lists all limited main sails that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "listcannons":
-						alternionHandlerEmbed.setDescription("Lists all limited cannons that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "listweapons":
-						alternionHandlerEmbed.setDescription("Lists all limited weapon skins that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "listflags":
-						alternionHandlerEmbed.setDescription("Lists all limited weapon skins that you have access to.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "assign":
-						alternionHandlerEmbed.setDescription("Assign an asset to be used.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					case "overview":
-						alternionHandlerEmbed.setDescription("Lists your currently selected setup.")
-							.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
-						sendAlternionEmbed(message,alternionHandlerEmbed,false);
-						break;
-					default:
-						break;
+			case "help":
+				if (args[1]){
+					switch (args[1].toLowerCase()){
+						case "listbadges":
+							alternionHandlerEmbed.setDescription("Lists all limited badges that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listsails":
+							alternionHandlerEmbed.setDescription("Lists all limited sails that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listmainsails":
+							alternionHandlerEmbed.setDescription("Lists all limited main sails that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listcannons":
+							alternionHandlerEmbed.setDescription("Lists all limited cannons that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listweapons":
+							alternionHandlerEmbed.setDescription("Lists all limited weapon skins that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listflags":
+							alternionHandlerEmbed.setDescription("Lists all limited weapon skins that you have access to.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "assign":
+							alternionHandlerEmbed.setDescription("Assign an asset to be used.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "overview":
+							alternionHandlerEmbed.setDescription("Lists your currently selected setup.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						default:
+							break;
+					}
+				}else{
+					alternionHandlerEmbed.setTitle("Help Menu")
+						.setDescription("Default usage:\n`;Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges\n- ListSails\n- ListMainSails\n- ListWeapons\n- Assign\n- Overview\nUse **;Blackwake Alternion Help** `FEATURE` for more help on each feature")
+						.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+					sendAlternionEmbed(message,alternionHandlerEmbed,false);
 				}
-			}else{
-				alternionHandlerEmbed.setTitle("Help Menu")
-					.setDescription("Default usage:\n`;Alternion` `Feature`\nCurrently supported features:\n- Help\n- ListBadges\n- ListSails\n- ListMainSails\n- ListWeapons\n- Assign\n- Overview\nUse **;Blackwake Alternion Help** `FEATURE` for more help on each feature")
-					.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+				break;
+
+			case "assign":
+				alternionHandlerEmbed.setTitle("Assigning Item");
+				assignItemSkin(message,args,alternionHandlerEmbed);
+				break;
+
+			case "whatsmyid":
+				alternionHandlerEmbed.setTitle("Your ID");
+				getUserID(message,alternionHandlerEmbed);
+				break;
+
+			case "overview":
+				getAlternionOverview(message,alternionHandlerEmbed);
+				break;
+
+			case "listsails":
+				alternionHandlerEmbed.setTitle("Available Restricted Sails")
+					.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
+				getNormalSails(message,message.author.id,args[1],alternionHandlerEmbed);
+				break;
+
+			case "listmainsails":
+				alternionHandlerEmbed.setTitle("Available Restricted Main Sails")
+					.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
+				getMainSails(message,message.author.id,args[1],alternionHandlerEmbed);
+				break;
+
+			case "listcannons":
+				alternionHandlerEmbed.setTitle("Available Restricted Cannons")
+					.setFooter("The formatting is: - `Cannon_ID` : Cannon Name -");
+				getCannons(message,message.author.id,args[1],alternionHandlerEmbed);
+				break;
+
+			case "listflags":
+				alternionHandlerEmbed.setTitle("Available Restricted Flags Skins")
+					.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
+				getFlags(message,message.author.id,args[1],alternionHandlerEmbed);
+				break;
+
+			case "listweapons":
+				alternionHandlerEmbed.setTitle("Available Restricted Weapon Skins")
+					.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
+				getWeaponSkins(message,message.author.id,alternionHandlerEmbed);
+				break;
+
+			case "manage":
+				alternionHandlerEmbed.setTitle("Managing User...");
+				teamLeaderHandler(message,args[1].toLowerCase(),args[2],alternionHandlerEmbed);
+				break;
+
+			case "listmembers":
+				teamLeaderFetchList(message,message.author.id,alternionHandlerEmbed);
+				break;
+
+			case "forceupdate":
+				teamLeaderForceLoadout(message,message.author.id,args[1].toLowerCase(),args[2],alternionHandlerEmbed);
+				break;
+
+			case "forceupdateuser":
+				teamLeaderForceLoadoutUser(message,message.author.id,args[1].toLowerCase(),args[2],args[3],alternionHandlerEmbed);
+				break;
+
+			case "searchuser":
+				teamLeaderSearch(message,args[1],args[2],alternionHandlerEmbed);
+				break;
+
+			default:
+				alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Alternion Help` to get a list of supported commands!");
 				sendAlternionEmbed(message,alternionHandlerEmbed,false);
-			}
-			break;
-
-		case "assign":
-			alternionHandlerEmbed.setTitle("Assigning Item");
-			assignItemSkin(message,args,alternionHandlerEmbed);
-			break;
-
-		case "whatsmyid":
-			alternionHandlerEmbed.setTitle("Your ID");
-			getUserID(message,alternionHandlerEmbed);
-			break;
-
-		case "overview":
-			getAlternionOverview(message,alternionHandlerEmbed);
-			break;
-
-		case "listsails":
-			alternionHandlerEmbed.setTitle("Available Restricted Sails")
-				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getNormalSails(message,message.author.id,args[1],alternionHandlerEmbed);
-			break;
-
-		case "listmainsails":
-			alternionHandlerEmbed.setTitle("Available Restricted Main Sails")
-				.setFooter("The formatting is: - `Sail_ID` : Sail Name -");
-			getMainSails(message,message.author.id,args[1],alternionHandlerEmbed);
-			break;
-
-		case "listcannons":
-			alternionHandlerEmbed.setTitle("Available Restricted Cannons")
-				.setFooter("The formatting is: - `Cannon_ID` : Cannon Name -");
-			getCannons(message,message.author.id,args[1],alternionHandlerEmbed);
-			break;
-
-		case "listflags":
-			alternionHandlerEmbed.setTitle("Available Restricted Flags Skins")
-				.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
-			getFlags(message,message.author.id,args[1],alternionHandlerEmbed);
-			break;
-
-		case "listweapons":
-			alternionHandlerEmbed.setTitle("Available Restricted Weapon Skins")
-				.setFooter("The formatting is: - `Skin_ID` : Skin Name -");
-			getWeaponSkins(message,message.author.id,alternionHandlerEmbed);
-			break;
-
-		case "manage":
-			alternionHandlerEmbed.setTitle("Managing User...");
-			teamLeaderHandler(message,args[1].toLowerCase(),args[2],alternionHandlerEmbed);
-			break;
-
-		case "listmembers":
-			teamLeaderFetchList(message,message.author.id,alternionHandlerEmbed);
-			break;
-
-		case "forceupdate":
-			teamLeaderForceLoadout(message,message.author.id,args[1].toLowerCase(),args[2],alternionHandlerEmbed);
-			break;
-
-		case "searchuser":
-			teamLeaderSearch(message,args[1],args[2],alternionHandlerEmbed);
-			break;
-
-		default:
-			alternionHandlerEmbed.setDescription("You have entered an incorrect command, please try again.\nUse `;Alternion Help` to get a list of supported commands!");
-			sendAlternionEmbed(message,alternionHandlerEmbed,false);
-			break;
+				break;
+		}
+	}else{
+		message.channel.send("Please ensure you have entered the correct terms!")
 	}
 }
 
@@ -350,7 +358,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	if (table1Name != "NA"){
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${message.author.id}`, (err,userRow) => {
 			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
-				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR Team_ID=${userRow[0].Team_ID}`, (err, rows2) => {
+				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
 					let found = false;
 					let assignedBadge = "";
 					if (rows){
@@ -454,7 +462,7 @@ function checkifInDatabase(message,args){
 
 function getWeaponSkins(message,ID,alternionHandlerEmbed){
 	db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-		db.alternionConnectionPool.query(`(SELECT WeaponSkin.Name, WeaponSkin.Display_Name FROM LimitedWeaponSkins INNER JOIN User ON User_ID = User.ID INNER JOIN WeaponSkin ON Allowed_Weapon_Skin_ID = WeaponSkin.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM WeaponSkin WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+		db.alternionConnectionPool.query(`(SELECT WeaponSkin.Name, WeaponSkin.Display_Name FROM LimitedWeaponSkins INNER JOIN User ON User_ID = User.ID INNER JOIN WeaponSkin ON Allowed_Weapon_Skin_ID = WeaponSkin.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM WeaponSkin WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 			if (rows.length < 1){
 				alternionHandlerEmbed.setDescription("No Weapon Skins found.");
 			}else{
@@ -476,7 +484,7 @@ function getCannons(message,ID,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM Cannon WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM Cannon WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No Cannons found.");
 				}else{
@@ -515,7 +523,7 @@ function getNormalSails(message,ID,pubPriv,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM NormalSail WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT NormalSail.Name, NormalSail.Display_Name FROM LimitedSails INNER JOIN User ON User_ID = User.ID INNER JOIN NormalSail ON Allowed_Sail_ID = NormalSail.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM NormalSail WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No Sails found.");
 				}else{
@@ -555,7 +563,7 @@ function getMainSails(message,ID,pubPriv,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM MainSail WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT MainSail.Name, MainSail.Display_Name FROM LimitedMainSails INNER JOIN User ON User_ID = User.ID INNER JOIN MainSail ON Allowed_Main_Sail_ID = MainSail.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM MainSail WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No Sails found.");
 				}else{
@@ -595,7 +603,8 @@ function getBadges(message,ID,pubPriv,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM Badge WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT Badge.Name, Badge.Display_Name FROM LimitedBadges INNER JOIN User ON User_ID = User.ID INNER JOIN Badge ON Allowed_badge_ID = Badge.ID WHERE User.Discord_ID='${ID}') UNION ( SELECT Name,Display_Name FROM Badge WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
+				console.log(rows);
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No badges found.");
 				}else{
@@ -635,7 +644,7 @@ function getFlags(message,ID,pubPriv,alternionHandlerEmbed){
 	}
 	if (pubPriv.toLowerCase() === "private"){
 		db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-			db.alternionConnectionPool.query(`(SELECT Flag.Name, Flag.Display_Name FROM LimitedFlags INNER JOIN User ON User_ID = User.ID INNER JOIN Flag ON Allowed_Flag_ID = Flag.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM Flag WHERE Team_ID=${rows1[0].Team_ID})`, (err,rows) => {
+			db.alternionConnectionPool.query(`(SELECT Flag.Name, Flag.Display_Name FROM LimitedFlags INNER JOIN User ON User_ID = User.ID INNER JOIN Flag ON Allowed_Flag_ID = Flag.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name,Display_Name FROM Flag WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 				if (rows.length < 1){
 					alternionHandlerEmbed.setDescription("No Flags found.");
 				}else{
@@ -797,6 +806,67 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 							message.channel.send(`Could not find any **${item}(s)** with ID \`${itemID}\``);
 						}
 					});
+				});
+			}else{
+				message.channel.send("This command is for Team Leaders only!");
+			}
+		});
+	}else{
+		message.channel.send("Incorrect input, double check your inputs.");
+	}
+}
+
+function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionHandlerEmbed){
+	let field;
+	let table;
+	switch (item){
+		case "badge":
+			field = "Badge_ID";
+			table = "Badge";
+			break;
+		case "mainsail":
+			field = "Main_Sail_ID";
+			table = "MainSail";
+			break;
+		case "sail":
+			field = "Sails_ID";
+			table = "NormalSail";
+			break;
+		case "flag":
+			field = "Flag_ID";
+			table = "Flag";
+			break;
+		default:
+			field = "NA";
+			break;
+	}
+	if (field != "NA"){
+		db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id='${tlID}'`, (err,rows) => {
+			if (rows.length === 1 && rows[0].Team_Leader !== 0){
+				db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE ID=${targetID}`, (err,rows2) => {
+					if (rows.length === 1 && rows[0].Team_Leader === rows2[0].Team_ID){
+						db.alternionConnectionPool.query(`SELECT ID, Name, Display_Name FROM ${table} WHERE Team_ID=${rows[0].Team_ID}`, (err,rows3) => {
+							let hasNotFound = true;
+							for (let s=0; s < rows3.length; s++){
+								if (rows3[s].Name === itemID){
+									hasNotFound = false;
+									for (let i=0; i < rows2.length; i++){
+										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[0].ID} WHERE ID=${rows2[i].ID}`);
+									}
+
+									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
+										.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[0].Display_Name}`);
+
+									sendAlternionEmbed(message,alternionHandlerEmbed,false);
+									break;
+								}
+							}
+
+							if (hasNotFound){
+								message.channel.send(`Could not find any **${item}(s)** with ID \`${itemID}\``);
+							}
+						});
+					}
 				});
 			}else{
 				message.channel.send("This command is for Team Leaders only!");
