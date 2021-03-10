@@ -400,6 +400,23 @@ async function displayRichestUsers(){
 	return;
 }
 
+exports.handler = function handler(type){
+	switch(type){
+		case 0:
+			updateShopWindow();
+			break;
+		case 1:
+			updateleaderboard();
+			break;
+		case 2:
+			displayRichestUsers();
+			break;
+		default:
+			console.log("Not valid found for " + type);
+			break;
+	}
+}
+
 function editMsg(contents,channelID,msgID){
 	bot.channels.cache.get(channelID).messages.fetch(msgID).then( msg => {
 		msg.edit(contents);
