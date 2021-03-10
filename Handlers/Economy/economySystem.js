@@ -281,7 +281,7 @@ function purchaseItem(ID,item,message,args){
 									.setDescription(desc);
 								bot.channels.cache.get("718232760388550667").send(logEmbed);
 							}
-							updateShopWindow();
+							displays.handler(0);
 							// displayRichestUsers();
 						}
 					});	
@@ -432,7 +432,7 @@ function sellItem(ID,item,message){
 						let sellEmbed = new Discord.MessageEmbed().setTitle("Item Sold").setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${message.author}`).setTimeStamp();
 						message.channel.send(sellEmbed);
 						bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(sellEmbed);
-						updateShopWindow();
+						displays.handler(0);
 						// displayRichestUsers();
 					});
 				}
@@ -538,7 +538,7 @@ function giftUserItem(gifterID,reciever,item,message){
 					db.mainDatabaseConnectionPool.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
 					let itemInfo = JSON.parse(rows2[0].info);
 					message.channel.send(`Item: ${itemInfo.name} has been sold for ${worth}.`);
-					updateShopWindow();
+					displays.handler(0);
 				});
 			}
 
