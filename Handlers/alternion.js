@@ -843,7 +843,7 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 	if (field != "NA"){
 		db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id='${tlID}'`, (err,rows) => {
 			if (rows.length === 1 && rows[0].Team_Leader !== 0){
-				db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE ID=${targetID}`, (err,rows2) => {
+				db.alternionConnectionPool.query(`SELECT Team_ID, discord_id FROM User WHERE ID=${targetID}`, (err,rows2) => {
 					if (rows.length === 1 && rows[0].Team_Leader === rows2[0].Team_ID){
 						db.alternionConnectionPool.query(`SELECT ID, Name, Display_Name FROM ${table} WHERE Team_ID=${rows[0].Team_ID}`, (err,rows3) => {
 							let hasNotFound = true;
@@ -851,11 +851,11 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 								if (rows3[s].Name === itemID){
 									hasNotFound = false;
 									for (let i=0; i < rows2.length; i++){
-										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[0].ID} WHERE ID=${rows2[i].ID}`);
+										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[s].ID} WHERE ID=${rows2[i].ID}`);
 									}
 
 									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
-										.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[0].Display_Name}`);
+										.setDescription(`Updated member <@${rows2[0].discord_id}> of team \`${rows[0].Team_ID}\`\nNew ${item}: **${rows3[0].Display_Name}**`);
 
 									sendAlternionEmbed(message,alternionHandlerEmbed,false);
 									break;
@@ -866,6 +866,8 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 								message.channel.send(`Could not find any **${item}(s)** with ID \`${itemID}\``);
 							}
 						});
+					}else{
+						message.channel.send(`This user is not part of your team!`);
 					}
 				});
 			}else{
