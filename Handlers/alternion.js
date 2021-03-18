@@ -50,6 +50,7 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
 							sendAlternionEmbed(message,alternionHandlerEmbed,false);
 							break;
+
 						case "assign":
 							alternionHandlerEmbed.setDescription("Assign an asset to be used.")
 								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
@@ -60,6 +61,38 @@ exports.alternionMainhandler = function alternionHandler(message,command,args){
 								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
 							sendAlternionEmbed(message,alternionHandlerEmbed,false);
 							break;
+						case "whatsmyid":
+							alternionHandlerEmbed.setDescription("Lists your Alternion ID")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+
+						case "manage":
+							alternionHandlerEmbed.setDescription("Lets team leaders manage members of their team.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "listmembers":
+							alternionHandlerEmbed.setDescription("Lets team leaders view all members of their team.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "forceupdate":
+							alternionHandlerEmbed.setDescription("Lets team leaders update all members of their team in one go.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "forceupdateuser":
+							alternionHandlerEmbed.setDescription("Lets team leaders update a specific member of their team.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+						case "searchuser":
+							alternionHandlerEmbed.setDescription("Lets team leaders search for a specific users Alternion ID.")
+								.setFooter("Note: Requires your discord_ID to be linked to your Steam_ID in the database, contact Archie for more information.");
+							sendAlternionEmbed(message,alternionHandlerEmbed,false);
+							break;
+
 						default:
 							break;
 					}
