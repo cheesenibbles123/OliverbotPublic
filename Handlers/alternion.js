@@ -826,7 +826,7 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 								for (let i=0; i < rows2.length; i++){
 									db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[0].ID} WHERE ID=${rows2[i].ID}`);
 								}
-
+								
 								alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
 									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[0].Display_Name}`);
 
@@ -886,6 +886,8 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 									for (let i=0; i < rows2.length; i++){
 										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[s].ID} WHERE ID=${targetID}`);
 									}
+
+									getLocalJson(rows2[0].discord_id);
 
 									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
 										.setDescription(`Updated member <@${rows2[0].discord_id}> of team \`${rows[0].Team_ID}\`\nNew ${item}: **${rows3[0].Display_Name}**`);
