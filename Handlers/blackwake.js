@@ -410,7 +410,7 @@ async function getBlackwakeStats(message,args){
 					allWeaponStats.push(stats[i]);
 				}
 				
-									if (ships.indexOf(stats[i].name) !== -1){
+				if (ships.indexOf(stats[i].name) !== -1){
 					shipStats.push(stats[i]);
 				}else
 				if (maintenance.indexOf(stats[i].name) !== -1){
