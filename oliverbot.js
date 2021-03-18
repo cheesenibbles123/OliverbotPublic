@@ -275,7 +275,7 @@ bot.on("message", async message => {
 
 
 		//N word filter
-		if (message.content.toLowerCase().includes('nigger') || message.content.toLowerCase().includes(" "+"nigger"+" ") && db.adjustableConfig.misc.nWordFilter){
+		if (message.content.toLowerCase().includes('nigger') && db.adjustableConfig.misc.nWordFilter){
 			if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
 				// Ignore
 			}else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
