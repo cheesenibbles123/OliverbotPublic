@@ -358,7 +358,7 @@ function assignItemSkin(message,args,alternionHandlerEmbed){
 	if (table1Name != "NA"){
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${message.author.id}`, (err,userRow) => {
 			db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
-				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
+				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${userRow[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
 					let found = false;
 					let assignedBadge = "";
 					if (rows){
@@ -851,7 +851,7 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 								if (rows3[s].Name === itemID){
 									hasNotFound = false;
 									for (let i=0; i < rows2.length; i++){
-										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[s].ID} WHERE ID=${rows2[i].ID}`);
+										db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[s].ID} WHERE ID=${targetID}`);
 									}
 
 									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
