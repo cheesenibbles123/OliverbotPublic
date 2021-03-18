@@ -218,7 +218,6 @@ function craftItem(message,args){
 	});
 }
 
-allowChannels = ["512331083493277706","577180597521350656","440525025452490752","663524428092538920","563478316120539147","722204531538002020","808475359258607616"];
 allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
@@ -354,7 +353,7 @@ bot.on("message", async message => {
 		}
 	}
 	
-	if (allowChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed && message.guild !== null){
+	if (config.serverInfo.channels.allowedChannels.indexOf(message.channel.id) === -1 && message.author.id != config.ownerID && isNotAllowed && message.guild !== null){
 		return;
 	}
 
