@@ -97,6 +97,7 @@ exports.handler = function handler(message,command,args){
 		case "work":
 		case "purchase":
 		case "search":
+		case "bet":
 			economy.handler(message,command,args);
 			break;
 		case "createcommand":
