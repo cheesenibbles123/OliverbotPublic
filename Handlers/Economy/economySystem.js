@@ -3,6 +3,7 @@ const config = require("./../../config.json");
 const glob = require("./../globalFunctions");
 const issueEmbed = require("./../issueEmbed");
 const displays = require("./displays");
+const bets = require("./tempTWBets");
 
 const Discord = require("discord.js");
 var bot;
@@ -33,6 +34,11 @@ exports.handler = function handler(message,command,args){
 			break;
 		case "search":
 			searchForItem(message,args);
+			break;
+		case "bet":
+			bets.handler(message,args);
+			break;
+		default:
 			break;
 	}
 }
