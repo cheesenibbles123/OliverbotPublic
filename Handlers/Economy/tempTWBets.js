@@ -24,7 +24,6 @@ function addUpdate(message,args){
 				if (validOptions.indexOf(args[1].toLowerCase()) !== -1){
 					db.mainDatabaseConnectionPool.query(`SELECT * FROM shittyTempBets WHERE user=${message.author.id}`, (err,rows) => {
 						if (rows.length < 1){
-							console.log(`INSERT INTO shittyTempBets values (${message.author.id},${amount},${args[1]})`);
 							db.mainDatabaseConnectionPool.query(`INSERT INTO shittyTempBets values ('${message.author.id}',${amount},'${args[1]}')`);
 							message.channel.send(`Your bet has been added.\n\`${args[1].toUpperCase()}\` : \`${amount}\``);
 						}else if (rows.length > 1){
