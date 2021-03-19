@@ -824,12 +824,12 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 							if (rows3[s].Name === itemID){
 								hasNotFound = false;
 								for (let i=0; i < rows2.length; i++){
-									db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[0].ID} WHERE ID=${rows2[i].ID}`);
+									db.alternionConnectionPool.query(`UPDATE User SET ${field}=${rows3[s].ID} WHERE ID=${rows2[i].ID}`);
 								}
 								globalJsonUpdate();
 
 								alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
-									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[0].Display_Name}`);
+									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[s].Display_Name}`);
 
 								sendAlternionEmbed(message,alternionHandlerEmbed,false);
 								break;
