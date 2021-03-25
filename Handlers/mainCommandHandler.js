@@ -35,6 +35,7 @@ exports.handler = function handler(message,command,args){
     	case "queue":
     	case "current":
     	case "clear":
+    	case "skip":
     		audio.handler(message,command,args);
     		break;
     	case "payday2":
@@ -58,7 +59,6 @@ exports.handler = function handler(message,command,args){
 		case "chuck":
 		case "dictionary":
 		case "coinflip":
-		case "today":
 		case "today":
 		case "playdie":
 		case "rollcustom":
