@@ -9,6 +9,7 @@ var currentDispatcher = null;
 var currentSongInfo;
 var bot;
 var songQueue = [];
+let connection;
 
 exports.isPlaying = isPlaying;
 
@@ -43,6 +44,9 @@ exports.handler = function handler(message,command,args){
 		case "clear":
 			clearQueue(message);
 			break;
+		case "skip":
+			skipTrack(message);
+			break;
 	}
 }
 
@@ -75,6 +79,12 @@ async function setupTune(message,args,fromFile){
 
 				if (!isPlaying){
 					playAudio(message,null,voiceChannel);
+				}else{
+					let embed = new Discord.MessageEmbed()
+						.setTitle("Added to Queue")
+						.setColor('#add8e6')
+						.setDescription(`${songInfo.title}\n${song}\n${Math.floor(songInfo.lengthSeconds / 3600)}h ${Math.floor(((songInfo.lengthSeconds / 3600) - Math.floor(songInfo.lengthSeconds / 3600)) * 60)}m ${songInfo.lengthSeconds % 60}s\n${songInfo.author}`);
+					message.channel.send(embed);
 				}
 			}else{
 				message.reply("Please enter a valid youtube link!");
@@ -121,32 +131,37 @@ async function playAudio(message,song,voiceChannel){
 		song = songQueue[0].url;
 	}
 
-	voiceChannel.join().then(connection =>{
-		connection.voice.setSelfDeaf(true);
-		currentDispatcher = connection
-			.play(
-        	  	ytdl(song,{filter:'audioonly',quality:'highestaudio',highWaterMark:1<<25}, {highWaterMark: 1},{bitrate: 192000})
-      		)
-      		.on("finish",() =>{
-      			voiceChannel.leave();
-      			songQueue.shift();
-      			if (songQueue.length < 1){
-      				isPlaying = false;
-      				currentDispatcher.destroy();
-      			}else{
-      				setTimeout(() => {
-      					playAudio(message,null,voiceChannel);
-      				}, 1000);
-      			}
-      		})
-      		.on("error",e=>{
-      			console.error(e);
-     		 	voiceChannel.leave();
-     		 	isPlaying = false;
-     		 	currentDispatcher.destroy();
-     		});
-     	currentDispatcher.setVolumeLogarithmic(0.5);
-    });
+	if (!connection){
+		await voiceChannel.join().then(connec => {
+			connection = connec;
+			connection.voice.setSelfDeaf(true);
+		});
+	}
+
+	currentDispatcher = connection
+		.play(
+    	  	ytdl(song,{filter:'audioonly',quality:'highestaudio',highWaterMark:1<<25}, {highWaterMark: 1},{bitrate: 192000})
+  		)
+  		.on("finish",() =>{
+  			songQueue.shift();
+  			if (songQueue.length < 1){
+  				voiceChannel.leave();
+  				isPlaying = false;
+  				currentDispatcher.destroy();
+  				connection = undefined;
+  			}else{
+  				setTimeout(() => {
+  					playAudio(message,null,voiceChannel);
+  				}, 1000);
+  			}
+  		})
+  		.on("error",e=>{
+  			console.error(e);
+ 		 	voiceChannel.leave();
+ 		 	isPlaying = false;
+ 		 	currentDispatcher.destroy();
+ 		});
+ 	currentDispatcher.setVolumeLogarithmic(0.5);
 }
 
 function setVolume(message,volume){
@@ -191,13 +206,19 @@ function embedHandler(message, type, additionInfo){
 		.setColor('#add8e6');
 	switch (type){
 		case 0:
-			embed.setTitle("Pause");
+			embed.setTitle("Paused");
 			break;
 		case 1:
-			embed.setTitle("Resume");
+			embed.setTitle("Resumed!");
 			break;
 		case 2:
 			embed.setTitle("SetVolume: " + additionInfo);
+			break;
+		case 3:
+			embed.setTitle("Skipped!");
+			break;
+		case 4:
+			embed.setTitle("Queue cleared!");
 			break;
 	}
 	message.channel.send(embed);
@@ -223,11 +244,26 @@ function getCurrentQueue(message){
 	message.channel.send(finalMsg + "```");
 }
 
+function skipTrack(message){
+	if (!isPlaying){
+		message.channel.send("I am not currently in a voice channel!");
+	}else if (!currentDispatcher){
+		message.channel.send("I am not currently playing anything!");
+	}else if (!message.member.voice.channel){
+		message.channel.send("You must be in the same voice channel!");
+	}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		message.channel.send("You must be in the same voice channel!");
+	}else{
+		currentDispatcher.end();
+		embedHandler(message, 3, null);
+	}
+}
+
 function clearQueue(message){
 	if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
 		message.channel.send("You must be in the same voice channel!");
 	}else{
 		songQueue = [];
-		message.channel.send("Cleared the queue!");
+		embedHandler(message,4,null);
 	}
 }
