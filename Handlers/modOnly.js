@@ -163,15 +163,15 @@ function displayUserInfo(message,userID,userCreatedAt,userJoinedAt,serverDeaf,se
 
 function saveQuote(channel,id){
 
-	if (typeof args[0] !== null && Number.isInteger(parseInt(args[0]))){
-			try{
+	if (typeof id !== null && Number.isInteger(parseInt(id))){
+		try{
 			bot.channels.cache.get(channel.id).messages.fetch(id).then(message => {
+				let dateSent = new Date(message.createdTimestamp);
 				let quote = new Discord.MessageEmbed()
 					.setTitle(`${message.author.username}`)
 					.setDescription(`${message.content}`)
 					.setThumbnail(message.author.displayAvatarURL())
-					.setFooter(`Sent in: #${channel.name} `)
-					.setTimestamp();
+					.setFooter(`Sent in: #${channel.name} ⚉ ${dateSent.getDay()}/${dateSent	.getDate()}/${dateSent.getFullYear()}`);
 				let hasNotAddedImage = true;
 				message.attachments.forEach(attachment => {
 		    		if (message.attachments.size === 1) {
@@ -186,9 +186,9 @@ function saveQuote(channel,id){
 		}catch(e){
 			channel.send("Please make sure you have entered it correctly!");
 		}
-		message.reply("Done!");
+		channel.send("Done!");
 	}else{
-		message.reply("Please make sure you have entered the correct message ID :)");
+		channel.send("Please make sure you have entered the correct message ID :)");
 	}
 }
 
