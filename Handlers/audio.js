@@ -6,7 +6,7 @@ const glob = require("./globalFunctions")
 var adjustableConfig;
 var isPlaying = false;
 var currentDispatcher = null;
-var currentSongInfo;
+var currentSongStart;
 var bot;
 var songQueue = [];
 let connection;
@@ -162,6 +162,7 @@ async function playAudio(message,song,voiceChannel){
  		 	currentDispatcher.destroy();
  		});
  	currentDispatcher.setVolumeLogarithmic(0.5);
+ 	currentSongStart = new Date().getTime();
 }
 
 function setVolume(message,volume){
@@ -226,10 +227,24 @@ function embedHandler(message, type, additionInfo){
 
 function getCurrentInfo(message){
 	if (isPlaying){
+		let timePassed = new Date(new Date().getTime() - currentSongStart);
+		let hrs = timePassed.getHours();
+		let duration = "";
+		if (hrs > 0){
+			duration += `${hrs}:`;
+		}
+		duration += `${timePassed.getMinutes()}:${timePassed.getSeconds()}`;
+
+		let songLength = "";
+		hrs = Math.floor(songQueue[0].lengthSeconds / 3600);
+		if (hrs > 0){
+			songLength += hrs;
+		}
+		songLength += `${Math.floor(((songQueue[0].lengthSeconds / 3600) - Math.floor(songQueue[0].lengthSeconds / 3600)) * 60)}:${songQueue[0].lengthSeconds % 60}`;
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Now Playing")
 			.setColor('#add8e6')
-			.addField(`Song Info:`,`${songQueue[0].title}\n${songQueue[0].url}\n${Math.floor(songQueue[0].lengthSeconds / 3600)}h ${Math.floor(((songQueue[0].lengthSeconds / 3600) - Math.floor(songQueue[0].lengthSeconds / 3600)) * 60)}m ${songQueue[0].lengthSeconds % 60}s\n${songQueue[0].author}`);
+			.addField(`Song Info:`,`${songQueue[0].title}\n${songQueue[0].url}\n${Math.floor(songQueue[0].lengthSeconds / 3600)}h ${Math.floor(((songQueue[0].lengthSeconds / 3600) - Math.floor(songQueue[0].lengthSeconds / 3600)) * 60)}m ${songQueue[0].lengthSeconds % 60}s\n${songQueue[0].author}\nDuration: ${duration}/${songLength}`);
 		message.channel.send(embed);
 	}
 }
