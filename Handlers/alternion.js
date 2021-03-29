@@ -803,7 +803,7 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 			table = "MainSail";
 			break;
 		case "sail":
-			field = "Sails_ID";
+			field = "Sail_ID";
 			table = "NormalSail";
 			break;
 		case "flag":
@@ -863,7 +863,7 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 			table = "MainSail";
 			break;
 		case "sail":
-			field = "Sails_ID";
+			field = "Sail_ID";
 			table = "NormalSail";
 			break;
 		case "flag":
