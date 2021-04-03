@@ -1,11 +1,5 @@
 # OliverBot
-![Last Commit](https://img.shields.io/github/last-commit/cheesenibbles123/OliverbotPublic)
-![Code Size](https://img.shields.io/github/languages/code-size/cheesenibbles123/OliverbotPublic)
-![Repo Size](https://img.shields.io/github/repo-size/cheesenibbles123/OliverbotPublic)
-![Open Issues](https://img.shields.io/github/issues-raw/cheesenibbles123/OliverbotPublic)
-![Closed Issues](https://img.shields.io/github/issues-closed-raw/cheesenibbles123/OliverbotPublic)
-![Latest Release](https://img.shields.io/github/v/release/cheesenibbles123/OliverbotPublic)
-![License](https://img.shields.io/github/license/cheesenibbles123/OliverbotPublic)
+![Build status](https://github.com/cheesenibbles123/OliverbotPublic/actions/workflows/NodeJSBuild.yml/badge.svg)
 
 ## Description
 
