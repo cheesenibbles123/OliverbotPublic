@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
   
   push:
-    branches: [ ghActions ]
+    branches: [ master ]
   pull_request:
-    branches: [ ghActions ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -24,9 +24,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-        with:
-          ref: ghActions
-          
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
