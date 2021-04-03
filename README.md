@@ -4,13 +4,7 @@
 
 ## Description
 
-These are the oliverbot datafile and main js files.
-
-I didnt upload the node-modules file to go with this as it contains too many files to upload in one go, and screw doing it manually.
-
-There are likley lots of malpractises in here and in general don't expect everything to work flawlessly, some stuff is **work-in-progress**, and upgrading to discordjs v12 messed with a lot of stuff.
-
-Incase the title of the files wasn't clear enough, the included config and datafile are simply templates containing the layout that should be used for them. ***A database is not included***, however it should be fairly simple to identify the columns used based on the code. For reference I used a **Mysql** database
+These are the oliverbot files, used for powering the discord bot.
 
 ## Known key issues
 
@@ -20,7 +14,7 @@ Incase the title of the files wasn't clear enough, the included config and dataf
 
 **Notes:**
  - The config + datafile must be within the same directory as the main oliverbot.js file (see Templates)
- - Please note idk wtf im doing with github.
+ - Database is not included as of current
  - Adding comments to the code to help readability (I'll get round to it some day)
  - [Website link](http://www.archiesbots.com/DiscordBots/Home.html)
  - Release version: 1.7.0
