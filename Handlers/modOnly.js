@@ -50,7 +50,7 @@ exports.handler = function handler(message,command,args){
 }
 
 function createCommand(message,args){
-	configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
+	db.configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
 	setTimeout(function(){
 		db.loadCustomCommandsFromDB();
 	}, 1000);
@@ -64,7 +64,7 @@ function deleteCommand(message,args){
 	}else{
 		commandToDelete = args;
 	}
-	configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
+	db.configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
 	setTimeout(function(){
 		db.loadCustomCommandsFromDB();
 	}, 1000);
