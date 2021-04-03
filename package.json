@@ -4,7 +4,7 @@
   "description": "A nice bot I made so that others could facepalm at my mistakes :)",
   "main": "oliverbot.js",
   "scripts": {
-    "test": "tingles"
+    "test": "echo tingles"
   },
   "author": "Archie the inventor#4744",
   "license": "ISC",
