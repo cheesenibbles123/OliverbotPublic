@@ -36,7 +36,7 @@ function listTheCommands(message){
       .setTitle("Blackwake Commands")
       .setColor(0x008000)
       .addField(`Main Features`,`Used in the following context:\n\`;Blackwake\` \`Feature\` \`SteamID\`\n - Overview\n - Weaponstats\n - Maintenance\n - ShipWeaponry\n - ShipStats\n - Compare\n - Monthly\n - Elo\n - Alternion`)
-      .addField(`Alternion Features`,`Used in the following context:\n\`;Blackwake\` \`Alternion\` \`Feature\`\n - ListBadges\n - ListSails\n - ListMainSails\n - ListCannons\n - ListWeapons\n - Overview\n - Assign\n - Help`)
+      .addField(`Alternion Features`,`Used in the following context:\n\`;Alternion\` \`Feature\`\n - ListBadges\n - ListSails\n - ListMainSails\n - ListCannons\n - ListWeapons\n - Overview\n - Assign\n - Help`)
       .setTimestamp();
    message.author.send(embed2);
 
