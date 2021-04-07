@@ -143,7 +143,7 @@ function help(message,args){
             message.react("🤔");
             break;
          case "blackwake":
-            message.channel.send("There are several actions for the blackwake command, currently the supported options are:\n`overview` `weaponstats` `shipstats` `maintenance` `shipweaponry` `monthly` `elo`\nNotes:\n- Requires your profile to be set to public.\n- `Monthly` and `elo` may take a while to load.");
+            message.channel.send("There are several actions for the blackwake command, currently the supported options are:\n`overview` `weaponstats` `shipstats` `maintenance` `shipweaponry` `monthly`\nNotes:\n- Requires your profile to be set to public.\n- `Monthly` and `elo` may take a while to load.");
             break;
          case "payday2":
             message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
