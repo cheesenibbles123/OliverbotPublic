@@ -149,7 +149,7 @@ function help(message,args){
             message.channel.send("There are several actions for the Alternion command, currently the supported options for individuals are:\n`Overview` `LiastBadges` `ListSails` `ListMainSails` `Assign` `WhatsMyID` `ListCannons` `ListFlags` `ListWeapons`\nTeam Leader commands:\n`Manage` `ListMembers` `ForceUpdate` `ForceUpdateUser` `SearchUser`\nNotes:\n- Requires your profile to be set to public.\n- `Monthly` and `elo` may take a while to load.");
             break;
          case "payday2":
-            message.channel.send("There are several actions for the payday2 command, currently the supported options are: `overview`\nNote: requires your profile to be set to public!");
+            message.channel.send("Currently supported options are: `overview`\nNote: requires your profile to be set to public!");
             break;
          case "trump":
             message.channel.send("Find out trumps opinion of the individual/group/company your specify!");
