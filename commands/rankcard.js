@@ -9,7 +9,7 @@ module.exports = {
 	help : "Displays your rank",
 	execute: (message,args) => {
 		let id = message.author.id;
-		if (Array.isArray(args)){
+		if (Array.isArray(args) && args.length === 1){
 			id = glob.getUserFromMention(args[0]).id;
 		}
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, (err,rows) => {
