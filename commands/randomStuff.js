@@ -1,9 +1,9 @@
-const glob = require("./globalFunctions");
+const glob = require("./_globalFunctions");
 var adjustableConfig;
 const Discord = require("discord.js");
 const fetch = require("node-fetch");
-const db = require("./databaseSetup");
-const issueEmbeds = require("./issueEmbed");
+const db = require("./_databaseSetup");
+const issueEmbeds = require("./_issueEmbed");
 const fs = require("fs");
 
 exports.init = function init(){
