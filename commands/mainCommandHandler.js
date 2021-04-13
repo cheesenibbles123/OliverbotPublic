@@ -60,6 +60,23 @@ module.exports = {
 				}
 			}
 
+			// Check Users
+			if (bot.commands[command].users){
+				let users = bot.commands[command].users;
+				let notFound = true;
+
+				for (let i=0; i < users.length; i++){
+					if (users[i] === message.author.id){
+						notFound = false;
+					}
+				}
+
+				if (notFound){
+					message.channel.send("You do not have permission to use this command!");
+					return;
+				}
+			}
+
 			bot.commands[command].execute(message,args);
 			db.updateTracking(command);
 
