@@ -10,8 +10,8 @@ module.exports = {
 
 			let command = require(__dirname + folder + "/" + file);
 
-			if (!bot.commands[command.name]){
-				bot.commands[command.name] = command;
+			if (!bot.commands[command.name.toLowerCase()]){
+				bot.commands[command.name.toLowerCase()] = command;
 			}else{
 				console.log("Error loading command: " + routeEndpoint.name);
 				console.log("From file: " + folder + "/" + file);
@@ -19,6 +19,7 @@ module.exports = {
 		});
 	},
 	handler: (message,command,args) => {
+		command = command.toLowerCase();
 		if (bot.commands[command]){
 
 			let isValid = true;
