@@ -31,7 +31,7 @@ const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665
 var adjustableConfig;
 
 exports.initDBStuff = function initDBStuff(){
-	adjustableConfig = require("./Handlers/databaseSetup").adjustableConfig;
+	adjustableConfig = require("./Handlers/_databaseSetup").adjustableConfig;
 }
 
 /////////////////////////////////////////////APIS
@@ -221,6 +221,7 @@ function craftItem(message,args){
 allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
+	comamnds.init(bot);
 	initialSetup.init();
 	console.log('Bot '+bot.user.username+' is ready!');
 });
