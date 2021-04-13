@@ -3,8 +3,8 @@ var bot;
 const config = require("./../config.json");
 const fetch = require("node-fetch");
 var adjustableConfig;
-const issueEmbeds = require("./issueEmbed");
-const db = require("./databaseSetup");
+//const issueEmbeds = require("./issueEmbed");
+const db = require("./_databaseSetup");
 
 const bw = require('@cheesenibbles123/blackwakehandler');
 bw.init(config.apiKeys.steam);
@@ -107,7 +107,7 @@ exports.handler = function handler(message,command,args){
 			}
 		}
 	}else{
-		message.channel.send(issueEmbeds.grabEmbed(4,null));
+		message.channel.send("Command disabled");
 	}
 }
 
