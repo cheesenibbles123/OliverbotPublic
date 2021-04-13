@@ -44,8 +44,8 @@ module.exports = {
 						embed.setDescription(data.content.formatted);
 						break;
 					case "shipstats":
-						embed.addField("Ships",data.content.ships.formatted)
-							.addField("General",data.content.general.formatted);
+						embed.addField("Ships",data.content.ships.formatted,true)
+							.addField("General",data.content.general.formatted,true);
 						break;
 					case "shipweaponry":
 						embed.setDescription(data.content.formatted);
