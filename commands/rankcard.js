@@ -6,6 +6,7 @@ const Discord = require("discord.js");
 module.exports = {
 	Name : "rankcard",
 	args : 0,
+	help : "Displays your rank",
 	execute: (message,args) => {
 		let id = message.author.id;
 		if (Array.isArray(args)){
