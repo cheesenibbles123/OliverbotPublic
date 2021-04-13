@@ -39,8 +39,6 @@ module.exports = {
 		command = command.toLowerCase();
 		if (bot.commands[command]){
 
-			let isValid = true;
-
 			// Check arguments
 			if (bot.commands[command].args){
 				if (typeof(bot.commands[command].args) === typeof([])){
