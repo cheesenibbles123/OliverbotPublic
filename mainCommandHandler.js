@@ -2,28 +2,38 @@ const fs = require('fs');
 const db = require('./commands/_databaseSetup.js');
 let bot;
 
+function loopOverFolders(folder){
+	fs.readdirSync(__dirname + folder).forEach((file) => {
+
+		if (fs.statSync(__dirname + folder + "/" + file).isDirectory()){
+			console.log(folder + "/" + file);
+			loopOverFolders(folder + "/" + file);
+		}
+
+		if (file.startsWith("_") || !file.endsWith(".js") || file === "mainCommandHandler.js") return;
+		console.log("Loading: " + folder + "/" + file);
+		let command = require(__dirname + folder + "/" + file);
+
+		if (!bot.commands[command.name.toLowerCase()]){
+			if (typeof(command.init) === 'function'){
+				command.init(bot);
+			}
+			bot.commands[command.name.toLowerCase()] = command;
+		}else{
+			console.log("Error loading command: " + command.name);
+			console.log("From file: " + folder + "/" + file);
+		}
+	});
+}
+
 module.exports = {
 	init: (botInstance) => {
 		botInstance['commands'] = {};
-		let folder = "/commands";
-		fs.readdirSync(__dirname + folder).forEach((file) => {
-
-			if (file.startsWith("_") || !file.endsWith(".js") || file === "mainCommandHandler.js") return;
-			console.log("Loading: " + folder + "/" + file);
-			let command = require(__dirname + folder + "/" + file);
-
-			if (!botInstance.commands[command.name.toLowerCase()]){
-				if (typeof(command.init) === 'function'){
-					command.init(botInstance);
-				}
-				botInstance.commands[command.name.toLowerCase()] = command;
-			}else{
-				console.log("Error loading command: " + command.name);
-				console.log("From file: " + folder + "/" + file);
-			}
-		});
 
 		bot = botInstance;
+		let folder = "/commands";
+
+		loopOverFolders(folder);
 	},
 	handler: (message,command,args) => {
 		command = command.toLowerCase();
@@ -53,7 +63,7 @@ module.exports = {
 
 				// Loop over all allowed roles
 				for (let i=0; i<roles.length; i++){
-					if (message.member.roles.has(roles[i])){
+					if (message.member.roles.cache.has(roles[i])){
 						missingRole = false;
 					}
 				}
