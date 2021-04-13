@@ -26,6 +26,8 @@ module.exports = {
 		if (args[0] === "monthly"){
 			fetchEloStuff(message, steamID, args[0]);
 		}else{
+			console.log(args[0]);
+			console.log(steamID);
 			let data = await bw.handler(args[0], steamID);
 
 			if (data.isValid){
@@ -391,15 +393,15 @@ function sendBWStatsEmbed(message,embed){
 
 function checkifInDatabaseBWHandler(message){
 	return new Promise((resolve, reject) => {
-		db.alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT Steam_ID FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
 			if (rows.length > 1){
 				message.channel.send("You appear to have two accounts linked to this discord account, please contact Archie.");
-				return;
+				resolve(0);
 			}else if (rows.length == 0){
 				message.channel.send("Your discord account is not linked to your steamID, please provide your steamID or contact Archie.");
-				return;
+				resolve(0);
 			}else{
-				resolve(rows[0].ID);
+				resolve(rows[0].Steam_ID);
 			}
 		});
 	});
