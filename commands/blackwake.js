@@ -7,12 +7,14 @@ var adjustableConfig;
 const db = require("./_databaseSetup");
 
 const bw = require('@cheesenibbles123/blackwakehandler');
-bw.init(config.apiKeys.steam);
 
 module.exports = {
 	name: "blackwake",
 	args: [1,2],
 	help: "Fetches blackwake data from your steam account.",
+	init: () =>{
+		bw.init(config.apiKeys.steam);
+	},
 	execute: async (message,args) => {
 		let steamID;
 		if (args.length === 1){
@@ -25,8 +27,9 @@ module.exports = {
 			fetchEloStuff(message, steamID, args[0]);
 		}else{
 			let data = await bw.handler(args[0], steamID);
+			console.log(data);
 
-			if (data.isvalid){
+			if (data.isValid){
 
 				let embed = Discord.MessageEmbed()
 					.setTitle(data,type);
@@ -59,6 +62,8 @@ module.exports = {
 
 				message.channel.send(embed);
 
+			}else{
+				message.channel.send("Invalid type and/or SteamID provided.");
 			}
 		}
 	}
