@@ -3,11 +3,11 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 
 const commands = require("./Handlers/mainCommandHandler");
-const glob = require("./Handlers/globalFunctions");
-const db = require("./Handlers/databaseSetup");
-const raw = require("./Handlers/rawEvents");
-const initialSetup = require("./Handlers/initialSetup");
-const random = require("./Handlers/randomStuff");
+const glob = require("./Handlers/_globalFunctions");
+const db = require("./Handlers/_databaseSetup");
+const raw = require("./Handlers/_rawEvents");
+const initialSetup = require("./Handlers/_initialSetup");
+const random = require("./Handlers/_randomStuff");
 const audio = require("./Handlers/audio");
 
 let serverStatus = {
@@ -303,7 +303,7 @@ bot.on("message", async message => {
 		if (message.guild.id === config.serverInfo.serverId){
 			db.xpGainHandler(message);
 		}
-
+		/*
 		//Ping Oliverbot
 		if (message.content.startsWith("<@!556545106468012052>")){
 			TrackingCommand = true;
@@ -311,7 +311,7 @@ bot.on("message", async message => {
 			if(message.member.voice.channel){
 				audio.handler(message, "play", null);
 			}
-		}
+		} */
 
 		//check content of any pictures sent for nudity
 		message.attachments.forEach(attachment => {
