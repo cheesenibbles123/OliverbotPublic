@@ -7,7 +7,7 @@ const issueEmbeds = require("./_issueEmbed");
 const fs = require("fs");
 
 exports.init = function init(){
-	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
+	adjustableConfig = require("./_databaseSetup.js").adjustableConfig;
 }
 
 function randomGif(message,content){
