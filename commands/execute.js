@@ -8,7 +8,7 @@ module.exports = {
 		}else if (args[0].toLowerCase().includes("everyone") || args[0].toLowerCase().includes("here")){
 			message.channel.send("Nah.");
 		}else{
-			message.channel.send(`Executing ${args[0]}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
+			message.channel.send(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
 			TrackingCommand = true;
 		}
 	}
