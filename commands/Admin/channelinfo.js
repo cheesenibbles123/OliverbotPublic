@@ -1,11 +1,16 @@
 const Discord = require("discord.js");
 const db = require("./../_databaseSetup");
 
+let bot;
+
 module.exports = {
 	name: "channelinfo",
 	args: 0,
 	help: "Displays the channel information",
 	roles: ["665939545371574283"],
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM channel_messages WHERE channel_id = '${message.channel.id}'`, (err,rows) => {
 			let message_count;

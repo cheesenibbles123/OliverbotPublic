@@ -11,6 +11,9 @@ module.exports = {
 			let command = require(__dirname + folder + "/" + file);
 
 			if (!bot.commands[command.name.toLowerCase()]){
+				if (typeof(command.init === 'function')){
+					command.init(bot);
+				}
 				bot.commands[command.name.toLowerCase()] = command;
 			}else{
 				console.log("Error loading command: " + routeEndpoint.name);
@@ -56,7 +59,6 @@ module.exports = {
 					return;
 				}
 			}
-
 
 			bot.commands[command].execute(message,args);
 			db.updateTracking(command);
