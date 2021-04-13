@@ -4,7 +4,7 @@ const glob = require("./_globalFunctions");
 const Discord = require("discord.js");
 
 module.exports = {
-	Name : "rankcard",
+	name : "rankcard",
 	args : 0,
 	help : "Displays your rank",
 	execute: (message,args) => {

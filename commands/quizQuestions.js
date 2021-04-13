@@ -5,7 +5,7 @@ const Discord = require("discord.js");
 isNotLocked = true;
 
 module.exports = {
-	Name: "quiz",
+	name: "quiz",
 	args: [0,1],
 	help: "Displays a quiz question for you to awnser",
 	execute: (message,args) => {
