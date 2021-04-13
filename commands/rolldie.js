@@ -1,9 +1,9 @@
 const glob = require("./_globalFunctions");
 
 module.exports = {
-	name: "nerds",
+	name: "rolldie",
 	args: 0,
-	help: "Pings all the nerds",
+	help: "Rolls a die",
 	execute: (message,args) => {
 		message.channel.send(glob.getRandomInt(7));
 	}
