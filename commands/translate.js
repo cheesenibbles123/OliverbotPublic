@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const config = require("./../config.json");
 
 module.exports = {
 	name: "translate",
@@ -25,6 +26,12 @@ async function translating(msg,args,lang1,lang2){
 	}
 	let query = `https://translate.yandex.net/api/v1.5/tr.json/translate?lang=${lang1}-${lang2}&key=${config.apiKeys.yandex}&text=${args.join('%20')}`;
 	let  translation = await fetch(query).then(response => response.json()).then(result =>{
+		if (result.code === 404){
+			return "Command is on cooldown";
+		}
+		if (result.text.length === 0){
+			result.text = "Translation failed.";
+		}
 		return result.text;
 	});
 	msg.channel.send(translation);
