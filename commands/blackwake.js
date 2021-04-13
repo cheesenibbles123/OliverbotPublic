@@ -31,8 +31,8 @@ module.exports = {
 
 			if (data.isValid){
 
-				let embed = Discord.MessageEmbed()
-					.setTitle(data,type);
+				let embed = new Discord.MessageEmbed()
+					.setTitle(data.type);
 
 				switch (data.type){
 					case "overview":
