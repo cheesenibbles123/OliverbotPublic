@@ -2,11 +2,11 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const commands = require("./commands/mainCommandHandler.js");
+const commands = require("./mainCommandHandler.js");
 const glob = require("./commands/_globalFunctions.js");
 const db = require("./commands/_databaseSetup.js");
 const raw = require("./commands/_rawEvents.js");
-//const initialSetup = require("./commands/_initialSetup");
+const initialSetup = require("./commands/_initialSetup");
 const random = require("./commands/_randomStuff.js");
 //const audio = require("./commands/audio");
 
@@ -31,7 +31,7 @@ const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665
 var adjustableConfig;
 
 exports.initDBStuff = function initDBStuff(){
-	adjustableConfig = require("./Handlers/_databaseSetup").adjustableConfig;
+	adjustableConfig = require("./commands/_databaseSetup").adjustableConfig;
 }
 
 /////////////////////////////////////////////APIS
@@ -222,7 +222,7 @@ allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
 	commands.init(bot);
-	//initialSetup.init();
+	initialSetup.init();
 	console.log('Bot '+bot.user.username+' is ready!');
 });
 

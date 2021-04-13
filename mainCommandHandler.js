@@ -1,25 +1,29 @@
 const fs = require('fs');
+const db = require('./commands/_databaseSetup.js');
+let bot;
 
 module.exports = {
-	init: (bot) => {
-		bot['commands'] = {};
-		let folder = ""; // "/commands";
+	init: (botInstance) => {
+		botInstance['commands'] = {};
+		let folder = "/commands";
 		fs.readdirSync(__dirname + folder).forEach((file) => {
 
 			if (file.startsWith("_") || !file.endsWith(".js") || file === "mainCommandHandler.js") return;
 			console.log("Loading: " + folder + "/" + file);
 			let command = require(__dirname + folder + "/" + file);
 
-			if (!bot.commands[command.name.toLowerCase()]){
+			if (!botInstance.commands[command.name.toLowerCase()]){
 				if (typeof(command.init) === 'function'){
-					command.init(bot);
+					command.init(botInstance);
 				}
-				bot.commands[command.name.toLowerCase()] = command;
+				botInstance.commands[command.name.toLowerCase()] = command;
 			}else{
 				console.log("Error loading command: " + command.name);
 				console.log("From file: " + folder + "/" + file);
 			}
 		});
+
+		bot = botInstance;
 	},
 	handler: (message,command,args) => {
 		command = command.toLowerCase();
