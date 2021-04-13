@@ -1,9 +1,9 @@
 const mysql = require("mysql");
 const config = require("./../config.json");
 const Discord = require("discord.js");
-const adminCommands = require("./adminOnly");
-const main = require("./../oliverbot");
-const economy = require("./Economy/economySystem");
+const adminCommands = require("./Admin/_sharedFunctions.js");
+const main = require("./../oliverbot.js");
+const economy = require("./Economy/_sharedFunctions.js");
 const btoa = require("btoa");
 
 var mainDatabaseConnectionPool = mysql.createPool({
