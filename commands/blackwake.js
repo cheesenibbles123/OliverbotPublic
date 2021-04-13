@@ -6,8 +6,62 @@ var adjustableConfig;
 const issueEmbeds = require("./issueEmbed");
 const db = require("./databaseSetup");
 
+const bw = require('@cheesenibbles123/blackwakehandler');
+bw.init(config.apiKeys.steam);
+
 module.exports = {
-	
+	name: "blackwake",
+	args: [1,2],
+	help: "Fetches blackwake data from your steam account.",
+	execute: async (message,args) => {
+		let steamID;
+		if (args.length === 1){
+			steamID = await checkifInDatabaseBWHandler(message);
+		}else if (!isNaN(parseInt(args[1]))){
+			steamID = args[1];
+		}
+
+		if (args[0] === "monthly"){
+			fetchEloStuff(message, steamID, args[0]);
+		}else{
+			let data = await bw.handler(args[0], steamID);
+
+			if (data.isvalid){
+
+				let embed = Discord.MessageEmbed()
+					.setTitle(data,type);
+
+				switch (data.type){
+					case "overview":
+						embed.addField(data.content.playerStats.formatted)
+							.addField(data.content.captainStats.formatted)
+							.addField(data.content.playerStats.faveWeapon.formatted);
+						break;
+					case "weaponstats":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "shipstats":
+						embed.addField("Ships",data.content.ships.formatted)
+							.addField("Overview",data.content.general.formatted);
+						break;
+					case "shipweaponry":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "maintenance":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "misc":
+						embed.setDescription(data.content.formatted);
+						break;
+					default:
+						break;
+				}
+
+				message.channel.send(embed);
+
+			}
+		}
+	}
 }
 
 exports.init = function init(){
@@ -329,6 +383,22 @@ function calculateEloPosition(steamID,response,userMatches,userRating){
 
 function sendBWStatsEmbed(message,embed){
     message.channel.send(embed);
+}
+
+function checkifInDatabaseBWHandler(message){
+	return new Promise((resolve, reject) => {
+		db.alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
+			if (rows.length > 1){
+				message.channel.send("You appear to have two accounts linked to this discord account, please contact Archie.");
+				return;
+			}else if (rows.length == 0){
+				message.channel.send("Your discord account is not linked to your steamID, please provide your steamID or contact Archie.");
+				return;
+			}else{
+				resolve(rows[0].ID);
+			}
+		});
+	});
 }
 
 function checkifInDatabaseBW(message,args,type){
