@@ -1,4 +1,4 @@
-const db = require("./../databaseSetup");
+const db = require("./../_databaseSetup");
 const config = require("./../../config.json");
 const Discord = require("discord.js");
 var bot;
