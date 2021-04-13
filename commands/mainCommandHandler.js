@@ -39,6 +39,25 @@ module.exports = {
 				}
 			}
 
+			// Check permissions
+			if (bot.commands[command].roles){
+				let roles = bot.commands[command].roles;
+				let missingRole = true;
+
+				// Loop over all allowed roles
+				for (let i=0; i<roles.length; i++){
+					if (message.member.roles.has(roles[i])){
+						missingRole = false;
+					}
+				}
+
+				if (missingRole){
+					message.channel.send("You do not have permission to use this command!");
+					return;
+				}
+			}
+
+
 			bot.commands[command].execute(message,args);
 			db.updateTracking(command);
 
