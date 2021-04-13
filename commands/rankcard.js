@@ -1,5 +1,5 @@
 const Canvas = require("canvas");
-const db = require("./databaseSetup");
+const db = require("./_databaseSetup");
 const glob = require("./_globalFunctions");
 const Discord = require("discord.js");
 
