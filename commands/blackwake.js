@@ -26,8 +26,7 @@ module.exports = {
 		if (args[0] === "monthly"){
 			fetchEloStuff(message, steamID, args[0]);
 		}else{
-			console.log(args[0]);
-			console.log(steamID);
+
 			let data = await bw.handler(args[0], steamID);
 
 			if (data.isValid){
@@ -37,9 +36,9 @@ module.exports = {
 
 				switch (data.type){
 					case "overview":
-						embed.addField("General",data.content.playerStats.formatted)
-							.addField("Captain Stats",data.content.captainStats.formatted)
-							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted);
+						embed.addField("General",data.content.playerStats.formatted,true)
+							.addField("Captain Stats",data.content.captainStats.formatted,true)
+							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
 						break;
 					case "weaponstats":
 						embed.setDescription(data.content.formatted);
