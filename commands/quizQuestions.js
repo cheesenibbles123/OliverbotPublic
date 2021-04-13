@@ -4,15 +4,19 @@ const Discord = require("discord.js");
 
 isNotLocked = true;
 
-exports.handler = function handler(message,command,args){
-	if (isNotLocked){
-		switch (args[0]){
-			case "income":
-				checkQuizAllowances(message,args);
-				break;
-			default:
-				getRandomQuizQuestion(message,false);
-				break;
+module.exports = {
+	Name: "quiz",
+	args: [0,1],
+	execute: (message,args) => {
+		if (isNotLocked){
+			switch (args[0]){
+				case "income":
+					checkQuizAllowances(message,args);
+					break;
+				default:
+					getRandomQuizQuestion(message,false);
+					break;
+			}
 		}
 	}
 }
