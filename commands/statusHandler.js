@@ -1,5 +1,5 @@
 const fs = require("fs");
-const glob = require("./globalFunctions");
+const glob = require("./_globalFunctions");
 var bot;
 
 exports.initStatus = function initStatus(){
