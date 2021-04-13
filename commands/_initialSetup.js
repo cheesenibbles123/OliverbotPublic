@@ -1,16 +1,10 @@
-const economy = require("./Economy/economySystem");
 const statusHandler = require("./_statusHandler");
 const db = require("./_databaseSetup");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
 const blackwake = require("./blackwake");
-const miscCommands = require("./smallCommands");
 const rawEmbeds = require("./_rawEvents");
-const pd2 = require("./payday2");
-const mod = require("./modOnly");
 const glob = require("./_globalFunctions");
-const audio = require("./audio");
-const admin = require("./adminOnly");
 const rand = require("./_randomStuff");
 
 var bot;
@@ -18,16 +12,9 @@ var bot;
 exports.init = function init(){
 	statusHandler.initStatus();
 	db.setupDatabase();
-	economy.initEconomy();
 	
-	blackwake.init();
-	miscCommands.init();
 	rawEmbeds.init();
-	pd2.init();
-	mod.init();
 	glob.init();
-	audio.init();
-	admin.init();
 	rand.init();
 
 	bot = require("./../oliverbot.js").bot;
@@ -35,9 +22,9 @@ exports.init = function init(){
 	setInterval(() =>{
 		getSteamGroupData();
 	}, 15000000);
-	setInterval(() =>{
+	/*setInterval(() =>{
 		ISSLocation();
-	}, 20000);
+	}, 20000);*/
 	//setInterval(() =>{
 	//	displayBotInfo();
 	//}, 6000);
