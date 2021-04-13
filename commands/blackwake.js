@@ -27,7 +27,6 @@ module.exports = {
 			fetchEloStuff(message, steamID, args[0]);
 		}else{
 			let data = await bw.handler(args[0], steamID);
-			console.log(data);
 
 			if (data.isValid){
 
@@ -36,16 +35,16 @@ module.exports = {
 
 				switch (data.type){
 					case "overview":
-						embed.addField(data.content.playerStats.formatted)
-							.addField(data.content.captainStats.formatted)
-							.addField(data.content.playerStats.faveWeapon.formatted);
+						embed.addField("General",data.content.playerStats.formatted)
+							.addField("Captain Stats",data.content.captainStats.formatted)
+							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted);
 						break;
 					case "weaponstats":
 						embed.setDescription(data.content.formatted);
 						break;
 					case "shipstats":
 						embed.addField("Ships",data.content.ships.formatted)
-							.addField("Overview",data.content.general.formatted);
+							.addField("General",data.content.general.formatted);
 						break;
 					case "shipweaponry":
 						embed.setDescription(data.content.formatted);
