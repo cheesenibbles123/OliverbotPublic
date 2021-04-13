@@ -1,17 +1,17 @@
 const economy = require("./Economy/economySystem");
-const statusHandler = require("./statusHandler");
-const db = require("./databaseSetup");
+const statusHandler = require("./_statusHandler");
+const db = require("./_databaseSetup");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
 const blackwake = require("./blackwake");
 const miscCommands = require("./smallCommands");
-const rawEmbeds = require("./rawEvents");
+const rawEmbeds = require("./_rawEvents");
 const pd2 = require("./payday2");
 const mod = require("./modOnly");
-const glob = require("./globalFunctions");
+const glob = require("./_globalFunctions");
 const audio = require("./audio");
 const admin = require("./adminOnly");
-const rand = require("./randomStuff");
+const rand = require("./_randomStuff");
 
 var bot;
 
