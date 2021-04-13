@@ -2,13 +2,13 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const commands = require("./commands/mainCommandHandler");
-const glob = require("./commands/_globalFunctions");
-const db = require("./commands/_databaseSetup");
-const raw = require("./commands/_rawEvents");
-const initialSetup = require("./commands/_initialSetup");
-const random = require("./commands/_randomStuff");
-const audio = require("./commands/audio");
+const commands = require("./commands/mainCommandHandler.js");
+const glob = require("./commands/_globalFunctions.js");
+const db = require("./commands/_databaseSetup.js");
+const raw = require("./commands/_rawEvents.js");
+//const initialSetup = require("./commands/_initialSetup");
+const random = require("./commands/_randomStuff.js");
+//const audio = require("./commands/audio");
 
 let serverStatus = {
 	"active" : false,
@@ -221,8 +221,8 @@ function craftItem(message,args){
 allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
-	comamnds.init(bot);
-	initialSetup.init();
+	commands.init(bot);
+	//initialSetup.init();
 	console.log('Bot '+bot.user.username+' is ready!');
 });
 
