@@ -50,7 +50,7 @@ async function setupTune(message,args,fromFile){
 }
 
 async function playAudio(message,song,voiceChannel){
-	.isPlaying = true;
+	variables.isPlaying = true;
 
 	if (song === null){
 		let embed = new Discord.MessageEmbed()
