@@ -6,6 +6,10 @@ var adjustableConfig;
 const issueEmbeds = require("./issueEmbed");
 const db = require("./databaseSetup");
 
+module.exports = {
+	
+}
+
 exports.init = function init(){
 	bot = require("./../oliverbot.js").bot;
 	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
