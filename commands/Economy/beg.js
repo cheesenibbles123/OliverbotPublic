@@ -13,7 +13,7 @@ module.exports = {
 			db.giveUserMoney(parseFloat(amount).toFixed(2) * 1);
 			message.channel.send(`Considering how desperate you are, I think I can spare you ${amount}GC, consider yourself lucky.`);
 		}else{
-			glob.loadFromDatafile(command,"",message);
+			glob.loadDataFromFile("beg","",message);
 		}
 	}
 }
