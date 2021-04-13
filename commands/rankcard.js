@@ -1,41 +1,43 @@
 const Canvas = require("canvas");
 const db = require("./databaseSetup");
-const glob = require("./globalFunctions");
+const glob = require("./_globalFunctions");
 const Discord = require("discord.js");
 
-exports.rankcardCreation = function rankcardCreation(message, args){
-	let id = message.author.id;
-	if (Array.isArray(args)){
-		id = glob.getUserFromMention(args[0]).id;
-	}
-	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, (err,rows) => {
-		if(err) console.log(err);
-		if(rows.length < 1){
-			createDefaultRankCard(message,id);
-		}else if(rows.length > 1){
-			createDefaultRankCard(message,id);
-		}else{
-			let inventory = JSON.parse(rows[0].inventory);
-			let notFound = true;
-			let shipName = "";
-			for (let i = 0; i < inventory.length; i++){
-				if (inventory[i].type === "largeShips"){
-					shipName = inventory[i].name;
-					notFound = false;
-					break;
-				}
-			}
-
-			if (notFound){
-				createDefaultRankCard(message, message.author.id);
-			}else{
-				createRankCanvas(message.channel,message.member,shipName,id);
-			}
-
+module.exports = {
+	Name : "rankcard",
+	args : 0,
+	execute: (message,args) => {
+		let id = message.author.id;
+		if (Array.isArray(args)){
+			id = glob.getUserFromMention(args[0]).id;
 		}
-	});
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, (err,rows) => {
+			if(err) console.log(err);
+			if(rows.length < 1){
+				createDefaultRankCard(message,id);
+			}else if(rows.length > 1){
+				createDefaultRankCard(message,id);
+			}else{
+				let inventory = JSON.parse(rows[0].inventory);
+				let notFound = true;
+				let shipName = "";
+				for (let i = 0; i < inventory.length; i++){
+					if (inventory[i].type === "largeShips"){
+						shipName = inventory[i].name;
+						notFound = false;
+						break;
+					}
+				}
 
-	return;
+				if (notFound){
+					createDefaultRankCard(message, message.author.id);
+				}else{
+					createRankCanvas(message.channel,message.member,shipName,id);
+				}
+
+			}
+		});
+	}
 }
 
 function createDefaultRankCard(message,id){
