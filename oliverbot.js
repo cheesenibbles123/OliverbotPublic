@@ -2,13 +2,13 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const commands = require("./Handlers/mainCommandHandler");
-const glob = require("./Handlers/_globalFunctions");
-const db = require("./Handlers/_databaseSetup");
-const raw = require("./Handlers/_rawEvents");
-const initialSetup = require("./Handlers/_initialSetup");
-const random = require("./Handlers/_randomStuff");
-const audio = require("./Handlers/audio");
+const commands = require("./commands/mainCommandHandler");
+const glob = require("./commands/_globalFunctions");
+const db = require("./commands/_databaseSetup");
+const raw = require("./commands/_rawEvents");
+const initialSetup = require("./commands/_initialSetup");
+const random = require("./commands/_randomStuff");
+const audio = require("./commands/audio");
 
 let serverStatus = {
 	"active" : false,
