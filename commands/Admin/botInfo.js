@@ -33,6 +33,10 @@ module.exports = {
 				memoryInformation = "N/A";
 			}
 			botInfo.addField("Memory Information", `${memoryInformation}`,true);
+
+			let procInf = `Node Version: ${process.env.node_version}\nVersion: ${env.version}\nRestarts: ${process.env.restart_time}\nArgs: ${process.env.node_args}\nAutorestart: ${process.env.autorestart}`;
+
+			botInfo.addField(`Process info`,procInf,true);
 		}
 
 		message.channel.send(botInfo);
