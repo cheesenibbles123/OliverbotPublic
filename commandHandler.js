@@ -10,7 +10,7 @@ function loopOverFolders(folder){
 			loopOverFolders(folder + "/" + file);
 		}
 
-		if (file.startsWith("_") || !file.endsWith(".js") || file === "mainCommandHandler.js") return;
+		if (file.startsWith("_") || !file.endsWith(".js")) return;
 		console.log("Loading: " + folder + "/" + file);
 		let command = require(__dirname + folder + "/" + file);
 

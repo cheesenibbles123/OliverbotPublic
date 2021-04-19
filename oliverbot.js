@@ -2,7 +2,7 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const commands = require("./mainCommandHandler.js");
+const commands = require("./commandHandler.js");
 const glob = require("./commands/_globalFunctions.js");
 const db = require("./commands/_databaseSetup.js");
 const raw = require("./commands/_rawEvents.js");
