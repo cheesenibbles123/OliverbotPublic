@@ -4,9 +4,9 @@ let bot;
 let variables;
 
 module.exports = {
-	name: "queue",
+	name: "clear",
 	args: 0,
-	help: "Displays the current queue",
+	help: "Clears the current queue",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;
