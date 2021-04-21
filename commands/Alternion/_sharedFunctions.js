@@ -16,7 +16,7 @@ exports.iterateOver = function iterateOver(rows, type){
 	}
 }
 
-exports.getLocalJson = function getLocalJson(discord_id){
+function getLocalJson(discord_id){
 	let filepath = config.alternion.jsonFilePath;
 	if (alternionJsonFile === null){
 		fs.readFile(filepath, function (err,data) {
@@ -33,6 +33,8 @@ exports.getLocalJson = function getLocalJson(discord_id){
 	}
 	return;
 }
+
+exports.getLocalJson = getLocalJson;
 
 function updateLocalCache(discord_id,filepath){
 	let notFoundUser = true;
