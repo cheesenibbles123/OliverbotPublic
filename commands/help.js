@@ -87,6 +87,28 @@ module.exports = {
 			console.log(list);
 			//embed.setDescription(list);
 			message.channel.send(embed);
+		}else{
+			let cmd = args[0].toLowerCase();
+			if (bot.commands[cmd]){
+
+				let help;
+				let usage;
+
+				if (bot.commands[cmd].help){
+					help = bot.commands[cmd].help;
+				}else{
+					help = "This command has no help section currently.";
+				}
+
+				if (bot.commands[cmd].usage){
+					embed.addField("Usage",";" + cmd + " `" + bot.commands[cmd].usage + "`");
+				}
+
+				embed.setTitle("Help")
+					.setDescription(help);
+
+				message.channel.send(embed);
+			}
 		}
 
 	}
