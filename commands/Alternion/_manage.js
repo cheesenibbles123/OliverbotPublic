@@ -1,5 +1,6 @@
 const db = require("./../_databaseSetup.js");
 const shared = require("./_sharedFunctions.js");
+const Discord = require("discord.js");
 
 module.exports = {
 	name: "manage",
@@ -11,12 +12,13 @@ module.exports = {
 
 		if (isTL){
 
-			let action = args[1];
+			let action = args[1].toLowerCase();
+			let team = await getTeamLeaderInfo(message.author.id);
 
 			if (action === "remove"){
-				teamLeaderUpdateUser(message,0,rows[0].tl_ID,args[2],action);
+				teamLeaderUpdateUser(message,0,team,args[2],action);
 			}else if (action === "add"){
-				teamLeaderUpdateUser(message,rows[0].tl_ID,null,args[2],action);
+				teamLeaderUpdateUser(message,team,null,args[2],action);
 			}else{
 				message.channel.send("Invalid action");
 			}
@@ -24,7 +26,22 @@ module.exports = {
 	}
 }
 
-function teamLeaderUpdateUser(message,team,tlTeam,userID,action,alternionHandlerEmbed){
+function getTeamLeaderInfo(discord_id){
+	return new Promise((resolve,reject) => {
+		db.alternionConnectionPool.query(`SELECT Team_Leader,Team_ID FROM User WHERE Discord_ID='${discord_id}'`,(err,rows) =>{
+			if (rows && rows.length === 1){
+				resolve(rows[0].Team_Leader);
+			}else{
+				resolve(null);
+			}
+		});
+	});
+}
+
+function teamLeaderUpdateUser(message,team,tlTeam,userID,action){
+	let alternionHandlerEmbed = new Discord.MessageEmbed()
+		.setTitle(`${action}ing user`);
+
 	db.alternionConnectionPool.query(`SELECT ID,Team_ID FROM User WHERE ID='${userID}'`, (err,rows) => {
 		if (rows.length < 1){
 			message.channel.send("That user is not in the database!");
@@ -37,11 +54,11 @@ function teamLeaderUpdateUser(message,team,tlTeam,userID,action,alternionHandler
 			if (team === 0){
 				alternionHandlerEmbed.setDescription(`User of ID \`${rows[0].ID}\` updated!\nThey are now free (for the time being)`);
 				removeAllEquipped(rows[0].ID,tlTeam);
-				sendAlternionEmbed(message,alternionHandlerEmbed,false);
+				message.channel.send(alternionHandlerEmbed);
 			}else{
 				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${team}`, (err,rows2) => {
 					alternionHandlerEmbed.setDescription(`User of ID \`${userID}\` updated!\nNew Team: **${rows2[0].Name}**`);
-					sendAlternionEmbed(message,alternionHandlerEmbed,false);
+					message.channel.send(alternionHandlerEmbed);
 				});
 			}
 		}
