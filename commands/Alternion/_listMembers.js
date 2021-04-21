@@ -7,7 +7,6 @@ module.exports = {
 	args: 1,
 	help: "Displays your alternion team",
 	execute: async (message,args) => {
-		try{
 			let isTL = await shared.checkIfTL(message);
 
 			if (isTL){
@@ -36,9 +35,5 @@ module.exports = {
 					}
 				});
 			}
-
-		}catch(e){
-			console.log("Error: " + e);
-		}
 	}
 }
