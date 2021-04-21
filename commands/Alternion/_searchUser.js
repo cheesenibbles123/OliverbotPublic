@@ -38,7 +38,7 @@ function teamLeaderSearch(message, type, ID, alternionHandlerEmbed){
 								message.channel.send("There seems to be an issue, this user is recorded multiple times.");
 							}else{
 								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
-								sendAlternionEmbed(message,alternionHandlerEmbed,false);
+								message.channel.send(alternionHandlerEmbed);
 							}
 						}else{
 							message.channel.send("No rows found.");
@@ -53,7 +53,7 @@ function teamLeaderSearch(message, type, ID, alternionHandlerEmbed){
 								message.channel.send("There seems to be an issue, this user is recorded multiple times.");
 							}else{
 								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
-								sendAlternionEmbed(message,alternionHandlerEmbed,false);
+								message.channel.send(alternionHandlerEmbed);
 							}
 						}else{
 							message.channel.send("No rows found.");
