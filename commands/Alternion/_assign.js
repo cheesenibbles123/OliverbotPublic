@@ -1,5 +1,6 @@
 const db = require("./../_databaseSetup.js");
 const shared = require("./_sharedFunctions.js");
+const Discord = require("discord.js");
 
 module.exports = {
 	name: "assign",
@@ -10,7 +11,7 @@ module.exports = {
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Assign");
 
-		let dbData = getTablesAndFields(args[0].toLowerCase());
+		let dbData = getTablesAndFields(args[1].toLowerCase());
 		let table1Name = dbData.tbl1N;
 		let table2Name = dbData.tbl2N;
 		let fieldName = dbData.field1Name;
@@ -34,7 +35,7 @@ module.exports = {
 							}
 						}
 
-						if (rows2 && !notfound){
+						if (rows2 && !found){
 							for (let i = 0; i < rows2.length; i++){
 								if (args[2] === rows2[i].Name){
 									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${message.author.id}'`);
@@ -56,6 +57,8 @@ module.exports = {
 					});
 				});
 			});
+		}else{
+			message.channel.send("That is not a valid item to assign!");
 		}
 	}
 }
@@ -248,7 +251,6 @@ function getTablesAndFields(inputType){
 				table2Field = "Allowed_Weapon_Skin_ID";
 				break;
 			default:
-				message.channel.send("That is not a valid item to assign!");
 				table1Name = "NA";
 				break;
 		}
