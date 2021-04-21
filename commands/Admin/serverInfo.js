@@ -5,6 +5,7 @@ module.exports = {
 	args: 0,
 	help: "Displays the server information",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	execute: (message,args) => {
 		let features = "";
 		if (!(message.guild.features.length > 0)){

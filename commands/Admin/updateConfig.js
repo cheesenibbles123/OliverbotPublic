@@ -7,6 +7,7 @@ module.exports = {
 	args: 0,
 	help: "Alteres the active commands config",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	init: (botInstance) => {
 		bot = botInstance;
 	},

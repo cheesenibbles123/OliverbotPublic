@@ -8,6 +8,7 @@ module.exports = {
 	args: 0,
 	help: "Displays the channel information",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	init: (botInstance) => {
 		bot = botInstance;
 	},

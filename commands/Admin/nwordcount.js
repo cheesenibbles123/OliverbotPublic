@@ -7,6 +7,7 @@ module.exports = {
 	args: 1,
 	help: "Displays number of n words said by the pinged individual",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	execute: (message,args) => {
 		if (Array.isArray(args)){
 			try{

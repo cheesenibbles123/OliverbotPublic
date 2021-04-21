@@ -3,6 +3,7 @@ module.exports = {
 	args: 0,
 	help: "Displays the bot information",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	execute: (message,args) => {
 		let totalSeconds = (bot.uptime / 1000);
 		let days = Math.floor(totalSeconds / 86400);

@@ -5,6 +5,7 @@ module.exports = {
 	args: 2,
 	help: "Creates a role that can be assigned through a reaction",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	execute: (message,args) => {
 		if (args[0].indexOf(":") !== -1){
 			let emojiID = args[0].split(":")[2].toString();

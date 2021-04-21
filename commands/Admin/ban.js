@@ -6,6 +6,7 @@ module.exports = {
 	args: 0,
 	help: "bans the user",
 	roles: ["665939545371574283"],
+	category: "Admin",
 	execute: (message,args) => {
 		if (typeof args[0] === "string"){
 			try{
