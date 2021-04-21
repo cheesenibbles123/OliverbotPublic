@@ -8,6 +8,7 @@ module.exports = {
 	name: "current",
 	args: 0,
 	help: "Displays the currently playing song",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

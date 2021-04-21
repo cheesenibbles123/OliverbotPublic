@@ -7,6 +7,7 @@ module.exports = {
 	name: "skip",
 	args: 0,
 	help: "Skips the current song",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

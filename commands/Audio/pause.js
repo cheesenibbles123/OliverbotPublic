@@ -8,6 +8,7 @@ module.exports = {
 	name: "pause",
 	args: 0,
 	help: "Pauses the current track",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

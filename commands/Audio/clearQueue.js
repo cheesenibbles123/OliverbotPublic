@@ -7,6 +7,7 @@ module.exports = {
 	name: "clear",
 	args: 0,
 	help: "Clears the current queue",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

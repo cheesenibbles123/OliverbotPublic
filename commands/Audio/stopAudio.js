@@ -7,6 +7,7 @@ module.exports = {
 	name: "stopaudio",
 	args: 0,
 	help: "Stops the bot playing music",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

@@ -8,6 +8,7 @@ module.exports = {
 	name: "resume",
 	args: 0,
 	help: "Resumes the current track",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;

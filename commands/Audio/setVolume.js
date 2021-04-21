@@ -8,6 +8,7 @@ module.exports = {
 	name: "volume",
 	args: 0,
 	help: "Sets the current volume",
+	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
 		variables = glob.variables;
