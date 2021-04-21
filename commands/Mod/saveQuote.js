@@ -7,6 +7,7 @@ module.exports = {
 	args: 1,
 	help: "Saves a message as a quote",
 	roles: ["440514569849536512"],
+	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;
 	},

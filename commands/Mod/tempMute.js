@@ -9,6 +9,7 @@ module.exports = {
 	args: [2,20],
 	help: "Temporarily mutes a user",
 	roles: ["440514569849536512"],
+	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;
 	},

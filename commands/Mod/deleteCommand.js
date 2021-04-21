@@ -5,6 +5,7 @@ module.exports = {
 	args: 1,
 	help: "Deletes a command",
 	roles: ["440514569849536512"],
+	category: "Mod",
 	execute: (message,args) => {
 		let commandToDelete = "";
 		if (Array.isArray(args)){

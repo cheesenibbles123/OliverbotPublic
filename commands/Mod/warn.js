@@ -8,6 +8,7 @@ module.exports = {
 	args: 1,
 	help: "Sends the user a warning",
 	roles: ["440514569849536512"],
+	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;
 	},
