@@ -57,10 +57,13 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 								}
 								shared.globalJsonUpdate();
 
-								alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
-									.setDescription(`Set all members of team \`${rows[0].Team_ID}\`\nNew ${item}: ${rows3[s].Display_Name}`);
+								db.alternionConnectionPool.query(`SELECT * FROM team WHERE ID=${rows[0].Team_ID}`,(err,rows4) => {
 
-								message.channel.send(alternionHandlerEmbed);
+									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
+										.setDescription(`Set all members of team \`${rows4[0].Name}\`\nNew ${item}: ${rows3[s].Display_Name}`);
+
+									message.channel.send(alternionHandlerEmbed);
+								});
 								break;
 							}
 						}
