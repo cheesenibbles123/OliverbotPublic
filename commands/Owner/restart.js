@@ -5,6 +5,7 @@ module.exports = {
 	args: 0,
 	help: "Restarts the bot",
 	users: ["337541914687569920"],
+	category: "Owner",
 	init: (botInstance) => {
 		bot = botInstance;
 	},

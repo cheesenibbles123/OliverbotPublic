@@ -5,6 +5,7 @@ module.exports = {
 	args: [1,200],
 	help: "Queries the database",
 	users: ["337541914687569920"],
+	category: "Owner",
 	execute: async (message,args) => {
 		try{
 			if (args[0].startsWith("$")){

@@ -5,6 +5,7 @@ module.exports = {
 	args: [1,200],
 	help: "Runs provided text as code",
 	users: ["337541914687569920"],
+	category: "Owner",
 	execute: async (message,args) => {
 		//alt.globalJsonUpdate();
 	}
