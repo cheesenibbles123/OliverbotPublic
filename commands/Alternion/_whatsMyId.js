@@ -6,7 +6,7 @@ module.exports = {
 	args: 0,
 	execute: (message, args) => {
 
-		let alternionHandlerEmbed = new Discord.MessageEmbed()
+		let embed = new Discord.MessageEmbed()
 			.setTitle("Your ID");
 			
 		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${message.author.id}'`, (err,rows) => {

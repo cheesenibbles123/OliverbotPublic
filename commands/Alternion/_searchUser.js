@@ -14,7 +14,7 @@ module.exports = {
 
 			let embed = new Discord.MessageEmbed();
 
-			teamLeaderSearch(message,args[1],args[2],alternionHandlerEmbed);
+			teamLeaderSearch(message,args[1],args[2],embed);
 		}
 	}
 }
