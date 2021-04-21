@@ -29,6 +29,7 @@ module.exports = {
 	name: "alternion",
 	args: [1,4],
 	help: "Alternion command handler",
+	category: "Api",
 	init: (botInstance) => {
 		botInstance['alternionCommands'] = {};
 		bot = botInstance;

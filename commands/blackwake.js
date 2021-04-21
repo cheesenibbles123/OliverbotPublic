@@ -12,6 +12,7 @@ module.exports = {
 	name: "blackwake",
 	args: [1,2],
 	help: "Fetches blackwake data from your steam account.",
+	category: "Api",
 	init: () =>{
 		bw.init(config.apiKeys.steam);
 	},

@@ -6,6 +6,7 @@ module.exports = {
 	name: "bacon",
 	args: 0,
 	help: "Grabs a random extract from bacon ipsum",
+	category: "Meme",
 	execute: (message,args) => {
 		let opt = glob.getRandomInt(2);
 		let content = "";

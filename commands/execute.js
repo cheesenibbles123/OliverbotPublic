@@ -2,6 +2,7 @@ module.exports = {
 	name: "execute",
 	args: 1,
 	help: "Executes the provided target",
+	category: "Meme",
 	execute: (message,args) => {
 		if (typeof args[0] === undefined){
 			message.channel.send("You need to say who to execute! 🤦");
