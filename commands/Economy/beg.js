@@ -5,6 +5,7 @@ module.exports = {
 	name: "beg",
 	args: 0,
 	help: "Beg for coins",
+	category: "Economy",
 	execute: async (message,args) => {
 
 		let num = glob.getRandomInt(300);

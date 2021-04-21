@@ -5,6 +5,7 @@ module.exports = {
 	name: "inventory",
 	args: 0,
 	help: "List your inventory",
+	category: "Economy",
 	execute: async (message,args) => {
 
 		let ID = message.author.id;

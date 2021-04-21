@@ -6,6 +6,7 @@ module.exports = {
 	name: "work",
 	args: 0,
 	help: "Work for coins",
+	category: "Economy",
 	execute: async (message,args) => {
 
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows,fields) =>{
