@@ -2,6 +2,7 @@ config.json
 SQL/
 Backups/
 shipsForRankcards/
+walletImages/
 
 # Logs
 logs
