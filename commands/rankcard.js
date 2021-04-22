@@ -101,12 +101,12 @@ async function createRankCanvas(channel,member,ship, ID){
 
 async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
 
-	let canvas = Canvas.createCanvas(1920,950);
+	let canvas = Canvas.createCanvas(860,540);
 	let ctx = canvas.getContext('2d');
 
 	//Add Background
 	let background = await Canvas.loadImage(`./shipsForRankcards/${ship}.png`);
-	ctx.drawImage(background, 0, 0, canvas.width, 1080);
+	ctx.drawImage(background, 0, 0, canvas.width, 540);
 
 	//Something
 	ctx.strokeStyle = '#74037b';
@@ -115,23 +115,23 @@ async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
 	//Display Name
 	ctx.font = applyText(canvas, member.displayName);;
 	ctx.fillStyle = '#ffffff';
-	ctx.fillText(member.displayName, canvas.width / 2, 125);
+	ctx.fillText(member.displayName, canvas.width / 2, 62.5);
 	ctx.shadowBlue = 5;
 
 	//Level and XP
-	ctx.font = '60px monospace';
+	ctx.font = '30px monospace';
 	ctx.fillStyle = '#aaa9ad';
-	ctx.fillText(`Lvl: ${level}`, canvas.width / 1.5, 250);
-	ctx.fillText(`XP: ${rnxp}/${xpneeded}`, canvas.width / 1.5, 375);
-	ctx.fillText(`GC: ${gCoins}`, canvas.width / 1.5, 500);
+	ctx.fillText(`Lvl: ${level}`, canvas.width / 1.5, 125);
+	ctx.fillText(`XP: ${rnxp}/${xpneeded}`, canvas.width / 1.5, 187.5);
+	ctx.fillText(`GC: ${gCoins}`, canvas.width / 1.5, 250);
 
 	//Display Avatar
 	ctx.beginPath();
-	ctx.arc(225, 225, 200, 0, Math.PI * 2, true);
+	ctx.arc(118, 118, 100, 0, Math.PI * 2, true);
 	ctx.closePath();
 	ctx.clip();
 	let avatar = await Canvas.loadImage(member.user.displayAvatarURL({format : 'jpg'}));
-	ctx.drawImage(avatar, 25, 25, 400, 400);
+	ctx.drawImage(avatar, 18, 18, 200, 200);
 
 	let attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'rankcard.png');
 	channel.send(attachment);
