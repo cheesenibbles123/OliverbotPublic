@@ -271,25 +271,23 @@ function randomPirateShit(msg,content){
 }
 
 exports.handleRandomReactions = function handleRandomReactions(message){
-	if (adjustableConfig.reactions.randomReactions){
-		let num = glob.getRandomInt(300);
-		if (num in [3,4,5,6]){
-			let reactions = randomResponse(message,message.content.toLowerCase(),message.channel.guild.id);
-			reactions.forEach(reaction => {
-				message.react(reaction);
-			});
-		}else
-		if (num in [15]){
-			let content = randomGif(message,message.content.toLowerCase());
-			if (content != null){
-				message.channel.send(content);
-			}
-		}else
-		if (num in [28]){
-			let content = randomPirateShit(message,message.content.toLowerCase());
-			if (content != null){
-				message.channel.send(content);
-			}
+	let num = glob.getRandomInt(300);
+	if (num in [3,4,5,6]){
+		let reactions = randomResponse(message,message.content.toLowerCase(),message.channel.guild.id);
+		reactions.forEach(reaction => {
+			message.react(reaction);
+		});
+	}else
+	if (num in [15]){
+		let content = randomGif(message,message.content.toLowerCase());
+		if (content != null){
+			message.channel.send(content);
+		}
+	}else
+	if (num in [28]){
+		let content = randomPirateShit(message,message.content.toLowerCase());
+		if (content != null){
+			message.channel.send(content);
 		}
 	}
 }
