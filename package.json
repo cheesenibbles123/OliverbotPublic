@@ -1,6 +1,6 @@
 {
   "name": "oliverbot",
-  "version": "1.5.1",
+  "version": "2.0.0",
   "description": "A nice bot I made so that others could facepalm at my mistakes :)",
   "main": "oliverbot.js",
   "scripts": {
