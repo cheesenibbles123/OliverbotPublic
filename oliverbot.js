@@ -2,13 +2,13 @@ const config = require("./config.json");
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 
-const commands = require("./Handlers/mainCommandHandler");
-const glob = require("./Handlers/globalFunctions");
-const db = require("./Handlers/databaseSetup");
-const raw = require("./Handlers/rawEvents");
-const initialSetup = require("./Handlers/initialSetup");
-const random = require("./Handlers/randomStuff");
-const audio = require("./Handlers/audio");
+const commands = require("./commandHandler.js");
+const glob = require("./commands/_globalFunctions.js");
+const db = require("./commands/_databaseSetup.js");
+const raw = require("./commands/_rawEvents.js");
+const initialSetup = require("./commands/_initialSetup");
+const random = require("./commands/_randomStuff.js");
+//const audio = require("./commands/audio");
 
 let serverStatus = {
 	"active" : false,
@@ -31,7 +31,7 @@ const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665
 var adjustableConfig;
 
 exports.initDBStuff = function initDBStuff(){
-	adjustableConfig = require("./Handlers/databaseSetup").adjustableConfig;
+	adjustableConfig = require("./commands/_databaseSetup").adjustableConfig;
 }
 
 /////////////////////////////////////////////APIS
@@ -221,6 +221,7 @@ function craftItem(message,args){
 allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
+	commands.init(bot);
 	initialSetup.init();
 	console.log('Bot '+bot.user.username+' is ready!');
 });
@@ -303,7 +304,7 @@ bot.on("message", async message => {
 		if (message.guild.id === config.serverInfo.serverId){
 			db.xpGainHandler(message);
 		}
-
+		/*
 		//Ping Oliverbot
 		if (message.content.startsWith("<@!556545106468012052>")){
 			TrackingCommand = true;
@@ -311,7 +312,7 @@ bot.on("message", async message => {
 			if(message.member.voice.channel){
 				audio.handler(message, "play", null);
 			}
-		}
+		} */
 
 		//check content of any pictures sent for nudity
 		message.attachments.forEach(attachment => {
