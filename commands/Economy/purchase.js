@@ -12,10 +12,14 @@ module.exports = {
 	category: "Economy",
 	init: (botInstance) => {
 		bot = botInstance;
+		displays.initDisplays(botInstance);
 	},
 	execute: async (message,args) => {
 
 		if (args[0] && args.length < 3){
+
+			let item = args[0];
+			let ID = message.author.id;
 
 			if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
 				message.channel.send("Please enter an appropriate search term!");

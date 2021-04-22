@@ -17,6 +17,7 @@ module.exports = {
 		if (args[0] && args.length < 2){
 			
 			let ID = message.author.id;
+			let item = args[0];
 
 			if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
 				message.channel.send("Please enter an appropriate search term!");
@@ -51,9 +52,13 @@ module.exports = {
 							db.mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${parseFloat(rows[0].giraffeCoins).toFixed(2) + worth}', inventory='${JSON.stringify(tempList)}' where ID='${ID}'`);
 							db.mainDatabaseConnectionPool.query(`update shop set inStock=${rows2[0].inStock + 1} where name='${item}'`);
 							let itemInfo = JSON.parse(rows2[0].info);
-							let sellEmbed = new Discord.MessageEmbed().setTitle("Item Sold").setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${message.author}`).setTimeStamp();
+							let sellEmbed = new Discord.MessageEmbed()
+								.setTitle("Item Sold")
+								.setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${message.author}`);
 							message.channel.send(sellEmbed);
-							bot.channels.cache.get(config.serverInfo.channels.economy.bigTransactionLoggingChannel).send(sellEmbed);
+							if (worth > 10000){
+								bot.channels.cache.get("718232760388550667").send(sellEmbed);
+							}
 							displays.handler(0);
 							// displayRichestUsers();
 						});
