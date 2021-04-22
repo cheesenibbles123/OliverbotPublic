@@ -65,8 +65,8 @@ async function generateImage(data,member){
 		let background = await Canvas.loadImage(`./walletImages/${data.WalletCard}.png`);
 		ctx.drawImage(background, 0, 0, width, height);
 	}else{
-		ctx.fillStyle = "blue";
-		ctx.fillRect(0, 0, width, height);
+		let background = await Canvas.loadImage(`./walletImages/woodFrame.png`);
+		ctx.drawImage(background, 0, 0, width, height);
 	}
 
 	//Display Name
@@ -74,7 +74,7 @@ async function generateImage(data,member){
 	ctx.fillStyle = '#ffffff';
 	ctx.textAlign = "center";
 	ctx.fillText(member.displayName, width / 2, 90);
-	ctx.shadowBlue = 5;
+
 
 	let coins = `GC: ${data.Gc}`;
 	let assetValue = `Asset Value: ${data.Value}`;
@@ -82,6 +82,7 @@ async function generateImage(data,member){
 	//Amount and most valuable
 	ctx.font = '40px monospace';
 	ctx.fillStyle = '#aaa9ad';
+	ctx.fillStyle = '#000000';
 
 	let centre = 250;
 	let gap = 70;
