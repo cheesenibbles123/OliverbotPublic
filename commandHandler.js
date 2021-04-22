@@ -30,6 +30,7 @@ function loadFromDatabase(){
 			if (!bot.commands[rows[i].command]){
 				let command = {
 					name: rows[i].command,
+					category: "Custom",
 					execute: (message,args) => {
 						message.channel.send(rows[i].response);
 					}

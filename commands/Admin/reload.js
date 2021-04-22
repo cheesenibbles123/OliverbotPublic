@@ -36,6 +36,7 @@ function loopOverFolders(root,folder,commandToFind){
 				if (rows[i].command === commandToFind){
 					let command = {
 						name: rows[i].command,
+						category: "Custom",
 						execute: (message,args) => {
 							message.channel.send(rows[i].response);
 						}
