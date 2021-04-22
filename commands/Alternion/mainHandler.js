@@ -14,9 +14,7 @@ function loadCommands(){
 			if (typeof(command.init) === "function"){
 				command.init(botInstance);
 			}
-			console.log(command);
 			bot.alternionCommands[command.name.toLowerCase()] = command;
-			console.log("Loaded command: " + bot.alternionCommands[command.name.toLowerCase()]);
 		}else{
 			console.log("Error loading command: " + command.name);
 			console.log("From file: " + __dirname + "/" + file);

@@ -6,12 +6,10 @@ function loopOverFolders(folder){
 	fs.readdirSync(__dirname + folder).forEach((file) => {
 
 		if (fs.statSync(__dirname + folder + "/" + file).isDirectory()){
-			console.log(folder + "/" + file);
 			loopOverFolders(folder + "/" + file);
 		}
 
 		if (file.startsWith("_") || !file.endsWith(".js")) return;
-		console.log("Loading: " + folder + "/" + file);
 		let command = require(__dirname + folder + "/" + file);
 
 		if (!bot.commands[command.name.toLowerCase()]){
