@@ -26,6 +26,24 @@ function loopOverFolders(folder){
 	});
 }
 
+function loadFromDatabase(){
+	db.configurationDatabaseConnectionPool.query(`SELECT * FROM CustomCommands`,(err,rows) => {
+		for (let i = 0; i < rows.length; i++){
+			if (!bot.commands[rows[i].command]){
+				let command = {
+					name: rows[i].command,
+					execute: (message,args) => {
+						message.channel.send(rows[i].response);
+					}
+				}
+				bot.commands[command.name] = command;
+			}else{
+				console.log("Error loading db command: " + command.name);
+			}
+		}
+	});
+}
+
 module.exports = {
 	init: (botInstance) => {
 		botInstance['commands'] = {};
@@ -34,6 +52,7 @@ module.exports = {
 		let folder = "/commands";
 
 		loopOverFolders(folder);
+		loadFromDatabase();
 	},
 	handler: (message,command,args) => {
 		command = command.toLowerCase();
@@ -93,6 +112,11 @@ module.exports = {
 			db.updateTracking(command);
 
 		}else{
+
+			// Custom database commands
+
+
+
 			message.react("🤔");
 		}
 	},
