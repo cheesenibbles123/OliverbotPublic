@@ -1,6 +1,7 @@
 config.json
 SQL/
 Backups/
+shipsForRankcards/
 
 # Logs
 logs
