@@ -16,8 +16,8 @@ var leaderboardlimits = {
 	"usernameEco" : 20
 }
 
-exports.initDisplays = function initDisplays(){
-	bot = require("./../../oliverbot.js").bot;
+exports.initDisplays = function initDisplays(botInstance){
+	bot = botInstance;
 	setInterval(function(){
 		updateleaderboard();
 	},delays.xpLb);
