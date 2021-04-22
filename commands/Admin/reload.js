@@ -1,19 +1,24 @@
 const commandHandler = require("./../../commandHandler.js");
 const db = require("./../_databaseSetup.js");
+const fs = require("fs");
 
 let bot;
 
-function loopOverFolders(commandToFind){
+function loopOverFolders(root,folder,commandToFind){
 	let commandNotFound = true;
+	fs.readdirSync(root + folder).forEach((file) => {
 
-	fs.readdirSync(__dirname + folder).forEach((file) => {
+		let path = root + folder + "/" + file;
 
-		if (fs.statSync(__dirname + folder + "/" + file).isDirectory()){
-			loopOverFolders(folder + "/" + file);
+		if (fs.statSync(path).isDirectory()){
+			let commandNotFound = loopOverFolders(root,folder + "/" + file,commandToFind);
 		}
 
 		if (file.startsWith("_") || !file.endsWith(".js")) return;
-		let command = require(__dirname + folder + "/" + file);
+
+		delete require.cache[path];
+
+		let command = require(path);
 
 		if (command.name === commandToFind){
 			if (typeof(command.init) === 'function'){
@@ -21,6 +26,7 @@ function loopOverFolders(commandToFind){
 			}
 			bot.commands[command.name.toLowerCase()] = command;
 			commandNotFound = false;
+			console.log("Found command: " + command.name);
 		}
 	});
 
@@ -35,10 +41,13 @@ function loopOverFolders(commandToFind){
 						}
 					}
 					bot.commands[commandToFind] = command;
+					commandNotFound = false;
 				}
 			}
 		});
 	}
+
+	return commandNotFound;
 }
 
 module.exports ={
@@ -46,6 +55,7 @@ module.exports ={
 	args: [0,1],
 	help: "Reloads a given command, or if none given, reloads all.",
 	roles: ["665939545371574283"],
+	users: ["337541914687569920"],
 	init: (botInstance) => {
 		bot = botInstance;
 	},
@@ -53,9 +63,16 @@ module.exports ={
 		if (args.length < 1){
 			commandHandler.init(bot);
 		}else if (bot.commands[args[0]]){
-			loopOverFolders();
+			let root = process.cwd();
+			let folder = "/commands";
+			let found = loopOverFolders(root, folder, args[0]);
+			if (!found){
+				message.channel.send("Command reloaded!");
+			}else{
+				message.channel.send("Command not found.");
+			}
 		}else{
-			message.channel.send("Command not found");
+			message.channel.send("Command not found.");
 		}
 	}
 }
