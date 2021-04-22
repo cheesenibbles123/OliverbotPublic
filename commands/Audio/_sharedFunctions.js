@@ -1,3 +1,6 @@
+const ytdl = require("ytdl-core");
+const Discord = require("discord.js");
+
 const variables = {
 	isPlaying : false,
 	currentDispatcher : null,
@@ -22,7 +25,7 @@ async function setupTune(message,args,fromFile){
 		}else{
 			song = args.join("");
 			if (song.includes("https://www.youtube.com/watch?v=")){
-				let songInfo = await ytdl.getInfo(song);
+				let songInfo = await ytdl.getInfo(song).catch(message.channel.send("Error getting song info."));
 
 				songInfo = songInfo.player_response.videoDetails;
 
@@ -48,6 +51,8 @@ async function setupTune(message,args,fromFile){
 		}
 	}
 }
+
+exports.setupTune = setupTune;
 
 async function playAudio(message,song,voiceChannel){
 	variables.isPlaying = true;
