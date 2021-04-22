@@ -55,20 +55,13 @@ function createDefaultRankCard(message,id){
 
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${id}`, (err,rows) => {
-			let rankcard = new Discord.MessageEmbed()
-				.setColor('#0099ff')
-				.setTitle(`${message.member.user.username}`)
-				.setAuthor(`Rank card`)
-				.setThumbnail(`${message.author.displayAvatarURL()}`)
-				.setTimestamp();
-			if (rows.length >0){
-				rankcard.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}\n Giraffe Coins: ${parseFloat(rows[0].giraffeCoins).toFixed(2)}`);
-			}else{
-				rankcard.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}`);
-			}
-			message.channel.send(rankcard);
-		});
+		let rankcard = new Discord.MessageEmbed()
+			.setColor('#0099ff')
+			.setTitle(`${message.member.user.username}`)
+			.setAuthor(`Rank card`)
+			.setThumbnail(`${message.author.displayAvatarURL()}`)
+			.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}`);
+		message.channel.send(rankcard);
 	});
 
 	return null;
@@ -87,19 +80,15 @@ async function createRankCanvas(channel,member,ship, ID){
 
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
-		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = ${ID}`, (err,rows) => {
-			if (rows.length > 0 ){
-				creatingCanvas(channel, member, ship, level, rnxp, xpneeded, rows[0].giraffeCoins);
-			}else{
-				creatingCanvas(channel, member, ship, level, rnxp, xpneeded, "N/A");
-			}
-		});
+		
+		creatingCanvas(channel, member, ship, level, rnxp, xpneeded);
+		
 	});
 
 	return;
 }
 
-async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
+async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded,){
 
 	let canvas = Canvas.createCanvas(860,540);
 	let ctx = canvas.getContext('2d');
@@ -123,7 +112,6 @@ async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
 	ctx.fillStyle = '#aaa9ad';
 	ctx.fillText(`Lvl: ${level}`, canvas.width / 1.5, 125);
 	ctx.fillText(`XP: ${rnxp}/${xpneeded}`, canvas.width / 1.5, 187.5);
-	ctx.fillText(`GC: ${gCoins}`, canvas.width / 1.5, 250);
 
 	//Display Avatar
 	ctx.beginPath();
