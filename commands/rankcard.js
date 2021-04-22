@@ -105,7 +105,7 @@ async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded, gCoins){
 	let ctx = canvas.getContext('2d');
 
 	//Add Background
-	let background = await Canvas.loadImage(`./shipsForRankcards/${ship}.png`);
+	let background = await Canvas.loadImage(`./../shipsForRankcards/${ship}.png`);
 	ctx.drawImage(background, 0, 0, canvas.width, 1080);
 
 	//Something
