@@ -58,6 +58,9 @@ module.exports = {
 		command = command.toLowerCase();
 		if (bot.commands[command]){
 
+			let missingRole = true;
+			let allowedUser = false;
+
 			// Check arguments
 			if (bot.commands[command].args){
 				if (typeof(bot.commands[command].args) === typeof([])){
@@ -76,7 +79,6 @@ module.exports = {
 			// Check permissions
 			if (bot.commands[command].roles){
 				let roles = bot.commands[command].roles;
-				let missingRole = true;
 
 				// Loop over all allowed roles
 				for (let i=0; i<roles.length; i++){
@@ -84,33 +86,25 @@ module.exports = {
 						missingRole = false;
 					}
 				}
-
-				if (missingRole){
-					message.channel.send("You do not have permission to use this command!");
-					return;
-				}
 			}
 
 			// Check Users
 			if (bot.commands[command].users){
 				let users = bot.commands[command].users;
-				let notFound = true;
 
 				for (let i=0; i < users.length; i++){
 					if (users[i] === message.author.id){
-						notFound = false;
+						allowedUser = true;
 					}
-				}
-
-				if (notFound){
-					message.channel.send("You do not have permission to use this command!");
-					return;
 				}
 			}
 
-			bot.commands[command].execute(message,args);
-			db.updateTracking(command);
-
+			if ((bot.commands[command].roles && !missingRole) || (!bot.commands[command].roles && missingRole) || allowedUser){
+				bot.commands[command].execute(message,args);
+				db.updateTracking(command);
+			}else{
+				message.channel.send("You do not have permission to use this command!");
+			}
 		}else{
 
 			// Custom database commands
