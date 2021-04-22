@@ -14,7 +14,6 @@ function loadCommands(){
 			if (typeof(command.init) === "function"){
 				command.init(botInstance);
 			}
-			console.log("adding new command: " + command.name.toLowerCase());
 			console.log(command);
 			bot.alternionCommands[command.name.toLowerCase()] = command;
 			console.log("Loaded command: " + bot.alternionCommands[command.name.toLowerCase()]);
