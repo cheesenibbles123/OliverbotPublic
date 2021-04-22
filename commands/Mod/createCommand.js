@@ -1,4 +1,5 @@
 const db = require("./../_databaseSetup");
+let bot;
 
 module.exports = {
 	name: "createcommand",
@@ -6,11 +7,22 @@ module.exports = {
 	help: "Creates a command",
 	roles: ["440514569849536512"],
 	category: "Mod",
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
-		db.configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
-		setTimeout(function(){
-			db.loadCustomCommandsFromDB();
-		}, 1000);
-		message.reply("Your command is ready to go!");
+		if (bot.commands[args[0]]){
+			message.channel.send("That command already exists!");
+		}else{
+			db.configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
+			let command = {
+				name: args[0],
+				execute: (message,args) => {
+					message.channel.send(args.slice(1));
+				}
+			}
+			bot.commands[args[0]] = command;
+			message.reply("Your command is ready to go!");
+		}
 	}
 }

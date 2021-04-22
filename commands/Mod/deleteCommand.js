@@ -13,10 +13,12 @@ module.exports = {
 		}else{
 			commandToDelete = args;
 		}
-		db.configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
-		setTimeout(function(){
-			db.loadCustomCommandsFromDB();
-		}, 1000);
-		message.reply("Command deleted!");
+		if (bot.commands[commandToDelete]){
+			db.configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
+			delete bot.commands[commandToDelete];
+			message.reply("Command deleted!");
+		}else{
+			message.channel.send("That command does not exist.");
+		}
 	}
 }
