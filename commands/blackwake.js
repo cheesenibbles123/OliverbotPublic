@@ -66,7 +66,7 @@ module.exports = {
 					message.channel.send("Invalid type and/or SteamID provided.");
 				}	
 			}).catch(err => {
-				message.channel.send(err);
+				message.channel.send("Please ensure you entered a valid **SteamID64** and your profile is set to **Public**.");
 			});
 		}
 	}
