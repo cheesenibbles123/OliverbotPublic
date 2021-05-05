@@ -28,44 +28,46 @@ module.exports = {
 			fetchEloStuff(message, steamID, args[0]);
 		}else{
 
-			let data = await bw.handler(args[0], steamID);
+			bw.handler(args[0], steamID).then(data => {
+				if (data.isValid){
 
-			if (data.isValid){
+					let embed = new Discord.MessageEmbed()
+						.setTitle(data.type);
 
-				let embed = new Discord.MessageEmbed()
-					.setTitle(data.type);
+					switch (data.type){
+						case "overview":
+							embed.addField("General",data.content.playerStats.formatted,true)
+								.addField("Captain Stats",data.content.captainStats.formatted,true)
+								.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
+							break;
+						case "weaponstats":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "shipstats":
+							embed.addField("Ships",data.content.ships.formatted,true)
+								.addField("General",data.content.general.formatted,true);
+							break;
+						case "shipweaponry":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "maintenance":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "misc":
+							embed.setDescription(data.content.formatted);
+							break;
+						default:
+							break;
+					}
 
-				switch (data.type){
-					case "overview":
-						embed.addField("General",data.content.playerStats.formatted,true)
-							.addField("Captain Stats",data.content.captainStats.formatted,true)
-							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
-						break;
-					case "weaponstats":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "shipstats":
-						embed.addField("Ships",data.content.ships.formatted,true)
-							.addField("General",data.content.general.formatted,true);
-						break;
-					case "shipweaponry":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "maintenance":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "misc":
-						embed.setDescription(data.content.formatted);
-						break;
-					default:
-						break;
-				}
+					message.channel.send(embed);
 
-				message.channel.send(embed);
-
-			}else{
-				message.channel.send("Invalid type and/or SteamID provided.");
-			}
+				}else{
+					message.channel.send("Invalid type and/or SteamID provided.");
+				}	
+			}).catch(err => {
+				message.channel.send(err);
+			});
 		}
 	}
 }
