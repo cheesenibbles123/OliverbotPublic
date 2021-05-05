@@ -1,13 +1,13 @@
 const db = require("./../_databaseSetup");
 const config = require("./../../config.json");
 const Discord = require("discord.js");
-var bot;
+let bot;
 
-var delays = {
+let delays = {
 	"xpLb" : 300000
 }
 
-var leaderboardlimits = {
+let leaderboardlimits = {
 	"listsizelimit" : 30,
 	"rank" : 2,
 	"username" : 20,
