@@ -16,18 +16,23 @@ module.exports = {
 			}else{
 				option = resp.list[0];
 			}
-			let embed = new Discord.MessageEmbed()
-			.setTitle("Urban Response")
-			.setColor(0x008000)
-			.addField(`Author:`,`${option.author}`)
-			.addField(`Permalink:`,`${option.permalink}`,true)
-			.addField(`Vote Ratio:`,`${option.thumbs_up} 👍\n${option.thumbs_down} 👎`,true)
-			.addField(`Word:`,`${option.word}`,true)
-			.addField(`Definition:`,`${option.definition}`)
-			.addField(`Example:`,`${option.example}`)
-			.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
-			.setTimestamp();
-			message.channel.send(embed);
+
+			if (typeof(option) === undefined){
+				let embed = new Discord.MessageEmbed()
+					.setTitle("Urban Response")
+					.setColor(0x008000)
+					.addField(`Author:`,`${option.author}`)
+					.addField(`Permalink:`,`${option.permalink}`,true)
+					.addField(`Vote Ratio:`,`${option.thumbs_up} 👍\n${option.thumbs_down} 👎`,true)
+					.addField(`Word:`,`${option.word}`,true)
+					.addField(`Definition:`,`${option.definition}`)
+					.addField(`Example:`,`${option.example}`)
+					.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
+					.setTimestamp();
+				message.channel.send(embed);
+			}else{
+				message.channel.send("No result found.");
+			}
 		});
 	}
 }
