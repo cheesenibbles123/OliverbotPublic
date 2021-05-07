@@ -35,7 +35,11 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 			field = "Sail_ID";
 			table = "NormalSail";
 			break;
-		case "flag":
+		case "navyflag":
+			field = "Flag_Navy_ID";
+			table = "Flag";
+			break;
+		case "pirateflag":
 			field = "Flag_ID";
 			table = "Flag";
 			break;
