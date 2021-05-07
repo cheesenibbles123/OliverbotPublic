@@ -89,10 +89,24 @@ function removeAllEquipped(userID,teamID){
 			}
 		});
 
+		db.alternionConnectionPool.query(`SELECT Team_ID FROM Flag WHERE ID=${rows[0].Flag_Navy_ID}`, (err,rows2) => {
+			if (rows2[0].Team_ID === teamID){
+				db.alternionConnectionPool.query(`UPDATE User SET Flag_Navy_ID=0 WHERE ID=${userID}`);
+				console.log("Reset Flag");
+			}
+		});
+
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM Flag WHERE ID=${rows[0].Flag_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Flag_ID=0 WHERE ID=${userID}`);
 				console.log("Reset Flag");
+			}
+		});
+
+		db.alternionConnectionPool.query(`SELECT Team_ID FROM Swivel WHERE ID=${rows[0].Swivel_ID}`, (err,rows2) => {
+			if (rows2[0].Team_ID === teamID){
+				db.alternionConnectionPool.query(`UPDATE User SET Swivel_ID=0 WHERE ID=${userID}`);
+				console.log("Reset Swivel");
 			}
 		});
 
