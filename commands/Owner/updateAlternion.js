@@ -1,12 +1,11 @@
-//const alt = require("./alternion");
+const alt = require("./../Alternion/_sharedFunctions.js");
 
 module.exports = {
 	name: "updatealternion",
-	args: [1,200],
-	help: "Runs provided text as code",
+	help: "Force Runs Alternion update for all users",
 	users: ["337541914687569920"],
 	category: "Owner",
-	execute: async (message,args) => {
-		//alt.globalJsonUpdate();
+	execute: (message,args) => {
+		alt.globalJsonUpdate();
 	}
 }
