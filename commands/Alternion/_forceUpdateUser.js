@@ -35,9 +35,17 @@ function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionH
 			field = "Sail_ID";
 			table = "NormalSail";
 			break;
-		case "flag":
+		case "pirateflag":
 			field = "Flag_ID";
 			table = "Flag";
+			break;
+		case "navyflag":
+			field = "Flag_Navy_ID";
+			table = "Flag";
+			break;
+		case "swivel":
+			field = "Swivel_ID";
+			table = "Swivel";
 			break;
 		default:
 			field = "NA";
