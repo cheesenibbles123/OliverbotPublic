@@ -100,7 +100,19 @@ function getTablesAndFields(inputType){
 				fieldName = "Cannon_ID";
 				table2Field = "Allowed_Cannon_ID";
 				break;
-			case "flag":
+			case "swivel":
+				table1Name = "Swivel";
+				table2Name = "LimitedSwivels";
+				fieldName = "Swivel_ID";
+				table2Field = "Allowed_Swivel_ID";
+				break;
+			case "flagnavy":
+				table1Name = "Flag";
+				table2Name = "LimitedFlags";
+				fieldName = "Flag_Navy_ID";
+				table2Field = "Allowed_Flag_ID";
+				break;
+			case "flagpirate":
 				table1Name = "Flag";
 				table2Name = "LimitedFlags";
 				fieldName = "Flag_ID";
