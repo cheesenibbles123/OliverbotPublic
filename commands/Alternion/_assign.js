@@ -51,6 +51,7 @@ module.exports = {
 							embed.setDescription("You cannot assign that Item!");
 						}else{
 							embed.setDescription(`Assigned skin: **${assignedBadge}**`);
+							shared.globalJsonUpdate();
 						}
 
 						message.channel.send(embed);
@@ -106,13 +107,13 @@ function getTablesAndFields(inputType){
 				fieldName = "Swivel_ID";
 				table2Field = "Allowed_Swivel_ID";
 				break;
-			case "flagnavy":
+			case "navyflag":
 				table1Name = "Flag";
 				table2Name = "LimitedFlags";
 				fieldName = "Flag_Navy_ID";
 				table2Field = "Allowed_Flag_ID";
 				break;
-			case "flagpirate":
+			case "pirateflag":
 				table1Name = "Flag";
 				table2Name = "LimitedFlags";
 				fieldName = "Flag_ID";
