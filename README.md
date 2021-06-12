@@ -17,7 +17,7 @@ These are the oliverbot files, used for powering the discord bot.
  - Database is not included as of current
  - Adding comments to the code to help readability (I'll get round to it some day)
  - [Website link](http://www.archiesbots.com/DiscordBots/Oliverbot/info.html)
- - Release version: 1.7.0
+ - Release version: 2.0
 
 **Dependencies:**
  - @discordjs/opus: ^0.3.2
