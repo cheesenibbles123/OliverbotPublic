@@ -16,7 +16,7 @@ These are the oliverbot files, used for powering the discord bot.
  - The config + datafile must be within the same directory as the main oliverbot.js file (see Templates)
  - Database is not included as of current
  - Adding comments to the code to help readability (I'll get round to it some day)
- - [Website link](http://www.archiesbots.com/DiscordBots/Home.html)
+ - [Website link](http://www.archiesbots.com/DiscordBots/Oliverbot/info.html)
  - Release version: 1.7.0
 
 **Dependencies:**
