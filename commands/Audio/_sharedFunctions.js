@@ -68,7 +68,7 @@ async function playAudio(message,song,voiceChannel){
 			},variables.songQueue[0].lengthSeconds * 1000);
 		});
 
-		song = songQueue[0].url;
+		song = variables.songQueue[0].url;
 	}
 
 	if (!variables.connection){
@@ -83,8 +83,8 @@ async function playAudio(message,song,voiceChannel){
     	  	ytdl(song,{filter:'audioonly',quality:'highestaudio',highWaterMark:1<<25}, {highWaterMark: 1},{bitrate: 192000})
   		)
   		.on("finish",() =>{
-  			songQueue.shift();
-  			if (songQueue.length < 1){
+  			variables.songQueue.shift();
+  			if (variables.songQueue.length < 1){
   				voiceChannel.leave();
   				variables.isPlaying = false;
   				variables.currentDispatcher.destroy();
