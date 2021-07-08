@@ -140,10 +140,10 @@ function randomResponse(message,content,serverid){
 	if (content.includes("love")){
 		returnEmojis.push("690145216883327022");
 	}
-	if (message.channel.id === 552871633266933811 && content.includes("thissmerk") && adjustableConfig.reactions.smirks){
+	if (message.channel.id === 552871633266933811 && content.includes("thissmerk")){
 		returnEmojis.push("553339106516533251");
 	}
-	if (message.channel.id === 552871633266933811 && content.includes("thatsmerk") && adjustableConfig.reactions.smirks){
+	if (message.channel.id === 552871633266933811 && content.includes("thatsmerk")){
 		returnEmojis.push("553339063315333147");
 	}
 	if (content.includes("fortnite")){
@@ -202,7 +202,7 @@ function randomResponse(message,content,serverid){
 	if (content.includes("frog") || content.includes("🐸")){
 		returnEmojis.push("🐸");
 	}
-	if (serverid === "401924028627025920" && adjustableConfig.reactions.gtSpecific){
+	if (serverid === "401924028627025920"){
 		if (content.includes("sad")){
 			returnEmojis.push("598649992931967011");
 		}
@@ -245,7 +245,7 @@ function randomResponse(message,content,serverid){
 		if (content.includes("yay")){
 			returnEmojis.push("588062673703403521");
 		}
-		if (message.member.roles.cache.has("616589349638635572") && adjustableConfig.reactions.giraffeReactions && (message.author.id !== "305802257172135947")){
+		if (message.member.roles.cache.has("616589349638635572")&& (message.author.id !== "305802257172135947")){
 			returnEmojis.push("526899241495429140");
 		}
 	}else
