@@ -1,6 +1,6 @@
 const db = require("./../_databaseSetup.js");
 const Discord = require("discord.js");
-
+const glob = require("./../_globalFunctions.js");
 let bot;
 
 module.exports = {
