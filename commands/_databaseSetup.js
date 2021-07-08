@@ -83,9 +83,6 @@ exports.setupDatabase = function setupDatabase(){
 	loadPermanentCommandsFromDB();
 	loadCustomCommandsFromDB();
 	loadReactionRolesFromDB();
-	setTimeout(function(){
-		main.initDBStuff();
-	},6000);
 }
 
 function loadXpDataFromDB(){
