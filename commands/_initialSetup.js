@@ -3,9 +3,7 @@ const db = require("./_databaseSetup");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
 const blackwake = require("./blackwake");
-const rawEmbeds = require("./_rawEvents");
 const glob = require("./_globalFunctions");
-const rand = require("./_randomStuff");
 
 var bot;
 
@@ -13,9 +11,7 @@ exports.init = function init(){
 	statusHandler.initStatus();
 	db.setupDatabase();
 	
-	rawEmbeds.init();
 	glob.init();
-	rand.init();
 
 	bot = require("./../oliverbot.js").bot;
 
