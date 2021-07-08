@@ -1,7 +1,7 @@
-const glob = require("./_sharedFunctions.js");
+//const glob = require("./_sharedFunctions.js");
 
 let bot;
-let variables;
+const variables = require("./_sharedFunctions.js").variables;
 
 module.exports = {
 	name: "stopaudio",
@@ -10,7 +10,7 @@ module.exports = {
 	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
-		variables = glob.variables;
+		//variables = glob.variables;
 	},
 	execute: (message,args) => {
 		if (!variables.isPlaying){
