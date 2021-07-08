@@ -8,7 +8,6 @@ const glob = require("./_globalFunctions");
 var bot;
 
 exports.init = function init(){
-	statusHandler.initStatus();
 	db.setupDatabase();
 	
 	glob.init();
