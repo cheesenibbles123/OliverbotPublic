@@ -54,7 +54,6 @@ module.exports = {
 		loadFromDatabase();
 	},
 	handler: (message,command,args) => {
-		command = command.toLowerCase();
 		if (bot.commands[command]){
 
 			let missingRole = true;
