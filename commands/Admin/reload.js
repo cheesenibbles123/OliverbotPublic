@@ -67,7 +67,7 @@ module.exports ={
 			let root = process.cwd();
 			let folder = "/commands";
 			let found = loopOverFolders(root, folder, args[0]);
-			if (!found){
+			if (found){
 				message.channel.send("Command reloaded!");
 			}else{
 				message.channel.send("Command not found.");
