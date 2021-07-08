@@ -31,7 +31,7 @@ module.exports = {
 					let port2 = null;
 
 					for (let i=0; i < ports.length; i++){
-						if (ports[i].Name.toLowerCase() === args[0]){
+						if (ports[i].Name.toLowerCase() === args.join(" ")){
 							port2 = ports[i];
 						}else if (ports[i].ID === player[0].Location){
 							port1 = ports[i];
@@ -49,9 +49,21 @@ module.exports = {
 						let B = Math.abs(loc1.y - loc2.y);
 
 						let C = Math.round( (Math.sqrt(A^2 + B^2) * 3.05 /*Scale factor (1129.74KM = 370)*/) * 100) / 100;
+						let goods = Math.ceil(C);
+						let inv = JSON.parse(player[0].Inventory);
 
-						message.channel.send(`Travelling ${C}KM`);
-						dbSetup.query(`UPDATE Player SET Location=${port2.ID} WHERE ID='${message.author.id}`);
+						message.channel.send(`Distance to travel: ${C}KM\nCosting ${goods} goods.`);
+
+						// Usage of 1 Consumer Goods per KM
+						if (inv.goods >= Math.ceil(C)){
+							message.channel.send(`Setting sail for ${port2.Name}`);
+							let sql =`UPDATE Player SET Location=${port2.ID} WHERE ID='${message.author.id}`;
+							console.log(sql);
+							dbSetup.query(sql);
+						}else{
+							message.channel.send(`You are missing ${Math.ceil(C) - inv.goods} goods.`);
+						}
+
 					}else{
 						message.channel.send("Port not found");
 					}
