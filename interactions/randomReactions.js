@@ -1,3 +1,5 @@
+const glob = require("./../commands/_globalFunctions.js");
+
 let bot;
 
 module.exports = {
