@@ -8,6 +8,7 @@ module.exports = {
 		bot = botInstance;
 	},
 	execute : (message) => { // Main event code that will be executed on call
+		return false;
 		// If in a server
 		if (message.guild){
 
