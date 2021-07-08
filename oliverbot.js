@@ -3,12 +3,9 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 
 const commands = require("./commandHandler.js");
-const glob = require("./commands/_globalFunctions.js");
-const db = require("./commands/_databaseSetup.js");
-const raw = require("./commands/_rawEvents.js");
 const initialSetup = require("./commands/_initialSetup");
-const random = require("./commands/_randomStuff.js");
-//const audio = require("./commands/audio");
+const interactions = require("./interactionHandler.js");
+const events = require("./eventHandler.js");
 
 let serverStatus = {
 	"active" : false,
@@ -24,15 +21,7 @@ let cooldowns = {
 	}
 };
 
-exports.bot = bot;
-
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
-
-var adjustableConfig;
-
-exports.initDBStuff = function initDBStuff(){
-	adjustableConfig = require("./commands/_databaseSetup").adjustableConfig;
-}
 
 /////////////////////////////////////////////APIS
 
@@ -59,31 +48,6 @@ function GetMarsWeatherData(message){
 		marsWeatherEmbed.addField("",`${text}`);
 		message.channel.send(marsWeatherEmbed);
 	});
-	return;
-}
-
-function saveQuoteAutomatic(message){
-	try{
-		let AutoQuote = new Discord.MessageEmbed()
-			.setTitle(`${message.author.username}`)
-			.setDescription(`${message.content}`)
-			.setThumbnail(message.author.displayAvatarURL())
-			.setFooter(`Sent in: #${message.channel.name} `)
-			.setTimestamp();
-		let hasNotAddedImage = true;
-		message.attachments.forEach(attachment => {
-    		if (message.attachments.size === 1) {
-      			if (attachment.url && hasNotAddedImage){
-      				AutoQuote.setImage(`${attachment.url}`);
-      				hasNotAddedImage = false;
-      			}
-    		}
-  		});
-		bot.channels.cache.get(config.serverInfo.channels.quotes).send(AutoQuote);
-	}catch(e){
-		console.log("I CANNOT DO THIS, PLEASE HELP!");
-		console.log(e);
-	}
 	return;
 }
 
@@ -223,6 +187,8 @@ allowedCommands = ["savequote"];
 bot.on("ready", () => {
 	commands.init(bot);
 	initialSetup.init();
+	interactions.init();
+	events.init(bot);
 	console.log('Bot '+bot.user.username+' is ready!');
 });
 
@@ -239,106 +205,8 @@ bot.on("message", async message => {
 		if (message.guild.id === "704649927975763969" && message.channel.id !== "705742490833256469") return;
 	}
 
-	random.handleRandomReactions(message);
-
-	// If in a server
-	if (message.guild){
-
-		// random staff channel message
-		if (message.channel.id === config.serverInfo.channels.staffChannels.moderator || message.channel.id === config.serverInfo.channels.staffChannels.serverAdministrator || message.channel.id === config.serverInfo.channels.staffChannels.discordAdministrator){
-			if (glob.getRandomInt(1000) === 6){
-				message.channel.send("Hmmm, yes, much discussion <:thonkhonk:690138132343160854>");
-			}
-		}
-
-		//If enabled creates support tickets
-		if (message.channel.id === config.serverInfo.channels.supportTicketChannel && db.adjustableConfig.misc.SupportTickets === true){
-			let d = new Date();
-			let date = d.getDate()+"-"+d.getMonth()+"-"+d.getFullYear();
-			message.guild.createChannel(`${message.author.username}-${date}`,{type: "text", permissionOverwrites: [
-				{
-					id : config.serverInfo.serverId,
-					deny : ['VIEW_CHANNEL'],
-				},
-				{
-					id : `${message.author.id}`,
-					allow : ["VIEW_CHANNEL"],
-				},
-				{
-					id : config.serverInfo.roles.serverAdministrator,
-					allow : ["VIEW_CHANNEL"],
-				},	
-			], reason: 'New Support Ticket Created!'}).then(channel => {
-				channel.send("Query is: " + message.content + " - please wait for an administrator to respond to your ticket.");
-			});
-			message.delete({timeout: 0, reason: "Support ticket creation."});
-		}
-
-
-		//N word filter
-		if (message.content.toLowerCase().includes('nigger') && db.adjustableConfig.misc.nWordFilter){
-			if ( message.member.roles.cache.has(config.serverInfo.roles.serverModerator) || message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-				// Ignore
-			}else if (message.guild.id === config.serverInfo.serverId && adjustableConfig.misc.nWordFilter){
-				message.delete();
-				message.channel.send(message.author+" Please dont use that language!");
-				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("Message: "+message.content+" , has been deleted. Author: <@"+message.author,id+">");
-			}
-			db.updateNWordCounter(message);
-			return;
-		}
-
-		//Prevents autoquote from taking from sensitive channels
-		if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
-			if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
-				if (message.channel.name.toLowerCase().includes("support")){
-					// Ignore
-				}else
-				if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
-					saveQuoteAutomatic(message);
-				}
-			}
-		}
-
-		//XP Gain
-		if (message.guild.id === config.serverInfo.serverId){
-			db.xpGainHandler(message);
-		}
-		/*
-		//Ping Oliverbot
-		if (message.content.startsWith("<@!556545106468012052>")){
-			TrackingCommand = true;
-			message.react("🤔");
-			if(message.member.voice.channel){
-				audio.handler(message, "play", null);
-			}
-		} */
-
-		//check content of any pictures sent for nudity
-		message.attachments.forEach(attachment => {
-	    	if (message.attachments.size > 0) {
-	      		if (attachment.url){
-	        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
-	          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
-	          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-	            			if (result.nudity.raw > 0.65){
-	              				let nudityEmbed = new Discord.MessageEmbed()
-	                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
-	             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
-	            			}
-	          			}).catch(function(err){
-	            			console.log(err);
-	          			});
-	        		}
-	      		}
-	    	}
-	  	});
-	}
-
-	//Old larry reference (RIP Larry)
-	if (message.content.startsWith("...") && message.content.length === 3){
-		message.react("452064991688916995");
-	}
+	// Random + intentional interactions + reactions
+	interactions.handler(message);
 
 	if (!message.content.startsWith(config.prefix)) return;
 
@@ -399,50 +267,9 @@ async function manageJoinReaction(event){
 
 //Pure Logging of events for administrative purposes
 bot.on('raw', async event => {
-	if (event.d){
-		if (event.d.guild_id){
-			if (event.d.guild_id !== config.serverInfo.serverId) return;
-			let member;
-
-			if ((event.t === "CHANNEL_CREATE" && event.d.type !== 'dm') || (event.t === "CHANNEL_DELETE" && event.d.type !== 'dm') || (event.t !== "CHANNEL_CREATE" && event.t !== "CHANNEL_DELETE")){
-				raw.manageRawEmbeds(event);
-			}
-
-			switch (event.t){
-				case "MESSAGE_REACTION_ADD":
-					if (event.d.channel_id === "762401591180525608"){
-						// manageJoinReaction(event);
-					}else if ((parseInt(event.d.channel_id) !== 607491352598675457 && db.adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
-		        		break;
-		    		}
-					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-					adjustableConfig.reactionRoles.forEach(roleInfo => {
-						if (event.d.emoji.name === roleInfo.EmojiName){ 
-							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-							member.roles.add(role);
-						}
-					});
-					break;
-				case "MESSAGE_REACTION_REMOVE":
-					if ((parseInt(event.d.channel_id) !== 607491352598675457 && db.adjustableConfig.reactions.reactionMenu) || event.d.user_id === config.botID){
-		        		break;
-		    		}
-					member = bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(event.d.user_id);
-					adjustableConfig.reactionRoles.forEach(roleInfo => {
-						if (event.d.emoji.name === roleInfo.EmojiName){ 
-							let role = bot.guilds.cache.get(event.d.guild_id).roles.cache.get(roleInfo.RoleID);
-							member.roles.remove(role);
-						}
-					});
-					break;
-				default:
-					break;
-			}
-
-		}
+	if (event.d && event.d.type !== 'dm'){
+		events.handler(event);
 	}
-
-	return;
 });
 
 // bot.on('presenceUpdate', (oldMember, newMember) => {
