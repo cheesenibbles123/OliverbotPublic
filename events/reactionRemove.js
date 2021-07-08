@@ -4,7 +4,7 @@ const db = require("./../commands/_databaseSetup.js");
 let bot;
 
 module.exports = {
-	name : "MESSAGE_REACTION_ADD", // This is the event name (event.t) and is what will be used in the eventHandler
+	name : "MESSAGE_REACTION_REMOVE", // This is the event name (event.t) and is what will be used in the eventHandler
 	init : (botInstance) => {  // If you do not need a reference to bot, simply remove this function
 		bot = botInstance;
 	},
