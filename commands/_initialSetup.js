@@ -1,4 +1,4 @@
-const statusHandler = require("./_statusHandler");
+
 const db = require("./_databaseSetup");
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
