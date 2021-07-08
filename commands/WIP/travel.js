@@ -57,7 +57,7 @@ module.exports = {
 						// Usage of 1 Consumer Goods per KM
 						if (inv.goods >= Math.ceil(C)){
 							message.channel.send(`Setting sail for ${port2.Name}`);
-							let sql =`UPDATE Player SET Location=${port2.ID} WHERE ID='${message.author.id}`;
+							let sql =`UPDATE Player SET Location=${port2.ID} WHERE ID='${message.author.id}'`;
 							console.log(sql);
 							dbSetup.query(sql);
 						}else{
