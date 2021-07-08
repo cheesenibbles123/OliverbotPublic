@@ -3,7 +3,7 @@ const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
 
 module.exports = {
-	name: "listcannons",
+	name: "listswivels",
 	args: 2,
 	execute: (message, args) => {
 
