@@ -54,7 +54,7 @@ module.exports = {
 					}
 					let gambleEmbed = new Discord.MessageEmbed()
 						.setTitle("Gamble")
-						.setDescription(`Income: ${((income * amount) - amount).toFixed(2)}`)
+						.setDescription(`Profit: ${((income * amount) - amount).toFixed(2)}`)
 						.setTimestamp();
 					message.channel.send(gambleEmbed);	
 					// displayRichestUsers();
