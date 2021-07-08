@@ -7,15 +7,14 @@ module.exports = {
 	args: 2,
 	execute: (message, args) => {
 
-		let id = message.author.id;
-		let pubPriv = args[1].toLowerCase();
-		let embed = new Discord.MessageEmbed()
-			.setTitle("Available Flags - " + pubPriv)
-			.setFooter("The formatting is: - `flag_id` : Flag Name -");
-
-		if (!pubPriv){
+		let ID = message.author.id;
+		let pubPriv = false;
+		if (args[1]){
+			pubPriv = args[1].toLowerCase();
+		}else{
 			pubPriv = "private";
 		}
+		
 		if (pubPriv.toLowerCase() === "private"){
 			db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
 				db.alternionConnectionPool.query(`(SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM Cannon WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
