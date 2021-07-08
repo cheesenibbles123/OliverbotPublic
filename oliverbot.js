@@ -186,8 +186,8 @@ allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
 	commands.init(bot);
-	initialSetup.init();
-	interactions.init();
+	initialSetup.init(bot);
+	interactions.init(bot);
 	events.init(bot);
 	console.log('Bot '+bot.user.username+' is ready!');
 });
