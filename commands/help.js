@@ -84,9 +84,11 @@ module.exports = {
 				}
 			}
 
-			console.log(list);
-			//embed.setDescription(list);
-			message.channel.send(embed);
+			message.author.send(embed).then(msg => {
+				message.channel.send("Check your DMs!");
+			}).catch(e => {
+				message.channel.send('It appears you currently can\'t receive Direct Messages.\nPlease enable \"Allow direct messages from server members\" under the Privacy & Safety tab in you user settings.');
+			});
 		}else{
 			let cmd = args[0].toLowerCase();
 			if (bot.commands[cmd]){
