@@ -7,7 +7,7 @@ module.exports = {
 	init : (botInstance) => {  // If you do not need a reference to bot, simply remove this function
 		bot = botInstance;
 	},
-	execute : (event) => { // Main event code that will be executed on call
+	execute : async (event) => { // Main event code that will be executed on call
 		if (event.d.guild_id !== config.serverInfo.serverId) return;
 
 		let rawEmbed = new Discord.MessageEmbed()
