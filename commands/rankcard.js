@@ -5,14 +5,11 @@ const Discord = require("discord.js");
 
 module.exports = {
 	name : "rankcard",
-	args : 0,
+	args : [0,1],
 	help : "Displays your rank",
 	execute: (message,args) => {
 		let id = message.author.id;
-		if (Array.isArray(args) && args.length === 1){
-			id = glob.getUserFromMention(args[0]).id;
-		}
-		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, (err,rows) => {
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${id}'`, async (err,rows) => {
 			if(err) console.log(err);
 			if(rows.length < 1){
 				createDefaultRankCard(message,id);
@@ -22,6 +19,7 @@ module.exports = {
 				let inventory = JSON.parse(rows[0].inventory);
 				let notFound = true;
 				let shipName = "";
+
 				for (let i = 0; i < inventory.length; i++){
 					if (inventory[i].type === "largeShips"){
 						shipName = inventory[i].name;
@@ -30,10 +28,26 @@ module.exports = {
 					}
 				}
 
-				if (notFound){
-					createDefaultRankCard(message, message.author.id);
+				let UserID;
+				let member;
+
+				if (args[0]){
+					let matches = args[0].match(/^<@!?(\d+)>$/);
+					if (!matches){
+						message.channel.send("Please ensure you have used a ping.");
+					}else{
+						UserID = matches[1];
+						member = await bot.guilds.cache.get("401924028627025920").members.cache.get(UserID);
+					}
 				}else{
-					createRankCanvas(message.channel,message.member,shipName,id);
+					UserID = message.author.id;
+					member = message.member;
+				}
+
+				if (notFound){
+					createDefaultRankCard(message, UserID);
+				}else{
+					createRankCanvas(message.channel, member, shipName, UserID);
 				}
 
 			}
