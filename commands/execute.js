@@ -10,7 +10,6 @@ module.exports = {
 			message.channel.send("Nah.");
 		}else{
 			message.channel.send(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
-			TrackingCommand = true;
 		}
 	}
 }
