@@ -1,5 +1,5 @@
 const Canvas = require("canvas");
-const db = require("./../_databaseSetup");
+const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 
 module.exports = {

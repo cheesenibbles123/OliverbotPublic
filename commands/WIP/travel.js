@@ -1,6 +1,7 @@
 const config = require("./../../config.json");
 const Discord = require("discord.js");
 const mysql = require("mysql");
+const db = require('./../../startup/database.js');
 
 var dbSetup = mysql.createPool({
 	connectionLimit : 10,

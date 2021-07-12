@@ -1,4 +1,4 @@
-const db = require("./../databaseSetup");
+const db = require("./../../startup/database.js");
 
 exports.handler = function handler(message,args){
 	if (!args){

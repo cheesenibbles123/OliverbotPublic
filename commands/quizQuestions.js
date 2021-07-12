@@ -1,5 +1,5 @@
 const glob = require("./_globalFunctions");
-const db = require("./_databaseSetup");
+const db = require("./../startup/database.js");
 const Discord = require("discord.js");
 
 isNotLocked = true;

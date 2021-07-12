@@ -1,5 +1,5 @@
 const economySystem = require("./economySystem");
-const db = require("./../db");
+const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 
 let delay = 7200000;

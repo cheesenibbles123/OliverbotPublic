@@ -1,4 +1,4 @@
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 const glob = require("./../_globalFunctions.js");
 
 module.exports = {

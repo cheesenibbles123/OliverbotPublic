@@ -1,4 +1,4 @@
-const db = require("./../_databaseSetup");
+const db = require("./../../startup/database.js");
 
 module.exports = {
 	name: "deletecommand",

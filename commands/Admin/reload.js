@@ -1,5 +1,5 @@
 const commandHandler = require("./../../commandHandler.js");
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 const fs = require("fs");
 
 let bot;

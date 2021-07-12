@@ -1,4 +1,4 @@
-const db = require("./../databaseSetup");
+const db = require("./../../startup/database.js");
 const issueEmbed = require("./../issueEmbed");
 
 //Relevant items in user object

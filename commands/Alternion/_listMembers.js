@@ -1,4 +1,4 @@
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 const shared = require("./_sharedFunctions.js");
 const Discord = require("discord.js");
 

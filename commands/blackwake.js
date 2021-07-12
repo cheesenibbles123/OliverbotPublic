@@ -4,7 +4,7 @@ const config = require("./../config.json");
 const fetch = require("node-fetch");
 var adjustableConfig;
 //const issueEmbeds = require("./issueEmbed");
-const db = require("./_databaseSetup");
+const db = require("./../startup/database.js");
 
 const bw = require('@cheesenibbles123/blackwakehandler');
 

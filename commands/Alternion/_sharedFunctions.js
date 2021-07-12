@@ -1,7 +1,7 @@
 const main = require("./mainHandler.js");
 const config = require("./../../config.json");
 const fs = require("fs");
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 let alternionJsonFile = null;
 
 exports.iterateOver = function iterateOver(rows, type){

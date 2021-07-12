@@ -1,4 +1,4 @@
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 
 exports.levelsystem = function levelsystem(xp,currentlevel){
 	if (currentlevel === 0 && xp > 400){

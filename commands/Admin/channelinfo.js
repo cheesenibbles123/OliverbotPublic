@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const db = require("./../_databaseSetup");
+const db = require("./../../startup/database.js");
 
 let bot;
 
