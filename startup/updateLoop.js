@@ -1,3 +1,5 @@
+const events = require("./../structs/events.js");
+
 let bot;
 
 module.exports = {
@@ -9,7 +11,3 @@ module.exports = {
 		},600000);
 	}
 }
-
-const events = {
-	UPDATE : 'update',
-};
