@@ -1,9 +1,8 @@
 const mysql = require("mysql");
 const config = require("./../config.json");
 const Discord = require("discord.js");
-const adminCommands = require("./Admin/_sharedFunctions.js");
-const main = require("./../oliverbot.js");
-const economy = require("./Economy/_sharedFunctions.js");
+const adminCommands = require("./../commands/Admin/_sharedFunctions.js");
+const economy = require("./../commands/Economy/_sharedFunctions.js");
 const btoa = require("btoa");
 
 var mainDatabaseConnectionPool = mysql.createPool({
@@ -36,6 +35,14 @@ var craftingConnectionPool = mysql.createPool({
 	user : config.databaseInfo.user,
 	password : config.databaseInfo.password,
 	database : "crafting"
+});
+
+var economyConnectionPool = mysql.createPool({
+	connectionLimit : 30,
+	host : config.databaseInfo.host,
+	user : config.databaseInfo.user,
+	password : config.databaseInfo.password,
+	database : "Economy"
 });
 
 var xpdetails = {
