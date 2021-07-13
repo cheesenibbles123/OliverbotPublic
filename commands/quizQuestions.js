@@ -62,22 +62,35 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 	message.channel.send(question).then(() => {
 
 		let list = [];
+		let attempts = {};
+
+		for (let i=0; i<awnsers.length; i++){
+			awnsers[i] = awnsers[i].toLowerCase();
+		}
 
 		let filter = response => {
+			if (attempts[response.author.id]){
+				attempts[response.author.id] += 1;
+			}else{
+				attempts[response.author.id] = 1;
+			}
+
 			if (response.attachments.size > 0){
 				response.channel.send("Attachments are not supported as awnsers.");
 				return false;
-			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1 && !response.author.bot){
+			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1 && !response.author.bot && attempts[message.author.id] <= maxAttempts ){
 				return true;
 			}else{
+				if (attempts[response.author.id] > maxAttempts && !response.author.bot){
+					response.channel.send("You have reached the max number of attempts you can make!");
+				}
 				return false;
 			}
 		};
 
-		let collector = message.channel.createMessageCollector(filter, { max: maxAttempts, time: 15000 * timeFactor });
+		let collector = message.channel.createMessageCollector(filter, { time: 15000 * timeFactor });
 
 		collector.on('collect', msg => {
-			// console.log('Got answer for: ' + msg.content);
 			if (list.indexOf(msg.author) === -1){
 				list.push(msg.author);
 				msg.delete();
@@ -113,6 +126,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 			}
 
 			isNotLocked = true;
+			attempts = {};
 		});
 	});
 }
