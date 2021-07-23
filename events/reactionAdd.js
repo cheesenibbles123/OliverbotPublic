@@ -1,5 +1,5 @@
 const config = require("./../config.json");
-const db = require("./../commands/_databaseSetup.js");
+const db = require("./../startup/database.js");
 
 let bot;
 
