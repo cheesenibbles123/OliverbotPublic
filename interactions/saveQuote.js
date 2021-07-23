@@ -1,4 +1,4 @@
-const db = require("./../commands/_databaseSetup.js");
+const db = require("./../startup/database.js");
 const config = require("./../config.json");
 const glob = require("./../commands/_globalFunctions.js");
 

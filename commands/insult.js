@@ -1,4 +1,4 @@
-const glob = require("_globalFunctions.js");
+const glob = require("./_globalFunctions.js");
 
 module.exports = {
 	name: "insult",
