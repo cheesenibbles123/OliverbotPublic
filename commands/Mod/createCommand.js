@@ -14,7 +14,7 @@ module.exports = {
 		if (bot.commands[args[0]]){
 			message.channel.send("That command already exists!");
 		}else{
-			db.configurationDatabaseConnectionPool.query(`insert into CustomCommands values ('${args[0]}' , '${args.slice(1)}' )`);
+			db.configurationDatabaseConnectionPool.query(`INSERT INTO CustomCommands VALUES ('${args[0]}' , '${args.slice(1)}' )`);
 			let command = {
 				name: args[0],
 				execute: (message,args) => {

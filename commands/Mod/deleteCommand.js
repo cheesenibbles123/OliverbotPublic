@@ -14,7 +14,7 @@ module.exports = {
 			commandToDelete = args;
 		}
 		if (bot.commands[commandToDelete]){
-			db.configurationDatabaseConnectionPool.query(`delete from CustomCommands where command='${commandToDelete}'`);
+			db.configurationDatabaseConnectionPool.query(`DELETE FROM CustomCommands WHERE command='${commandToDelete}'`);
 			delete bot.commands[commandToDelete];
 			message.reply("Command deleted!");
 		}else{
