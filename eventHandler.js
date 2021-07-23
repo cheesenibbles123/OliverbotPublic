@@ -17,7 +17,7 @@ function loopOverFolders(folder){
 		let event = require(__dirname + folder + "/" + file);
 
 		// Check if event name already exists
-		if (!bot.events[event.name.toLowerCase()]){
+		if (!bot.events[event.name]){
 
 			// Execute init function on event if it exists
 			if (typeof(event.init) === 'function'){
@@ -25,7 +25,7 @@ function loopOverFolders(folder){
 			}
 
 			// Store event
-			bot.events[event.name.toLowerCase()] = event;
+			bot.events[event.name] = event;
 		}else{
 			console.log("Error loading event: " + event.name);
 			console.log("From file: " + folder + "/" + file);
