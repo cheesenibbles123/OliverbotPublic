@@ -3,7 +3,7 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 
 const commands = require("./commandHandler.js");
-const initialSetup = require("./commands/_initialSetup");
+const startup = require("./startupHandler.js");
 const interactions = require("./interactionHandler.js");
 const events = require("./eventHandler.js");
 
@@ -184,7 +184,7 @@ allowedCommands = ["savequote"];
 
 bot.on("ready", () => {
 	commands.init(bot);
-	initialSetup.init(bot);
+	startup.init(bot);
 	interactions.init(bot);
 	events.init(bot);
 	console.log('Bot '+bot.user.username+' is ready!');
