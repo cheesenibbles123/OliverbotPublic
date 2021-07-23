@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const config = require("./../../config.json");
+let bot;
 
 module.exports = {
 	name: "ban",
@@ -7,6 +8,9 @@ module.exports = {
 	help: "bans the user",
 	roles: ["665939545371574283"],
 	category: "Admin",
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
 		if (typeof args[0] === "string"){
 			try{
