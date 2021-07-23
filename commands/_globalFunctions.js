@@ -1,6 +1,6 @@
 let adjustableConfig;
 let bot;
-const db = require("./_databaseSetup");
+const db = require("./../startup/database.js");
 const fs = require('fs');
 
 exports.init = function init(botInstance){
