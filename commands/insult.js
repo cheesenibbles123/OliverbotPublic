@@ -1,17 +1,10 @@
-const fetch = require("node-fetch");
-const config = require("./../config.json");
-const Discord = require("discord.js");
-const issueEmbed = require("./issueEmbed");
-var adjustableConfig;
-const db = require("./databaseSetup");
-const glob = require("./globalFunctions");
+const glob = require("_globalFunctions.js");
 
-exports.init = function init(){
-	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
-}
-
-function insultUser(message,args){
-	if (levelchecker(message,7)){
+module.exports = {
+	name: "insult",
+	args: [0,100],
+	help: "Insults whatever gets input",
+	execute: async (message,args) => {
 		let fine = true;
 		for (i=0; i<args.length;){
 			let mentionrole = message.guild.roles.cache.get(args[i]);
@@ -29,7 +22,5 @@ function insultUser(message,args){
 		}else{
 			message.reply("Please enter a correct target. Please also refrain from insulting and pinging roles.");
 		}
-	}else{
-		issueEmbed.grabEmbed(2,7);
 	}
 }
