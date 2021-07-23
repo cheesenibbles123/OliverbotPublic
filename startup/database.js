@@ -84,7 +84,7 @@ exports.configurationDatabaseConnectionPool = configurationDatabaseConnectionPoo
 exports.alternionConnectionPool = alternionConnectionPool;
 exports.mainDatabaseConnectionPool = mainDatabaseConnectionPool;
 
-exports.setupDatabase = function setupDatabase(){
+exports.init = function init(){
 	loadXpDataFromDB();
 	loadConfigFromDB();
 	loadPermanentCommandsFromDB();
