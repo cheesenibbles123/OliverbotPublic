@@ -64,10 +64,6 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 		let list = [];
 		let attempts = {};
 
-		for (let i=0; i<awnsers.length; i++){
-			awnsers[i] = awnsers[i].toLowerCase();
-		}
-
 		let filter = response => {
 			if (attempts[response.author.id]){
 				attempts[response.author.id] += 1;
