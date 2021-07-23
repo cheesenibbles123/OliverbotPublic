@@ -71,7 +71,7 @@ const adjustableConfig = {
 let customCommandList;
 let miniCommands;
 //let reactionRoles;
-
+exports.enabled = true;
 exports.adjustableConfig = adjustableConfig;
 
 exports.customCommandList = customCommandList;

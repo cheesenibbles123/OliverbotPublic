@@ -1,7 +1,7 @@
 const config = require("./../config.json");
 
 module.exports = {
-	enabled : 0,
+	enabled : false,
 	init : (bot) => {
 		if(serverStatus.msg === null){
 			bot.channels.cache.get(serverStatus.channel).send("Getting Updates").then((msg)=>{

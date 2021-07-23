@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 module.exports = {
-	enabled : 0,
+	enabled : false,
 	init : (bot) => {
 		fetch('https://www.battlemetrics.com/servers/7dtd/6591807').then(response => response.text()).then(body => {
 		    try{

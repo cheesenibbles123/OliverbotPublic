@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 module.exports = {
-	enabled : 0,
+	enabled : false,
 	init : (bot) => {
 		let delay = 25000;
 	  	var interval = setInterval(function(){

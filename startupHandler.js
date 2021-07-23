@@ -17,7 +17,7 @@ function loopOverFolders(folder){
 		// Load startup stuff
 		let startupStuff = require(__dirname + folder + "/" + file);
 
-		if (startupStuff.enabled || startupStuff.enabled === 1){
+		if (startupStuff.enabled){
 			startupStuff.init(bot);
 		}
 	});

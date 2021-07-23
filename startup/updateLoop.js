@@ -3,7 +3,7 @@ const events = require("./../structs/events.js");
 let bot;
 
 module.exports = {
-	enabled: 0,
+	enabled: false,
 	init: (botInstance) => {
 		bot = botInstance;
 		
