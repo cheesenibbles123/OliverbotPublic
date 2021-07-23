@@ -1,4 +1,4 @@
-const db = require("./../_databaseSetup.js");
+const db = require("./../../startup/database.js");
 
 exports.displayReactionRoles = function displayReactionRoles(){
 	db.mainDatabaseConnectionPool.query('SELECT * FROM reactionRoleMessages', (err,rows, fields) => {
