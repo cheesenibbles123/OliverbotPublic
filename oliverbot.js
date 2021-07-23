@@ -265,7 +265,7 @@ async function manageJoinReaction(event){
 
 //Pure Logging of events for administrative purposes
 bot.on('raw', async event => {
-	if (event.d.type !== 'dm'){
+	if (event.d && event.d.type !== 'dm'){
 		events.handler(event);
 	}
 });
