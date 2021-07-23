@@ -1,10 +1,10 @@
 const config = require("./../config.json");
-const events = require("./../structs/events.js");
-
+const glob = require("./../commands/_globalFunctions.js");
+const db = require("./../startup/database.js").economyConnectionPool;
 let bot;
 
 module.exports = {
-	name : events.UPDATE, // This is the event name (event.t) and is what will be used in the eventHandler
+	name : "Update", // This is the event name (event.t) and is what will be used in the eventHandler
 	init : (botInstance) => {  // If you do not need a reference to bot, simply remove this function
 		bot = botInstance;
 	},
@@ -16,7 +16,7 @@ module.exports = {
 }
 
 function checkForEncounters(){
-	dbSetup.quert(`SELECT * FROM Player WHERE Location=999`, (err,players) => {
+	db.quert(`SELECT * FROM Player WHERE Location=999`, (err,players) => {
 		for (let i=0; i<players.length; i++){
 			let num = glob.getRandomInt(100);
 			if (num === 50){
@@ -50,7 +50,7 @@ function spawnEncounter(UserID){
 			msg += "A ship has approached us!\n";
 		}
 
-		dbSetup.query(`SELECT * FROM DefaultLayout WHERE ID=${encounter.ShipID}`, (err,shipData) => {
+		db.query(`SELECT * FROM DefaultLayout WHERE ID=${encounter.ShipID}`, (err,shipData) => {
 
 		});
 

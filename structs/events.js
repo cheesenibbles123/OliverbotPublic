@@ -1,3 +1,3 @@
 exports.events = {
-	UPDATE : "update",
+	UPDATE : "Update",
 }
