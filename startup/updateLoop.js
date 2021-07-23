@@ -1,4 +1,4 @@
-const events = require("./../structs/events.js");
+const events = require("./../structs/events.js").events;
 
 let bot;
 
@@ -9,6 +9,6 @@ module.exports = {
 		
 		setInterval(() => {
 			bot.emit(events.UPDATE);
-		},600000);
+		},180000); // 30min
 	}
 }
