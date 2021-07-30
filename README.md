@@ -20,6 +20,7 @@ These are the oliverbot files, used for powering the discord bot.
  - Release version: 2.0
 
 **Dependencies:**
+ - @cheesenibbles123/blackwakehandler: ^3.1.3
  - @discordjs/opus: ^0.3.2
  - btoa: ^1.2.1
  - canvas: ^2.6.1
