@@ -32,7 +32,7 @@ module.exports = {
 
 				if (bot.scamFilter.users[message.author.id].infractions >= bot.scamFilter.threshold && !bot.scamFilter.users[message.author.id].isMuted){
 					bot.scamFilter.users[message.author.id].isMuted = true;
-					//message.member.roles.add();
+					message.member.roles.add(config.serverInfo.roles.muted);
 
 					let links = "";
 					for (let s = 0; s < bot.scamFilter.users[message.author.id].links.length; s++){
@@ -46,9 +46,9 @@ module.exports = {
 					bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(embed);
 				}
 
-				fs.writeFileSync(file, JSON.stringify(bot.scamFilter), 'utf8');
-
 				message.delete();
+
+				fs.writeFileSync(file, JSON.stringify(bot.scamFilter), 'utf8');
 			}
 		}
 	}
