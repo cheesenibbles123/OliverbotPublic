@@ -77,7 +77,7 @@ async function textQuizQuestions(message,question,awnsers,timeFactor,worthFactor
 			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1 && !response.author.bot && attempts[message.author.id] <= maxAttempts ){
 				return true;
 			}else{
-				if (attempts[response.author.id] > maxAttempts && !response.author.bot){
+				if (attempts[response.author.id] > maxAttempts && attempts[response.author.id] < maxAttempts + 2 && !response.author.bot){
 					response.channel.send("You have reached the max number of attempts you can make!");
 				}
 				return false;
