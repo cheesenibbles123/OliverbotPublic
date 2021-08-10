@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
-
+const config = require.main.require("./config.json");
 let bot;
 
 module.exports = {
