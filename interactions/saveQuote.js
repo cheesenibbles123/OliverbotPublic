@@ -1,6 +1,7 @@
 const db = require("./../startup/database.js");
 const config = require("./../config.json");
 const glob = require("./../commands/_globalFunctions.js");
+const Discord = require("discord.js");
 
 const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
 
@@ -17,35 +18,36 @@ module.exports = {
 	},
 	execute : (message) => { // Main event code that will be executed on call
 		//Prevents autoquote from taking from sensitive channels
-		if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
-			if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
-				if (message.channel.name.toLowerCase().includes("support")){
-					// Ignore
-				}else
-				if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
-					try{
-						let AutoQuote = new Discord.MessageEmbed()
-							.setTitle(`${message.author.username}`)
-							.setDescription(`${message.content}`)
-							.setThumbnail(message.author.displayAvatarURL())
-							.setFooter(`Sent in: #${message.channel.name} `)
-							.setTimestamp();
+		if (message.guild){
+			if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
+				if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
+					if (message.channel.name.toLowerCase().includes("support")){
+						// Ignore
+					}else
+					if (glob.getRandomInt(db.adjustableConfig.quotes.chanceOfBeingQuoted) === 1){
+						try{
+							let AutoQuote = new Discord.MessageEmbed()
+								.setTitle(`${message.author.username}`)
+								.setDescription(`${message.content}`)
+								.setThumbnail(message.author.displayAvatarURL())
+								.setFooter(`Sent in: #${message.channel.name} `)
+								.setTimestamp();
 
-						let hasNotAddedImage = true;
-						
-						message.attachments.forEach(attachment => {
-				    		if (message.attachments.size === 1) {
-				      			if (attachment.url && hasNotAddedImage){
-				      				AutoQuote.setImage(`${attachment.url}`);
-				      				hasNotAddedImage = false;
-				      			}
-				    		}
-				  		});
+							let hasNotAddedImage = true;
+							
+							message.attachments.forEach(attachment => {
+					    		if (message.attachments.size === 1) {
+					      			if (attachment.url && hasNotAddedImage){
+					      				AutoQuote.setImage(`${attachment.url}`);
+					      				hasNotAddedImage = false;
+					      			}
+					    		}
+					  		});
 
-						bot.channels.cache.get(config.serverInfo.channels.quotes).send(AutoQuote);
-					}catch(e){
-						console.log("I CANNOT DO THIS, PLEASE HELP!");
-						console.log(e);
+							bot.channels.cache.get(config.serverInfo.channels.quotes).send(AutoQuote);
+						}catch(e){
+							console.log(e);
+						}
 					}
 				}
 			}
