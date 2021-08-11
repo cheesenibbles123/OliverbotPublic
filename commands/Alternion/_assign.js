@@ -107,6 +107,12 @@ function getTablesAndFields(inputType){
 				fieldName = "Swivel_ID";
 				table2Field = "Allowed_Swivel_ID";
 				break;
+			case "mortar":
+				table1Name = "Mortar";
+				table2Name = "LimitedMortars";
+				fieldName = "Mortar_ID";
+				table2Field = "Allowed_Mortar_ID";
+				break;
 			case "navyflag":
 				table1Name = "Flag";
 				table2Name = "LimitedFlags";

@@ -3,7 +3,7 @@ const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
 
 module.exports = {
-	name: "listflags",
+	name: "listmortars",
 	args: 2,
 	execute: (message, args) => {
 
@@ -14,24 +14,23 @@ module.exports = {
 		}else{
 			pubPriv = "private";
 		}
-		
 		let embed = new Discord.MessageEmbed()
-			.setTitle("Available Flag Skins - ")
-			.setFooter("The formatting is: - `flag_id` : Flag Name -");
-
+			.setTitle("Available Mortar Skins - ")
+			.setFooter("The formatting is: - `mortar_id` : Mortar Name -");
+		
 		if (pubPriv.toLowerCase() === "private"){
 			db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-				db.alternionConnectionPool.query(`(SELECT Cannon.Name, Cannon.Display_Name FROM LimitedCannons INNER JOIN User ON User_ID = User.ID INNER JOIN Cannon ON Allowed_Cannon_ID = Cannon.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM Cannon WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
+				db.alternionConnectionPool.query(`(SELECT Mortar.Name, Mortar.Display_Name FROM LimitedMortars INNER JOIN User ON User_ID = User.ID INNER JOIN Mortar ON Allowed_Mortar_ID = Mortar.ID WHERE User.Discord_ID='${ID}') UNION (SELECT Name, Display_Name FROM Mortar WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 					
-					embed.setDescription(shared.iterateOver(rows,"Flags"));
+					embed.setDescription(shared.iterateOver(rows,"Mortars"));
 					message.channel.send(embed);
 
 				});
 			});
 		}else if (pubPriv.toLowerCase() === "public"){
-			db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM Flag WHERE Limited!=1`, (err,rows) => {
+			db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM Mortar WHERE Limited!=1`, (err,rows) => {
 
-				embed.setDescription(shared.iterateOver(rows,"Flags"));
+				embed.setDescription(shared.iterateOver(rows,"Mortars"));
 				message.channel.send(embed);
 
 			});
