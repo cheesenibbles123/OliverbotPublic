@@ -3,7 +3,7 @@ const config = require("./../config.json");
 const glob = require("./../commands/_globalFunctions.js");
 const Discord = require("discord.js");
 
-const autoQuoteNotAllowedCategories = [408407982926331904,440525688248991764,665972605928341505,585042086542311424,632107333933334539,692084502184329277];
+const autoQuoteNotAllowedCategories = ["408407982926331904","440525688248991764","665972605928341505","585042086542311424","632107333933334539","692084502184329277"];
 
 let bot;
 
@@ -20,7 +20,7 @@ module.exports = {
 		//Prevents autoquote from taking from sensitive channels
 		if (message.guild){
 			if (db.adjustableConfig.quotes.active && message.guild.id === config.serverInfo.serverId){
-				if (autoQuoteNotAllowedCategories.indexOf(parseInt(message.channel.parentID)) === -1){
+				if (autoQuoteNotAllowedCategories.indexOf(message.channel.parentID) === -1){
 					if (message.channel.name.toLowerCase().includes("support")){
 						// Ignore
 					}else
