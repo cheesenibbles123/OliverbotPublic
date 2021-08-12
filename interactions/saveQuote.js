@@ -36,12 +36,10 @@ module.exports = {
 							let hasNotAddedImage = true;
 							
 							message.attachments.forEach(attachment => {
-					    		if (message.attachments.size === 1) {
-					      			if (attachment.url && hasNotAddedImage){
-					      				AutoQuote.setImage(`${attachment.url}`);
-					      				hasNotAddedImage = false;
-					      			}
-					    		}
+				      			if (attachment.url && hasNotAddedImage){
+				      				AutoQuote.setImage(`${attachment.url}`);
+				      				hasNotAddedImage = false;
+				      			}
 					  		});
 
 							bot.channels.cache.get(config.serverInfo.channels.quotes).send(AutoQuote);
