@@ -18,7 +18,7 @@ module.exports = {
 			fine = false;
 		}
 		if (fine){
-			glob.loadFromDatafile(command,args.join(" "),message);
+			glob.loadDataFromFile("insult",args.join(" "),message);
 		}else{
 			message.reply("Please enter a correct target. Please also refrain from insulting and pinging roles.");
 		}
