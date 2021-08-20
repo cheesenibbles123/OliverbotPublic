@@ -1,0 +1,15 @@
+[Unit]
+Description=Oliverbot
+
+[Service]
+ExecStart=
+Restart=always
+# Note setup is for ubunutu, other distros/OSs will have different setups here
+User=nogroup
+group=nogroup
+Environment=
+Environment=NODE_ENV=production
+WorkinDirectory=
+
+[Install]
+WantedBy=multi-user.target
