@@ -9,6 +9,7 @@ module.exports = {
 	name: "purchase",
 	args: 1,
 	help: "Purchase an item",
+	usage: "<itemID>",
 	category: "Economy",
 	init: (botInstance) => {
 		bot = botInstance;

@@ -8,6 +8,7 @@ module.exports = {
 	name: "gamble",
 	args: 1,
 	help: "Search for an item by its ID",
+	usage: "<amount>",
 	category: "Economy",
 	init: (botInstance) => {
 		bot = botInstance;

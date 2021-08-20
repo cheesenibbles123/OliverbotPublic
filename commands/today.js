@@ -5,6 +5,7 @@ module.exports = {
 	name: "today",
 	args: 1,
 	help: "Gets a random historical moment that occured at this time.",
+	usage: "<type>",
 	execute: (message,args) => {
 		if (args[0]){
 			let allowedInputs = ["events","births","deaths"];

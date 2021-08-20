@@ -4,6 +4,7 @@ module.exports = {
 	name: "memegen",
 	args: [0,100],
 	help: "Generates a meme based off the input",
+  usage: "<template>,<caption1>,<caption2>",
 	execute: async (message,args) => {
 		let contents = message.content.split(",");
     	for (i=0;i<contents.length;){
@@ -22,7 +23,7 @@ module.exports = {
     	    contents[i] = word;
     	    i++;
     	}
-		let URL = `https://memegen.link/${contents[0]}/${contents[1]}/${contents[2]}.jpg`;
+		let URL = `https://memegen.link/images/${contents[0]}/${contents[1]}/${contents[2]}.jpg`;
 		fetch(URL).then(response =>{
 		    message.channel.send(response.url);
 		});

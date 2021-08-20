@@ -9,6 +9,7 @@ module.exports = {
 	help: "Displays the channel information",
 	roles: ["665939545371574283"],
 	category: "Admin",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

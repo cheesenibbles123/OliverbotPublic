@@ -5,6 +5,7 @@ module.exports = {
 	args: 1,
 	help: "Plays a song or adds it to the queue",
 	category: "Audio",
+	usage: "<youtubeURL>",
 	execute: (message,args) => {
 		glob.setupTune(message,args,false);
 	}

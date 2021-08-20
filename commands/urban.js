@@ -6,7 +6,7 @@ module.exports = {
 	name: "urban",
 	args: 1,
 	help: "Searches for the word on urban dictionary",
-	usage: "{wordToSearch}",
+	usage: "<word>",
 	execute: (message,args) => {
 		let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
 		fetch(api).then(response => response.json()).then(resp => {

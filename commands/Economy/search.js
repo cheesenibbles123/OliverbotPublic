@@ -7,6 +7,7 @@ module.exports = {
 	name: "search",
 	args: 1,
 	help: "Search for an item by its ID",
+	usage: "<itemID>",
 	category: "Economy",
 	init: (botInstance) => {
 		bot = botInstance;

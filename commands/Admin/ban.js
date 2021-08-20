@@ -6,6 +6,7 @@ module.exports = {
 	name: "ban",
 	args: 0,
 	help: "bans the user",
+	usage: "@user",
 	roles: ["665939545371574283"],
 	category: "Admin",
 	init: (botInstance) => {

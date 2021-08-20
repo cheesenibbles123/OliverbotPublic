@@ -5,6 +5,7 @@ module.exports = {
 	name: "words",
 	args: [0,100],
 	help: "Looks up the meaning behind a given word",
+	usage: "<word>",
 	execute: async (message,args) => {
 		if (args.length > 1){
 			message.channel.send("The API only works with one word at a time :(");

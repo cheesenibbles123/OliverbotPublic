@@ -7,6 +7,7 @@ module.exports = {
 	name: "giftcoins",
 	args: 2,
 	help: "Gift another user coins",
+	usage: "@user <amount>",
 	category: "Economy",
 	init: (botInstance) => {
 		bot = botInstance;

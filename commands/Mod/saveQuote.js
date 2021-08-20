@@ -8,6 +8,7 @@ module.exports = {
 	help: "Saves a message as a quote",
 	roles: ["440514569849536512"],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

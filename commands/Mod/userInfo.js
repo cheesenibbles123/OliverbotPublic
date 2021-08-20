@@ -10,6 +10,7 @@ module.exports = {
 	help: "Displays information about a user",
 	roles: ["440514569849536512"],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

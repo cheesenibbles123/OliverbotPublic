@@ -5,6 +5,7 @@ module.exports = {
 	name: "trump",
 	args: [0,30],
 	help: "Gives a trump description about the input.",
+	usage: "<target>",
 	category: "Meme",
 	execute: (message,args) => {
 		if (message.content.includes("everyone") || message.content.includes("here")){

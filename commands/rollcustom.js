@@ -4,6 +4,7 @@ module.exports = {
 	name: "rollcustom",
 	args: 2,
 	help: "Rolls a custom die",
+	usage: "<min> <max>",
 	execute: (message,args) => {
 		let min = parseInt(args[0]);
 		let max = parseInt(args[1]);

@@ -2,6 +2,7 @@ module.exports = {
 	name: "execute",
 	args: 1,
 	help: "Executes the provided target",
+	usage: "<target>",
 	category: "Meme",
 	execute: (message,args) => {
 		if (typeof args[0] === undefined){

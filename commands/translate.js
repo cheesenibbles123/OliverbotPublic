@@ -5,6 +5,7 @@ module.exports = {
 	name: "translate",
 	args: [1,200],
 	help: "Translates between RU and EN using yandex",
+	usage: "<language> <text>",
 	execute: (message,args) => {
 		if (args[0] === "ru"){
 			args = args.slice(1);

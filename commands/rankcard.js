@@ -7,6 +7,7 @@ module.exports = {
 	name : "rankcard",
 	args : [0,1],
 	help : "Displays your rank",
+	usage: "@user",
 	execute: async (message,args) => {
 		let UserID;
 		let member;

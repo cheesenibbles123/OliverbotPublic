@@ -4,6 +4,7 @@ module.exports = {
 	name: "yodish",
 	args: [0,100],
 	help: "Converts the input text to yodish.",
+	usage: "<text>",
 	execute: async (message,args) => {
 		let text = args.join(" ");
 		if (text.toLowerCase().includes("everyone") || text.toLowerCase().includes("here")){

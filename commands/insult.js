@@ -4,6 +4,7 @@ module.exports = {
 	name: "insult",
 	args: [0,100],
 	help: "Insults whatever gets input",
+	usage: "<target>",
 	execute: async (message,args) => {
 		let fine = true;
 		for (i=0; i<args.length;){

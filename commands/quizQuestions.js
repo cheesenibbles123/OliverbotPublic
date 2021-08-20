@@ -8,6 +8,7 @@ module.exports = {
 	name: "quiz",
 	args: [0,1],
 	help: "Displays a quiz question for you to awnser",
+	usage: "<income>",
 	execute: (message,args) => {
 		if (isNotLocked){
 			switch (args[0]){
