@@ -1,4 +1,5 @@
 const db = require("./../../startup/database.js");
+let bot;
 
 module.exports = {
 	name: "restart",

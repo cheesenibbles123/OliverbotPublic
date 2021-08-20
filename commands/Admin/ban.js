@@ -19,7 +19,7 @@ module.exports = {
 				if (member.roles.has(config.serverInfo.roles.serverAdministrator)){
 					message.channel.send("You can't ban an admin!");
 				}else{
-					message.guild.members.ban(member);
+					message.guild.members.ban(member, { reason : args.shift().join(' ') });
 					bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: "+member+", has been banned. Reason: "+(args.slice(2)).join(" ")+"\n"
 																+"Banned by: "+message.member.user.username+".");
 				}

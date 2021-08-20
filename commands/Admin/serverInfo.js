@@ -19,7 +19,7 @@ module.exports = {
 							.setColor('#00008b')
 							.setTitle(`${message.guild.name}`)
 							.setDescription(`Server Information`)	
-							.addField('Basic', `Owner: ${message.guild.owner}\nDescription: ${message.guild.description}\nCreated on: ${message.guild.createdAt}\nAcronym: ${message.guild.nameAcronym}\nRegion: ${message.guild.region}\nID: ${message.guild.id}`)
+							.addField('Basic', `Owner: ${message.guild.fetchOwner()}\nDescription: ${message.guild.description}\nCreated on: ${message.guild.createdAt}\nAcronym: ${message.guild.nameAcronym}\nRegion: ${message.guild.region}\nID: ${message.guild.id}`)
 							.addField('Total Members', `Real People: ${message.guild.members.cache.filter(member => !member.user.bot).size}\nBots: ${message.guild.members.cache.filter(member => member.user.bot).size}`)
 							.addField('Additional Info', `Number of Roles:\nNumber of Bans:\nMFA Level Required:\nNumber of Webhooks:\nDefault Message Notifications:`,true)
 							//.addField('-----', `${message.guild.roles.size}\n${await message.guild.fetchBans().then(result => {return result.size})}\n${message.guild.mfaLevel}\n${await message.guild.fetchWebhooks().then(result => {return result.size})}\n${message.guild.defaultMessageNotifications}`,true)

@@ -1,6 +1,6 @@
 const config = require("./config.json");
-const Discord = require("discord.js");
-const bot = new Discord.Client();
+const { Client, Intents } = require('discord.js');
+const bot = new Client({intents: returnIntents()});
 
 const commands = require("./commandHandler.js");
 const startup = require("./startupHandler.js");
@@ -20,6 +20,26 @@ let cooldowns = {
 		"timeoutLength" : 120000
 	}
 };
+
+function returnIntents(){
+	return [
+
+	Intents.FLAGS.GUILDS,
+	Intents.FLAGS.GUILD_MEMBERS,
+	Intents.FLAGS.GUILD_BANS,
+	Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
+	Intents.FLAGS.GUILD_INTEGRATIONS,
+	Intents.FLAGS.GUILD_WEBHOOKS,
+	Intents.FLAGS.GUILD_INVITES,
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+
+	Intents.FLAGS.DIRECT_MESSAGES,
+	Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+
+	]
+}
 
 /////////////////////////////////////////////APIS
 
@@ -182,7 +202,7 @@ function craftItem(message,args){
 
 allowedCommands = ["savequote"];
 
-bot.on("ready", () => {
+bot.once("ready", () => {
 	commands.init(bot);
 	startup.init(bot);
 	interactions.init(bot);
@@ -190,8 +210,8 @@ bot.on("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
 });
 
-bot.on("message", async message => {
-
+bot.on("messageCreate", async message => {
+	
 	try{
 
 	//dont respond to bots
@@ -292,7 +312,7 @@ bot.on('raw', async event => {
 
 
 bot.on('error', console.error);
-//bot.on('debug', console.log)
+bot.on('debug', console.log)
 bot.on("warn", (e) => console.warn(e));
 
 bot.on("messageDelete", function(message){

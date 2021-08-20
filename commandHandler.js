@@ -2,6 +2,9 @@ const fs = require('fs');
 const db = require('./startup/database.js');
 const config = require('./config.json');
 
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+
 let bot;
 
 function loopOverFolders(folder){
@@ -48,6 +51,8 @@ function loadFromDatabase(){
 
 async function setupSlashCommands(){
 
+	const rest = new REST({ version: '9' }).setToken(token);
+
 	const timer = ms => new Promise( res => setTimeout(res, ms));
 
 	for (let commandName in bot.commands){
@@ -71,15 +76,6 @@ async function setupSlashCommands(){
 	};
 }
 
-function respondToInteraction(interaction,message){
-	bot.api.interactions(interaction.id, interaction.token).callback.post({
-		type : 4,
-		data: {
-			content: message
-		}
-	});
-}
-
 module.exports = {
 	init: (botInstance) => {
 		botInstance['commands'] = {};
@@ -91,7 +87,10 @@ module.exports = {
 		loadFromDatabase();
 		//setupSlashCommands();
 	},
-	handler: (message,command,args) => {
+	handler: async (message,command,args) => {
+		if (!interaction.isCommand()) return;
+		await interaction.deferReply();
+
 		if (bot.commands[command]){
 
 			let missingRole = true;
@@ -142,7 +141,7 @@ module.exports = {
 			}
 
 			// Check if server only
-			if (bot.commands[command].guildOnly && message.channel.type === 'dm'){
+			if (bot.commands[command].guildOnly && message.channel.type === 'DM'){
 				return message.channel.send("I can't execute that command within DMs!");
 			}
 
@@ -174,14 +173,14 @@ module.exports = {
 						if (bot.commands[command].usage){
 							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
-						return respondToInteraction(msg);
+						return interaction.reply(msg);
 					}
 				// if arguments are a fixed length
 				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
 					if (bot.commands[command].usage){
 							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
-					return respondToInteraction(msg);
+					return interaction.reply(msg);
 				}
 			}
 
