@@ -69,14 +69,14 @@ module.exports = {
 					// if arguments are a range between [min,max]
 					if (bot.commands[command].args[0] > args || bot.commands[command].args[1] < args){
 						if (bot.commands[command].usage){
-							msg += `Example usage: \`${config.prefix}\`\`${bot.commands[command].name}\` \`${bot.commands[command].usage}\``;
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
 						return message.channel.send(msg);
 					}
 				// if arguments are a fixed length
 				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
 					if (bot.commands[command].usage){
-							msg += `Example usage: \`${config.prefix}\`\`${bot.commands[command].name}\` \`${bot.commands[command].usage}\``;
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
 					return message.channel.send(msg);
 				}
