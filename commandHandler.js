@@ -86,10 +86,7 @@ module.exports = {
 		await loadFromDatabase();
 		bot.loadedCommands = true;
 	},
-	handler: async (interaction) => {
-		//if (!interaction.isCommand()) return;
-		console.log(interaction);
-		let command = interaction.data.name;
+	handler: async (message,command,args) => {
 		if (bot.commands[command]){
 
 			let missingRole = true;
@@ -155,9 +152,8 @@ module.exports = {
 		}
 	},
 	slashHandler: (interaction) => {
-		//if (!interaction.isCommand()) return;
-		console.log(interaction);
-		let command = interaction.data.name;
+		if (!interaction.isCommand()) return;
+		let command = interaction.commandName;
 		if (bot.commands[command]){
 
 			let missingRole = true;
