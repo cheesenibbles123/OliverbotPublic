@@ -97,7 +97,7 @@ module.exports = {
 				}
 			}
 
-			if ((bot.commands[command].roles && !missingRole) || (!bot.commands[command].roles && missingRole) || allowedUser){
+			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
 				bot.commands[command].execute(message,args);
 				db.updateTracking(command);
 			}else{
