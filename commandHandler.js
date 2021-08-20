@@ -2,9 +2,6 @@ const fs = require('fs');
 const db = require('./startup/database.js');
 const config = require('./config.json');
 
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-
 let bot;
 
 function loopOverFolders(folder){
@@ -30,30 +27,32 @@ function loopOverFolders(folder){
 }
 
 function loadFromDatabase(){
-	db.configurationDatabaseConnectionPool.query(`SELECT * FROM CustomCommands`,(err,rows) => {
-		for (let i = 0; i < rows.length; i++){
-			if (!bot.commands[rows[i].command]){
-				let command = {
-					name: rows[i].command,
-					help: "Custom Command",
-					category: "Custom",
-					execute: (message,args) => {
-						message.channel.send(rows[i].response);
+	return new Promise((resolve,reject) => {
+		db.configurationDatabaseConnectionPool.query(`SELECT * FROM CustomCommands`,(err,rows) => {
+			for (let i = 0; i < rows.length; i++){
+				if (!bot.commands[rows[i].command]){
+					let command = {
+						name: rows[i].command,
+						help: "Custom Command",
+						category: "Custom",
+						execute: (message,args) => {
+							message.channel.send(rows[i].response);
+						}
 					}
+					bot.commands[command.name] = command;
+				}else{
+					console.log("Error loading db command: " + command.name);
 				}
-				bot.commands[command.name] = command;
-			}else{
-				console.log("Error loading db command: " + command.name);
 			}
-		}
+		});
 	});
 }
 
 async function setupSlashCommands(){
 
-	const rest = new REST({ version: '9' }).setToken(token);
+	let rest = new REST({ version: '9' }).setToken(token);
 
-	const timer = ms => new Promise( res => setTimeout(res, ms));
+	let timer = ms => new Promise( res => setTimeout(res, ms));
 
 	for (let commandName in bot.commands){
 		let command = bot.commands[commandName];
@@ -77,20 +76,20 @@ async function setupSlashCommands(){
 }
 
 module.exports = {
-	init: (botInstance) => {
+	init: async (botInstance) => {
+		botInstance['loadedCommands'] = false;
 		botInstance['commands'] = {};
-
 		bot = botInstance;
 		let folder = "/commands";
 
 		loopOverFolders(folder);
-		loadFromDatabase();
-		//setupSlashCommands();
+		await loadFromDatabase();
+		bot.loadedCommands = true;
 	},
-	handler: async (message,command,args) => {
-		if (!interaction.isCommand()) return;
-		await interaction.deferReply();
-
+	handler: async (interaction) => {
+		//if (!interaction.isCommand()) return;
+		console.log(interaction);
+		let command = interaction.data.name;
 		if (bot.commands[command]){
 
 			let missingRole = true;
@@ -156,7 +155,8 @@ module.exports = {
 		}
 	},
 	slashHandler: (interaction) => {
-		if (!interaction.isCommand()) return;
+		//if (!interaction.isCommand()) return;
+		console.log(interaction);
 		let command = interaction.data.name;
 		if (bot.commands[command]){
 
