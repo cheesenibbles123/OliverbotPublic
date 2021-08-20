@@ -24,7 +24,8 @@ module.exports = {
 	},
 	execute: (message,args) => {
 		let ship = args[0];
-		let port = args.shift().join(" ").toLowerCase();
+		args.shift();
+		let port = args.length > 1 ? args.join(' ') : args[0];
 		
 		dbSetup.query(`SELECT * FROM Player WHERE ID='${message.author.id}'`, (err,player) => {
 			if (player.length > 1 || player.length === 0){
