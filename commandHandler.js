@@ -1,5 +1,7 @@
 const fs = require('fs');
 const db = require('./startup/database.js');
+const config = require('./config.json');
+
 let bot;
 
 function loopOverFolders(folder){
@@ -61,16 +63,22 @@ module.exports = {
 
 			// Check arguments
 			if (bot.commands[command].args){
+				let msg = "Please check your argument length";
+
 				if (typeof(bot.commands[command].args) === typeof([])){
 					// if arguments are a range between [min,max]
 					if (bot.commands[command].args[0] > args || bot.commands[command].args[1] < args){
-						message.channel.send("Please check your argument length");
-						return;
+						if (bot.commands[command].usage){
+							msg += `Example usage: \`${config.prefix}\`\`${bot.commands[command].name}\` \`${bot.commands[command].usage}\``;
+						}
+						return message.channel.send(msg);
 					}
 				// if arguments are a fixed length
 				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
-					message.channel.send("Please check your argument length");
-					return;
+					if (bot.commands[command].usage){
+							msg += `Example usage: \`${config.prefix}\`\`${bot.commands[command].name}\` \`${bot.commands[command].usage}\``;
+						}
+					return message.channel.send(msg);
 				}
 			}
 
@@ -95,6 +103,11 @@ module.exports = {
 						allowedUser = true;
 					}
 				}
+			}
+
+			// Check if server only
+			if (bot.commands[command].guildOnly && message.channel.type === 'dm'){
+				return message.channel.send("I can't execute that command within DMs!");
 			}
 
 			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
