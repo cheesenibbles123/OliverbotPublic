@@ -7,6 +7,7 @@ module.exports = {
 	name: "unmute",
 	args: 1,
 	help: "Saves a message as a quote",
+	usage: "@user",
 	roles: ["440514569849536512"],
 	category: "Mod",
 	init: (botInstance) => {

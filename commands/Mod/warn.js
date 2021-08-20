@@ -7,6 +7,7 @@ module.exports = {
 	name: "warn",
 	args: 1,
 	help: "Sends the user a warning",
+	usage: "@user",
 	roles: ["440514569849536512"],
 	category: "Mod",
 	init: (botInstance) => {

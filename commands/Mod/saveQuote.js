@@ -6,6 +6,7 @@ module.exports = {
 	name: "savequote",
 	args: 1,
 	help: "Saves a message as a quote",
+	usage: "<messageID>",
 	roles: ["440514569849536512"],
 	category: "Mod",
 	guildOnly: true,

@@ -8,6 +8,7 @@ module.exports = {
 	name: "mute",
 	args: 1,
 	help: "Mutes a user",
+	usage: "@user",
 	roles: ["440514569849536512"],
 	category: "Mod",
 	init: (botInstance) => {
