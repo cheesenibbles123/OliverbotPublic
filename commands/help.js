@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Discord = require("discord.js");
+const config = require("./../config.json");
 
 let bot;
 
@@ -103,7 +104,7 @@ module.exports = {
 				}
 
 				if (bot.commands[cmd].usage){
-					embed.addField("Usage",";" + cmd + " `" + bot.commands[cmd].usage + "`");
+					embed.addField("Usage",config.prefix + cmd + " `" + bot.commands[cmd].usage + "`");
 				}
 
 				embed.setTitle("Help")
