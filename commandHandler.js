@@ -19,7 +19,6 @@ function loopOverFolders(folder){
 				command.init(bot);
 			}
 			bot.commands[command.name.toLowerCase()] = command;
-			setupSlashCommand(command);
 		}else{
 			console.log("Error loading command: " + command.name);
 			console.log("From file: " + folder + "/" + file);
@@ -33,14 +32,13 @@ function loadFromDatabase(){
 			if (!bot.commands[rows[i].command]){
 				let command = {
 					name: rows[i].command,
-					description: "Custom Command",
+					help: "Custom Command",
 					category: "Custom",
 					execute: (message,args) => {
 						message.channel.send(rows[i].response);
 					}
 				}
 				bot.commands[command.name] = command;
-				setupSlashCommand(command);
 			}else{
 				console.log("Error loading db command: " + command.name);
 			}
@@ -48,24 +46,29 @@ function loadFromDatabase(){
 	});
 }
 
-function setupSlashCommand(command){
-	if (!command.roles || !command.users){
-		let data = {
-			name : command.name,
-			description : command.description,
-		}
+async function setupSlashCommands(){
 
-		if (command.options){
-			data['options'] = command.options;
-		}
-		if (command.guildOnly){
-			bot.guilds.cache.forEach(guild => {
-				bot.api.applications(bot.user.id).guilds(guild.id).commands.post({data});
-			});
-		}else{
+	const timer = ms => new Promise( res => setTimeout(res, ms));
+
+	for (let commandName in bot.commands){
+		let command = bot.commands[commandName];
+		console.log(command);
+		if (!command.roles && !command.users){
+			let data = {
+				name : command.name,
+				description : command['help'] ? command.help : "N/A",
+			}
+
+			if (command.options){
+				data['options'] = command.options;
+			}
+
+			bot.api.applications(bot.user.id).guilds(config.serverInfo.serverId).commands.post({data});
+			
 			bot.api.applications(bot.user.id).commands.post({data});
 		}
-	}
+		await timer(500); // avoid getting rate-limited
+	};
 }
 
 module.exports = {
@@ -77,6 +80,7 @@ module.exports = {
 
 		loopOverFolders(folder);
 		loadFromDatabase();
+		setupSlashCommands();
 	},
 	handler: (message,command,args) => {
 		if (bot.commands[command]){
