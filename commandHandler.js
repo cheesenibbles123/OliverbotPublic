@@ -68,7 +68,7 @@ module.exports = {
 						return;
 					}
 				// if arguments are a fixed length
-				}else if (bot.commands[command].args.length < args.length || bot.commands[command].args.length > args.length){
+				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
 					message.channel.send("Please check your argument length");
 					return;
 				}
