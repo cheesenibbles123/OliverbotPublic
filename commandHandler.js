@@ -117,11 +117,6 @@ module.exports = {
 				message.channel.send("You do not have permission to use this command!");
 			}
 		}else{
-
-			// Custom database commands
-
-
-
 			message.react("🤔");
 		}
 	},
