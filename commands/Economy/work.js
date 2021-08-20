@@ -74,7 +74,7 @@ module.exports = {
 						workingEmbed.setDescription(`You cannot work yet! You must wait until ${finalDate} CEST\nTime Remaining:  ${remainingTime}`);
 					}
 				}
-				message.channel.send(workingEmbed);
+				message.channel.send({embeds : [workingEmbed]});
 				//displayRichestUsers();
 			}else{
 				message.channel.send("Ping archie. Errors go brrr.");

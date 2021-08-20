@@ -210,7 +210,7 @@ bot.once("ready", () => {
 	console.log('Bot '+bot.user.username+' is ready!');
 });
 
-bot.on("message", async message => {
+bot.on("messageCreate", async message => {
 	try{
 
 	//dont respond to bots
@@ -284,6 +284,7 @@ async function manageJoinReaction(event){
 
 bot.on("interactionCreate", async interaction => {
 	console.log("Triggered interaction");
+	console.log(interaction);
 	interaction.reply("test");
 	commands.slashHandler(interaction);
 });
