@@ -71,6 +71,15 @@ async function setupSlashCommands(){
 	};
 }
 
+function respondToInteraction(interaction,message){
+	bot.api.interactions(interaction.id, interaction.token).callback.post({
+		type : 4,
+		data: {
+			content: message
+		}
+	});
+}
+
 module.exports = {
 	init: (botInstance) => {
 		botInstance['commands'] = {};
@@ -80,7 +89,7 @@ module.exports = {
 
 		loopOverFolders(folder);
 		loadFromDatabase();
-		setupSlashCommands();
+		//setupSlashCommands();
 	},
 	handler: (message,command,args) => {
 		if (bot.commands[command]){
@@ -145,6 +154,76 @@ module.exports = {
 			}
 		}else{
 			message.react("🤔");
+		}
+	},
+	slashHandler: (interaction) => {
+		if (!interaction.isCommand()) return;
+		let command = interaction.data.name;
+		if (bot.commands[command]){
+
+			let missingRole = true;
+			let allowedUser = false;
+
+			// Check arguments
+			if (bot.commands[command].args){
+				let msg = "Please check your argument length";
+
+				if (typeof(bot.commands[command].args) === typeof([])){
+					// if arguments are a range between [min,max]
+					if (bot.commands[command].args[0] > args || bot.commands[command].args[1] < args){
+						if (bot.commands[command].usage){
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
+						}
+						return respondToInteraction(msg);
+					}
+				// if arguments are a fixed length
+				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
+					if (bot.commands[command].usage){
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
+						}
+					return respondToInteraction(msg);
+				}
+			}
+
+			// Check permissions
+			if (bot.commands[command].roles){
+				let roles = bot.commands[command].roles;
+				if (interaction.member && interaction.member.roles.includes(roles[i])){
+					missingRole = false;
+				}
+			}
+
+			// Check Users
+			if (bot.commands[command].users){
+				let users = bot.commands[command].users;
+
+				let authorId = interaction.member ? interaction.member.user.id : interaction.user.id;
+
+				for (let i=0; i < users.length; i++){
+					if (users[i] === authorId){
+						allowedUser = true;
+					}
+				}
+			}
+
+			// Check if server only
+			if (bot.commands[command].guildOnly && !interaction.guild_id){
+				return interaction.reply("I can't execute that command within DMs!");
+			}
+
+			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
+				if (bot.commands[command].interactionSupport){
+					interaction.reply("Completed commandHandler");
+					//bot.commands[command].executeInteraction(interaction);
+					//db.updateTracking(command);
+				}else{
+					interaction.reply("This command does not currently have support for slash commands.");
+				}
+			}else{
+				interaction.reply("You do not have permission to use this command!");
+			}
+		}else{
+			interaction.reply("This command doesn't seem to exist 🤔");
 		}
 	},
 }

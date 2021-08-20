@@ -263,6 +263,10 @@ async function manageJoinReaction(event){
 	return;
 }
 
+bot.ws.on("INTERACTION_CREATE", async interaction => {
+	commands.slashHandler(interaction);
+});
+
 //Pure Logging of events for administrative purposes
 bot.on('raw', async event => {
 	if (event.d && event.d.type !== 'dm'){
