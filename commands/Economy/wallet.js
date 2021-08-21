@@ -10,7 +10,7 @@ module.exports = {
 		let user = await getUserInfo(event,isMessage,event.member.user.id);
 		if (typeof(user) !== "boolean"){
 			let image = await generateImage(user,event.member);
-			reply(event,image,isMessage);
+			reply(event,{files : [image]},isMessage);
 		}
 	}
 }

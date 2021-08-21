@@ -142,7 +142,7 @@ async function creatingCanvas(event,member,ship,level,rnxp,xpneeded,isMessage){
 	ctx.drawImage(avatar, 18, 18, 200, 200);
 
 	let attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'rankcard.png');
-	reply(event,{embdes:[attachment]},isMessage);
+	reply(event,{files:[attachment]},isMessage);
 }
 
 const applyText = (canvas, text) => {
