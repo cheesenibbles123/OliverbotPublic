@@ -1,6 +1,6 @@
 const Canvas = require("canvas");
 const db = require("./../../startup/database.js");
-const {reply} = require("./../combinedResponses")
+const {reply} = require("./../_combinedResponses")
 const Discord = require("discord.js");
 
 module.exports = {
