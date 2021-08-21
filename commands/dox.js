@@ -1,4 +1,4 @@
-const { reply } = require('./commands/_combinedResponses.js');
+const { reply } = require('./_combinedResponses.js');
 
 module.exports = {
 	name: "dox",
