@@ -33,10 +33,6 @@ module.exports = {
 				}
 
 				slashCommands.push(data);
-
-				//bot.api.applications(bot.user.id).guilds(config.serverInfo.serverId).commands.post({data});
-				
-				//bot.api.applications(bot.user.id).commands.post({data});
 			}
 		};
 
