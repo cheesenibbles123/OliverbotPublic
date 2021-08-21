@@ -1,126 +1,130 @@
 const Discord = require("discord.js");
-var bot;
+let bot;
 const config = require("./../config.json");
 const fetch = require("node-fetch");
-var adjustableConfig;
-//const issueEmbeds = require("./issueEmbed");
+let adjustableConfig;
 const db = require("./../startup/database.js");
-
 const bw = require('@cheesenibbles123/blackwakehandler');
-
+const { reply } = require('_globalFunctions.js');
 module.exports = {
 	name: "blackwake",
 	args: [1,2],
 	help: "Fetches blackwake data from your steam account.",
-	usage: "<type> <steamID64>",
+	usage: "<type> (SteamID64)",
 	category: "Api",
-	init: () =>{
+	interactionSupport: true,
+	options: [
+		{
+			name : "type",
+			description : "type of data to display",
+			type : 3,
+			required : true,
+			choices : [
+				{
+					name : "Monthly",
+					value : "monthly"
+				},
+				{
+					name : "Overview",
+					value : "overview"
+				},
+				{
+					name : "Weapon Stats",
+					value : "weaponstats"
+				},
+				{
+					name : "Ship Stats",
+					value : "shipstats"
+				},
+				{
+					name : "Ship Weaponry",
+					value : "shipweaponry"
+				},
+				{
+					name : "Maintenance",
+					value : "maintenance"
+				},
+				{
+					name : "Miscellaneous",
+					value : "misc"
+				}
+			]
+		},{
+			name : "steamid64",
+			description : "your steamid64",
+			type : 3,
+			required : false
+		}
+	],
+	init: (botInstance) =>{
+		bot = botInstance;
+		adjustableConfig = require("./databaseSetup.js").adjustableConfig;
 		bw.init(config.apiKeys.steam);
 	},
 	execute: async (message,args) => {
-		let steamID;
-		if (args.length === 1){
-			steamID = await checkifInDatabaseBWHandler(message);
-		}else if (!isNaN(parseInt(args[1]))){
-			steamID = args[1];
-		}
-
-		if (args[0] === "monthly"){
-			fetchEloStuff(message, steamID, args[0]);
-		}else{
-
-			bw.handler(args[0], steamID).then(data => {
-				if (data.isValid){
-
-					let embed = new Discord.MessageEmbed()
-						.setTitle(data.type);
-
-					switch (data.type){
-						case "overview":
-							embed.addField("General",data.content.playerStats.formatted,true)
-								.addField("Captain Stats",data.content.captainStats.formatted,true)
-								.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
-							break;
-						case "weaponstats":
-							embed.setDescription(data.content.formatted);
-							break;
-						case "shipstats":
-							embed.addField("Ships",data.content.ships.formatted,true)
-								.addField("General",data.content.general.formatted,true);
-							break;
-						case "shipweaponry":
-							embed.setDescription(data.content.formatted);
-							break;
-						case "maintenance":
-							embed.setDescription(data.content.formatted);
-							break;
-						case "misc":
-							embed.setDescription(data.content.formatted);
-							break;
-						default:
-							break;
-					}
-
-					message.channel.send(embed);
-
-				}else{
-					message.channel.send("Invalid type and/or SteamID provided.");
-				}	
-			}).catch(err => {
-				message.channel.send("Please ensure you entered a valid **SteamID64** and your profile is set to **Public**.");
-			});
-		}
+		mainHandler(message,args,false);
+	},
+	executeInteraction: async (interaction,args) => {
+		mainHandler(message,args,true);
 	}
 }
 
-exports.init = function init(){
-	bot = require("./../oliverbot.js").bot;
-	adjustableConfig = require("./databaseSetup.js").adjustableConfig;
-}
+function mainHandler(event,args,isMessage){
+	let steamID;
+	if (args.length === 1){
+		steamID = await checkifInDatabaseBWHandler(event,isMessage);
+	}else if (!isNaN(parseInt(args[1]))){
+		steamID = args[1];
+	}
 
-exports.handler = function handler(message,command,args){
-	if (adjustableConfig.apis.blackwake){
-		if (!args){
-			message.reply("Please enter the valid terms!");
-		}else
-		if (args.length < 1){
-			message.reply("Please enter the valid terms!");
-		}else{
-			switch (args[0].toLowerCase()){
-				case "monthly":
-					if (!isNaN(parseInt(args[1])))
-					{
-						fetchEloStuff(message, args[1], args[0]);
-					}else{
-						checkifInDatabaseBW(message,args,"elo");
-					}
-					break;
-				case "elo":
-					message.channel.send("This command is currently disabled.");
-					break;
-					if (!isNaN(parseInt(args[1])))
-					{
-						fetchEloStuff(message, args[1], args[0]);
-					}else{
-						checkifInDatabaseBW(message,args,"elo");
-					}
-					break;
-				default:
-					if (!isNaN(parseInt(args[1])))
-					{
-						getBlackwakeStats(message,args);
-					}else{
-						checkifInDatabaseBW(message,args);
-					}
-					break;
-			}
-		}
+	if (args[0] === "monthly"){
+		fetchEloStuff(events, steamID, args[0], isMessage);
 	}else{
-		message.channel.send("Command disabled");
+
+		bw.handler(args[0], steamID).then(data => {
+			if (data.isValid){
+
+				let embed = new Discord.MessageEmbed()
+					.setTitle(data.type);
+
+				switch (data.type){
+					case "overview":
+						embed.addField("General",data.content.playerStats.formatted,true)
+							.addField("Captain Stats",data.content.captainStats.formatted,true)
+							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
+						break;
+					case "weaponstats":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "shipstats":
+						embed.addField("Ships",data.content.ships.formatted,true)
+							.addField("General",data.content.general.formatted,true);
+						break;
+					case "shipweaponry":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "maintenance":
+						embed.setDescription(data.content.formatted);
+						break;
+					case "misc":
+						embed.setDescription(data.content.formatted);
+						break;
+					default:
+						break;
+				}
+
+				reply(event,{embeds : [embed]}, isMessage);
+
+			}else{
+				reply(event, "Invalid type and/or SteamID provided.", isMessage);
+			}	
+		}).catch(err => {
+			reply(event, "Please ensure you entered a valid **SteamID64** and your profile is set to **Public**.", isMessage);
+		});
 	}
 }
 
-async function fetchEloStuff(message,steamID,type){
+async function fetchEloStuff(event,steamID,type,isMessage){
 
 	fetch(config.eloBoardURL).then(resp => resp.json()).then(response => {
 
@@ -153,7 +157,6 @@ async function fetchEloStuff(message,steamID,type){
 				}
 
 				eloStatsEmbed.setTitle(steamID);
-				sendBWStatsEmbed(message,eloStatsEmbed);
 				break;
 			case "monthly":
 				user = response.monthly[steamID];
@@ -348,9 +351,10 @@ async function fetchEloStuff(message,steamID,type){
 				if (maintainStats.length > 1){
 					eloStatsEmbed.addField(`Maintenance`, maintainStats, true);
 				}
-				sendBWStatsEmbed(message,eloStatsEmbed);
 				break;
 		}
+
+		reply(event,{embeds : [eloStatsEmbed]}, isMessage);
 	});
 }
 
@@ -390,290 +394,19 @@ function calculateEloPosition(steamID,response,userMatches,userRating){
 	return [elo,matches,position];
 }
 
-function sendBWStatsEmbed(message,embed){
-    message.channel.send(embed);
-}
-
-function checkifInDatabaseBWHandler(message){
+function checkifInDatabaseBWHandler(event,isMessage){
 	return new Promise((resolve, reject) => {
 		db.alternionConnectionPool.query(`SELECT Steam_ID FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
 			if (rows.length > 1){
-				message.channel.send("You appear to have two accounts linked to this discord account, please contact Archie.");
+				reply(event,"You appear to have two accounts linked to this discord account, please contact Archie.",isMessage);
 				resolve(0);
 			}else if (rows.length == 0){
-				message.channel.send("Your discord account is not linked to your steamID, please provide your steamID or contact Archie.");
+				reply(event,"Your discord account is not linked to your steamID, please provide your steamID or contact Archie.",isMessage);
 				resolve(0);
 			}else{
 				resolve(rows[0].Steam_ID);
 			}
 		});
-	});
-}
-
-function checkifInDatabaseBW(message,args,type){
-	db.alternionConnectionPool.query(`SELECT * FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
-		if (rows.length > 1){
-			message.channel.send("You appear to have two accounts linked to this discord account, please contact Archie.");
-			return;
-		}else if (rows.length == 0){
-			message.channel.send("Your discord account is not linked to your steamID, please provide your steamID or contact Archie.");
-			return;
-		}else{
-			args.push(rows[0].steam_id)
-			if (type === "elo"){
-				fetchEloStuff(message, args[1], args[0]);
-			}else{
-				getBlackwakeStats(message,args);
-			}
-		}
-	});
-}
-
-async function getBlackwakeStats(message,args){
-	fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[1]}`).then(resp => resp.text()).then(response => {
-
-		if (response.includes("500 Internal Server Error")){
-			message.channel.send("Steam API error, code 500");
-		}else if (response.includes("Unknown problem determining WebApi request destination.")) {
-			message.channel.send("Please ensure you have entered the correct terms! Terms can be found using `;help` `blackwake`.\nThe format is as followed:\n`;blackwake` `term` `steamID64`");
-		}else if(response[0] == '<') {
-			console.log("BW RESPONSE ISSUE");
-			console.log(response);
-			console.log("END OF RESPONSE");
-			message.channel.send("Error - Please ping @Archie so he checks the console in time!");
-		}else{
-			let bwStatsEmbed = new Discord.MessageEmbed().setTimestamp();
-			response = JSON.parse(response);
-			let stats = response.playerstats.stats;
-
-			let weapons = ["acc_mus","acc_blun","acc_nock","acc_ann","acc_rev","acc_pis","acc_duck","acc_mpis","acc_cut","acc_dag","acc_bot","acc_tomo","acc_gren","acc_rap"];
-			let substituteNames = ["Musket","Blunderbuss","Nockgun","Annley","Revolver","Pistol","Duckfoot","Short Pistol","Cutlass","Dagger","Bottle","Tomohawk","Grenade","Rapier"];
-			let allWeaponStats = [];
-
-			let shipWeaponry = ["acc_can","acc_swiv","acc_grape","acc_arson","acc_ram"];
-			let shipWeaponrySubNames = ["Cannonball","Swivel","Grapeshot","Fireshot","Ramming"];
-			let shipWeaponryStats = [];
-
-			let ships = ["acc_winHoy","acc_winJunk","acc_winSchoon","acc_cutt","acc_bombk","acc_carr","acc_gunb","acc_winGal","acc_brig","acc_xeb","acc_cru","acc_bombv"];
-			let subShipNames = ["Hoy","Junk","Schooner","Cutter","Bomb Ketch","Carrack","Gunboat","Galleon","Brig","Xebec","Cruiser","Bomb Vessel"];
-			let shipStats = [];
-
-			let maintenance = ["acc_rep","acc_pump","acc_sail","acc_noseRep"];
-			let subMaintain = ["Hole Repairs","Pumping","Sail Repairs","Nose Repairs"];
-			let maintain = [];
-
-			let miscList = ["acc_head","acc_sup"];
-			let subMiscList = ["Headshots","Supplies"];
-			let misc = [];
-
-			let unassigned = true;
-			let faveWeap = {}; //"name" : "", "value": ""
-			let kills = 0;
-			let deaths = 0;
-			let captainWins = 0;
-			let captainLosses = 0;
-			let crewHits = 0;
-			let score = 0;
-			let rating = 0;
-			let statScoreGs = 0;
-			let prestige = 0;
-
-			for (i=0;i<stats.length;i++){
-
-				// fav weapon
-				if (weapons.indexOf(stats[i].name) !== -1){
-					if (unassigned){
-						faveWeap = stats[i];
-						unassigned = false;
-					}else{
-						if (faveWeap.value < stats[i].value){
-							faveWeap = stats[i];
-						}
-					}
-					allWeaponStats.push(stats[i]);
-				}
-				
-				if (ships.indexOf(stats[i].name) !== -1){
-					shipStats.push(stats[i]);
-				}else
-				if (maintenance.indexOf(stats[i].name) !== -1){
-					maintain.push(stats[i]);
-				}else
-				if (shipWeaponry.indexOf(stats[i].name) !== -1){
-					shipWeaponryStats.push(stats[i]);
-				}else
-				if (miscList.indexOf(stats[i].name) !== -1){
-					misc.push(stats[i]);
-				}
-
-				switch (stats[i].name){
-					case "acc_kills":
-						kills = stats[i].value;
-						break;
-					case "acc_deaths":
-						deaths = stats[i].value;
-						break;
-					case "acc_capWins":
-						captainWins = stats[i].value;
-						break;
-					case "acc_capLose":
-						captainLosses = stats[i].value;
-						break;
-					case "stat_score":
-						score = stats[i].value;
-						break;
-					case "stat_rating":
-						rating = stats[i].value;
-						break;
-					case "stat_score_gs":
-						statScoreGs = stats[i].value;
-						break;
-					case "stat_pres":
-						prestige = stats[i].value;
-						break;
-					case "acc_capHit":
-						crewHits = stats[i].value;
-						break;
-					default:
-						break;
-				}
-			}
-
-			let BwShipsEmbed;
-			switch (args[0]){
-				case "overview":
-					let achieves = "";
-					if (JSON.stringify(response).includes("achievements")){
-						achieves = response.playerstats.achievements.length.toString();
-					}else{
-						achieves = "NA";
-					}
-
-					let level = levelProgress(score, prestige);
-
-					let playerStatsCombined = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nLevel: (${prestige}) ${level}\nAchievements: ${achieves}/39`;
-					if (statScoreGs != 0){
-						playerStatsCombined = playerStatsCombined +`\nScore Gs: ${statScoreGs}`;
-					}
-					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-						response2 = response2.response.games;
-						for (i=0;i<response2.length;i++){
-							if (parseInt(response2[i].appid) === 420290){
-								playerStatsCombined = playerStatsCombined + `\n${(response2[i].playtime_forever)/60}hrs`;
-							}
-						}	
-						bwStatsEmbed.setTitle(`${args[1]}`)
-							.addField(`General`,`${playerStatsCombined}`,true)
-							.addField(`Captain Stats`,`${captainWins} wins\n${captainLosses} losses\nRatio: ${captainWins/captainLosses}\nCrew Hits: ${crewHits}`,true)
-							.addField(`Fav Weapon`,`${substituteNames[weapons.indexOf(faveWeap.name)]}\n${faveWeap.value} kills`,true);
-						sendBWStatsEmbed(message,bwStatsEmbed);
-					});
-					break;
-				case "weaponstats":
-					let WeaponStats = WeaponTextGenerator(WeaponSorter(allWeaponStats),substituteNames,weapons,"kills",true);
-					bwStatsEmbed.setTitle(`${args[1]}`)
-						.setDescription(WeaponStats);
-					sendBWStatsEmbed(message,bwStatsEmbed);
-					break;
-				case "shipstats":
-					let ShipStats = WeaponTextGenerator(WeaponSorter(shipStats),subShipNames,ships,"wins",true);
-					let untrackedWins = parseInt(captainWins) - parseInt(ShipStats.split("Total: ")[1]);
-					bwStatsEmbed.setTitle(`${args[1]}`)
-						.addField("Ships",`${ShipStats}`,true)
-						.addField("General",`Wins: ${captainWins}\n - Untracked: ${untrackedWins}\nLosses: ${captainLosses}\nWin Rate: ${captainWins/captainLosses}`,true);
-					sendBWStatsEmbed(message,bwStatsEmbed);
-					break;
-				case "shipweaponry":
-					let shipWeap = WeaponTextGenerator(WeaponSorter(shipWeaponryStats),shipWeaponrySubNames,shipWeaponry,"kills",true);
-					bwStatsEmbed.setTitle(`${args[1]}`)
-						.setDescription(`${shipWeap}`);
-					sendBWStatsEmbed(message,bwStatsEmbed);
-					break;
-				case "maintenance":
-					let maintainStats = WeaponTextGenerator(WeaponSorter(maintain),subMaintain,maintenance,"",false);
-					bwStatsEmbed.setTitle(`${args[1]}`)
-						.setDescription(maintainStats);
-					sendBWStatsEmbed(message,bwStatsEmbed);
-					break;
-				case "misc":
-					let miscStats = WeaponTextGenerator(WeaponSorter(misc),subMiscList,miscList,"",false);
-					bwStatsEmbed.setTitle(`${args[1]}`)
-						.addField("Misc",`${miscStats}`,true);
-					sendBWStatsEmbed(message,bwStatsEmbed);
-					break;
-				case "compare":
-					let playerStatsCombinedP1 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-					if (statScoreGs != 0){
-						playerStatsCombinedP1 = playerStatsCombinedP1 +`\nScore Gs: ${statScoreGs}`;
-					}
-					fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[1]}`).then(resp => resp.json()).then(response2 =>{
-						response2 = response2.response.games;
-						for (i=0;i<response2.length;i++){
-							if (parseInt(response2[i].appid) === 420290){
-								playerStatsCombinedP1 = playerStatsCombinedP1 + `\n${(response2[i].playtime_forever)/60}hrs`;
-							}
-						}
-						fetch(`https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2?key=${config.apiKeys.steam}&appid=420290&steamid=${args[2]}`).then(resp=>resp.json()).then(response => {
-							stats = response.playerstats.stats;
-							for (i=0;i<stats.length;i++){
-
-								switch (stats[i].name){
-									case "acc_kills":
-										kills = stats[i].value;
-										break;
-									case "acc_deaths":
-										deaths = stats[i].value;
-										break;
-									case "acc_capWins":
-										captainWins = stats[i].value;
-										break;
-									case "acc_capLose":
-										captainLosses = stats[i].value;
-										break;
-									case "stat_score":
-										score = stats[i].value;
-										break;
-									case "stat_score_gs":
-										statScoreGs = stats[i].value;
-										break;
-									case "stat_rating":
-										rating = stats[i].value;
-										break;
-									default:
-										break;
-								}
-
-							}
-
-							let playerStatsCombinedP2 = `${kills} kills\n${deaths} deaths\n KD of ${kills/deaths}\nScore: ${score}\nCap Wins: ${captainWins}\nCap Losses: ${captainLosses}\nRating: ${rating}`;
-							if (statScoreGs != 0){
-								playerStatsCombinedP2 = playerStatsCombinedP2 +`\nScore Gs: ${statScoreGs}`;
-							}
-							fetch(`http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${config.apiKeys.steam}&steamid=${args[2]}`).then(resp => resp.json()).then(response2 =>{
-								response2 = response2.response.games;
-								for (i=0;i<response2.length;i++){
-									if (parseInt(response2[i].appid) === 420290){
-										playerStatsCombinedP2 = playerStatsCombinedP2+ `\n${(response2[i].playtime_forever)/60}hrs`;
-									}
-								}
-								bwStatsEmbed.setTitle(`${args[1]} VS ${args[2]}`)
-									.addField(`${args[1]}`,`${playerStatsCombinedP1}`,true)
-									.addField(`${args[2]}`,`${playerStatsCombinedP2}`,true);
-								sendBWStatsEmbed(message,bwStatsEmbed);
-							});
-						});
-					});
-					break;
-				default:
-					message.reply("Please enter a valid option! You can find valid options by using `;help blackwake`.");
-					break;
-			}
-		}
-	}).catch(err => {
-		if (err) {
-			console.error(err);
-			message.channel.send("Please make sure you have entered a correct Steam ID and the profile is set to public! :slight_smile:");
-		};
 	});
 }
 
