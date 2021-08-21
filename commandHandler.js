@@ -111,7 +111,7 @@ module.exports = {
 			}
 
 			// Check if server only
-			if (bot.commands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.get(channelIf).type === "DM")){
+			if (bot.commands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.cache.get(event.channelId).type === "DM")){
 				return reply(event,"I can't execute that command within DMs!",isMessage);
 			}
 
