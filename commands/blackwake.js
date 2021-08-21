@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 let adjustableConfig;
 const db = require("./../startup/database.js");
 const bw = require('@cheesenibbles123/blackwakehandler');
-const { reply } = require('./_globalFunctions.js');
+const { reply } = require('./_combinedResponses.js');
 
 module.exports = {
 	name: "blackwake",

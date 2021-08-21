@@ -1,12 +1,11 @@
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
-const glob = require("./_globalFunctions");
+const {reply} = require("./_combinedResponses.js");
 
 module.exports = {
 	name: "bacon",
 	help: "Grabs a random extract from bacon ipsum",
 	category: "Meme",
-	interactionSupport: true,
 	executeGlobal: (event,args,isMessage) => {
 		let opt = glob.getRandomInt(2);
 		let content = "";
@@ -20,7 +19,7 @@ module.exports = {
 			let BaconEmbed = new Discord.MessageEmbed()
 				.setDescription(`${response[glob.getRandomInt(response.length)]}`)
 				.setTimestamp();
-			glob.reply(event,{embeds: [BaconEmbed]},isMessage);
+			reply(event,{embeds: [BaconEmbed]},isMessage);
 		});
 	}
 }
