@@ -97,7 +97,7 @@ module.exports = {
 
 				// Loop over all allowed roles
 				for (let i=0; i<roles.length; i++){
-					if (message.member.roles.cache.has(roles[i])){
+					if (event.member.roles.cache.has(roles[i])){
 						missingRole = false;
 					}
 				}
@@ -108,14 +108,14 @@ module.exports = {
 				let users = bot.commands[command].users;
 
 				for (let i=0; i < users.length; i++){
-					if (users[i] === message.author.id){
+					if (users[i] === isMessage ? event.author.id : event.member.user.id){
 						allowedUser = true;
 					}
 				}
 			}
 
 			// Check if server only
-			if (bot.commands[command].guildOnly && message.channel.type === 'DM'){
+			if (bot.commands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.get(channelIf).type === "DM")){
 				return reply(event,"I can't execute that command within DMs!",isMessage);
 			}
 
