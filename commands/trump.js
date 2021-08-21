@@ -1,5 +1,6 @@
 const glob = require("./_globalFunctions");
 const fetch = require("node-fetch");
+const {reply} = require("./_combinedResponses");
 
 module.exports = {
 	name: "trump",
