@@ -24,7 +24,7 @@ module.exports = {
 		console.log('Entering for loop');
 		for (let commandName in bot.commands){
 			let command = bot.commands[commandName];
-			if (!command.roles && !command.users && command.interactionSupport && addedCommands.indexOf(command.name) === -1){
+			if (!command.roles && !command.users && (command.interactionSupport || typeof(command.executeGlobal === "function")) && addedCommands.indexOf(command.name) === -1){
 				console.log("[LOADING SLASH] " + commandName);
 				let data = {
 					name : command.name,
