@@ -9,7 +9,7 @@ module.exports = {
 		fetch(`https://api.adviceslip.com/advice`).then(res => res.json()).then(response => {
 			let Advice = new Discord.MessageEmbed()
 				.setDescription(`${response.slip.advice} ID:${response.slip.id}`);
-			reply(Advice);
+			reply(event,{embeds:[Advice]},isMessage);
 		});
 	}
 }
