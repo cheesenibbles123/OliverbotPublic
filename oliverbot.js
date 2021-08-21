@@ -285,8 +285,8 @@ async function manageJoinReaction(event){
 bot.on("interactionCreate", async interaction => {
 	if (!interaction.isCommand()) return;
 	await interaction.deferReply();
-	console.log(interaction);
-	commands.handler(interaction, false, interaction.commandName, null);
+	console.log(interaction.options._hoistedOptions);
+	commands.handler(interaction, false, interaction.commandName, interaction.options._hoistedOptions);
 });
 
 //Pure Logging of events for administrative purposes
