@@ -18,7 +18,7 @@ module.exports = {
 			required : true
 		},
 		{
-			name : "amount"
+			name : "amount",
 			description : "Amount of coins to gift",
 			type : 4,
 			required : true
