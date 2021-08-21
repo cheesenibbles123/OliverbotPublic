@@ -63,10 +63,10 @@ module.exports = {
 		bw.init(config.apiKeys.steam);
 	},
 	execute: (message,args) => {
-		mainHandler(message,args,false);
+		mainHandler(message,args,true);
 	},
 	executeInteraction: (interaction,args) => {
-		mainHandler(message,args,true);
+		mainHandler(interaction,args,false);
 	}
 }
 
@@ -79,7 +79,7 @@ async function mainHandler(event,args,isMessage){
 	}
 
 	if (args[0] === "monthly"){
-		fetchEloStuff(events, steamID, args[0], isMessage);
+		fetchEloStuff(event, steamID, args[0], isMessage);
 	}else{
 
 		bw.handler(args[0], steamID).then(data => {
@@ -135,7 +135,7 @@ async function fetchEloStuff(event,steamID,type,isMessage){
 
 		switch (type)
 		{
-			case "elo":
+			case "elo": // legacy code for if in future it returns
 
 				user = response.elo[steamID];
 
@@ -397,7 +397,7 @@ function calculateEloPosition(steamID,response,userMatches,userRating){
 
 function checkifInDatabaseBWHandler(event,isMessage){
 	return new Promise((resolve, reject) => {
-		db.alternionConnectionPool.query(`SELECT Steam_ID FROM User WHERE Discord_ID="${message.author.id}"`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT Steam_ID FROM User WHERE Discord_ID="${isMessage ? event.author.id : event.member.user.id}"`, (err,rows) => {
 			if (rows.length > 1){
 				reply(event,"You appear to have two accounts linked to this discord account, please contact Archie.",isMessage);
 				resolve(0);
