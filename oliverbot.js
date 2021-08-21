@@ -320,7 +320,7 @@ bot.on('raw', async event => {
 bot.on('error', console.error);
 bot.on('debug', console.log)
 bot.on("warn", (e) => console.warn(e));
-
+/*
 bot.on("messageDelete", function(message){
 	if (message.channel.id === "562013905426317322" || message.channel.id === "522864242626658305") return;
 	let msgDeleteEmbed = new MessageEmbed()
@@ -330,5 +330,5 @@ bot.on("messageDelete", function(message){
 		.setTimestamp();
     bot.channels.cache.get("732318686186045440").send(msgDeleteEmbed);
 });
-
+*/
 bot.login(config.token);
