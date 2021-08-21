@@ -3,16 +3,18 @@ const db = require("./../startup/database.js");
 const Discord = require("discord.js");
 const { reply } = require("./_globalFunctions.js");
 
-isNotLocked = true;
+let bot;
+let isNotLocked = true;
 
 module.exports = {
 	name: "quiz",
 	args: [0,1],
 	help: "Displays a quiz question for you to awnser",
 	usage: "<income>",
+	interactionSupport: true,
 	options : [
 		{
-			name : "Income",
+			name : "income",
 			description : "Provides income up to 5GC for 1st place, has a cooldown.",
 			type : 3,
 			required : false,
@@ -24,6 +26,9 @@ module.exports = {
 			]
 		}
 	],
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
 		if (isNotLocked){
 			switch (args[0]){
@@ -40,9 +45,11 @@ module.exports = {
 		if (isNotLocked){
 			switch (args[0]){
 				case "income":
+					interaction.editReply("Setting up income...");
 					checkQuizAllowances(interaction,args,false);
 					break;
 				default:
+					interaction.editReply("Setting up quiz...");
 					getRandomQuizQuestion(interaction,false,false);
 					break;
 			}
@@ -67,7 +74,7 @@ function checkQuizAllowances(event,args,isMessage){
 				db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastQuiz='${new Date().getTime()}' WHERE ID='${id}'`);
 
 			}else{
-				message.channel.send(`Please wait, your income on this command is currently on a ${parseInt(rows2[0].duration / 1000)}sec cooldown.`);
+				reply(event,`Please wait, your income on this command is currently on a ${parseInt(rows2[0].duration / 1000)}sec cooldown.`,isMessage);
 			}
 
 		});
@@ -114,10 +121,10 @@ async function textQuizQuestions(event,question,awnsers,timeFactor,worthFactor,m
 			}
 		};
 
-		let collector = channel.createMessageCollector(filter, { time: 15000 * timeFactor });
+		let collector = channel.createMessageCollector({filter, time: 15000 * timeFactor });
 
 		collector.on('collect', msg => {
-			if (list.indexOf(msg.author) === -1){
+			if (list.indexOf(msg.author) === -1 && !msg.author.bot){
 				list.push(msg.author);
 				msg.delete();
 				channel.send(`${msg.author} got the correct awnser!`);
@@ -146,7 +153,7 @@ async function textQuizQuestions(event,question,awnsers,timeFactor,worthFactor,m
 					}
 				}
 				embed.setDescription(allUsers);
-				channel.send(embed);
+				channel.send({embeds : [embed]});
 			}else{
 				channel.send('Sadly, right now, is not the moment we find out the answer to this question.');
 			}
