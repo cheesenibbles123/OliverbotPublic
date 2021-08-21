@@ -10,7 +10,7 @@ module.exports = {
 	interactionSupport: true,
 	options: [
 		{
-			name : "Target",
+			name : "target",
 			description : "Target of trumps opinion",
 			required : true,
 			type : 3

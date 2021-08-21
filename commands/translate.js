@@ -60,6 +60,6 @@ async function translate(event,args,isMessage){
 		}else{
 			reply(event,result.text,isMessage);
 		}
-	}
+	});
 
 }

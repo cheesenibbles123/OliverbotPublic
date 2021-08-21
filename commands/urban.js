@@ -7,8 +7,25 @@ module.exports = {
 	args: 1,
 	help: "Searches for the word on urban dictionary",
 	usage: "<word>",
+	interactionSupport = true,
+	options: [
+		{
+			name : "word",
+			description : "Word to search for",
+			type : 3,
+			required : true
+		}
+	],
 	execute: (message,args) => {
-		let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
+		mainHandler(message,args,true);
+	},
+	executeInteraction: (interaction,args) => {
+		mainHandler(interaction,args,false);
+	}
+}
+
+function mainHandler(event,args,isMessage){
+	let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
 		fetch(api).then(response => response.json()).then(resp => {
 			let option;
 			if (resp.list.length > 1){
@@ -29,10 +46,9 @@ module.exports = {
 					.addField(`Example:`,`${option.example}`)
 					.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
 					.setTimestamp();
-				message.channel.send(embed);
+				glob.reply(event,{embeds : [embed]},isMessage);
 			}else{
-				message.channel.send("No result found.");
+				glob.reply(event,"No result found.",isMessage);
 			}
 		});
-	}
 }
