@@ -18,7 +18,7 @@ module.exports = {
 			type : 6
 		}
 	],
-	executeGlobal: (event,args,isMessage) => {
+	executeGlobal: async (event,args,isMessage) => {
 		let UserID;
 		let member;
 
