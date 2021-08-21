@@ -2,23 +2,30 @@ const glob = require("./_globalFunctions");
 
 module.exports = {
 	name: "eightball",
-	args: 0,
 	help: "NA",
+	interactionSupport: true,
 	execute: (message,args) => {
-		let option = glob.getRandomInt(0,3);
-		switch (option){
-			case 0:
-				message.channel.send("Yes");
-				break;
-			case 1:
-				message.channel.send("No");
-				break;
-			case 2:
-				message.channel.send("Im not sure 🤔");
-				break;
-			default:
-				message.channel.send("Effort.");
-				break;
-		}
+		mainHandler(message,true);
+	},
+	executeInteraction: (interaction,args) => {
+		mainHandler(interaction,false);
+	}
+}
+
+function mainHandler(event,isMessage){
+	let option = glob.getRandomInt(0,3);
+	switch (option){
+		case 0:
+			glob.reply(event,"Yes",isMessage);
+			break;
+		case 1:
+			glob.reply(event,"No",isMessage);
+			break;
+		case 2:
+			glob.reply(event,"Im not sure 🤔",isMessage);
+			break;
+		default:
+			glob.reply(event,"Effort.",isMessage);
+			break;
 	}
 }

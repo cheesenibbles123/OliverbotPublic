@@ -5,7 +5,6 @@ const {reply} = require("./_globalFunctions.js");
 
 module.exports ={
 	name: "apod",
-	args: 0,
 	help: "Displays today astronomy picture of the day!",
 	interactionSupport: true,
 	execute: (message,args) => {

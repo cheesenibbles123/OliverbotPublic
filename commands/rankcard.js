@@ -2,58 +2,76 @@ const Canvas = require("canvas");
 const db = require("./../startup/database.js");
 const glob = require("./_globalFunctions");
 const Discord = require("discord.js");
+const config = require("./../config.json");
 
 module.exports = {
 	name : "rankcard",
 	args : [0,1],
 	help : "Displays your rank",
-	usage: "@user",
-	execute: async (message,args) => {
-		let UserID;
-		let member;
-
-		if (args[0]){
-			let matches = args[0].match(/^<@!?(\d+)>$/);
-			if (!matches){
-				message.channel.send("Please ensure you have used a ping.");
-			}else{
-				UserID = matches[1];
-				member = await bot.guilds.cache.get("401924028627025920").members.cache.get(UserID);
-			}
-		}else{
-			UserID = message.author.id;
-			member = message.member;
+	usage : "@user",
+	guildOnly : true,
+	interactionSupport: true,
+	options : [
+		{
+			name : "user",
+			description : "View someone elses rankcard",
+			required : false,
+			type : 6
 		}
-
-		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${UserID}'`, (err,rows) => {
-			if(err) console.log(err);
-			if(rows.length !== 1){
-				createDefaultRankCard(message, member, UserID);
-			}else{
-				let inventory = JSON.parse(rows[0].inventory);
-				let notFound = true;
-				let shipName = "";
-
-				for (let i = 0; i < inventory.length; i++){
-					if (inventory[i].type === "largeShips"){
-						shipName = inventory[i].name;
-						notFound = false;
-						break;
-					}
-				}
-
-				if (notFound){
-					createDefaultRankCard(message, member, UserID);
-				}else{
-					createRankCanvas(message.channel, member, shipName, UserID);
-				}
-
-			}
-		});
+	],
+	execute: (message,args) => {
+		mainHandler(message,args,true);
+	},
+	executeInteraction: (interaction,args) => {
+		mainHandler(interaction,args,false);
 	}
 }
 
-function createDefaultRankCard(message,member,id){
+async function mainHandler(event,args,isMessage){
+	let UserID;
+	let member;
+
+	if (args[0]){
+		let matches = args[0].match(/^<@!?(\d+)>$/);
+		if (!matches){
+			return glob.reply(event,"Please ensure you have used a ping.",isMessage);
+		}else{
+			UserID = matches[1];
+			member = await bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(UserID);
+		}
+	}else{
+		UserID = isMessage ? event.author.id : event.member.user.id;
+		member = event.member;
+	}
+
+	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${UserID}'`, (err,rows) => {
+		if(err) console.log(err);
+		if(rows.length !== 1){
+			createDefaultRankCard(event, member, UserID, isMessage);
+		}else{
+			let inventory = JSON.parse(rows[0].inventory);
+			let notFound = true;
+			let shipName = "";
+
+			for (let i = 0; i < inventory.length; i++){
+				if (inventory[i].type === "largeShips"){
+					shipName = inventory[i].name;
+					notFound = false;
+					break;
+				}
+			}
+
+			if (notFound){
+				createDefaultRankCard(event, member, UserID, isMessage);
+			}else{
+				createRankCanvas(event, member, shipName, UserID, isMessage);
+			}
+
+		}
+	});
+}
+
+function createDefaultRankCard(event,member,id,isMessage){
 
 	db.mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${id}'` , (err,rows) => {
 		let xpneeded;
@@ -73,13 +91,13 @@ function createDefaultRankCard(message,member,id){
 			.setAuthor(`Rank card`)
 			.setThumbnail(`${member.user.displayAvatarURL()}`)
 			.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}`);
-		message.channel.send(rankcard);
+		glob.reply(event, {embeds: [rankcard]},isMessage);
 	});
 
 	return null;
 }
 
-async function createRankCanvas(channel,member,ship, ID){
+function createRankCanvas(event,member,ship,ID,isMessage){
 	db.mainDatabaseConnectionPool.query(`SELECT * FROM xp WHERE id = '${ID}'` , (err,rows) => {
 		let xpneeded;
 		let rnxp;
@@ -93,14 +111,12 @@ async function createRankCanvas(channel,member,ship, ID){
 		rnxp = parseInt(rows[0].xp);
 		level = rows[0].level;
 		
-		creatingCanvas(channel, member, ship, level, rnxp, xpneeded);
+		creatingCanvas(event, member, ship, level, rnxp, xpneeded, isMessage);
 		
 	});
-
-	return;
 }
 
-async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded,){
+async function creatingCanvas(event,member,ship,level,rnxp,xpneeded,isMessage){
 
 	let canvas = Canvas.createCanvas(860,540);
 	let ctx = canvas.getContext('2d');
@@ -134,7 +150,7 @@ async function creatingCanvas(channel,member,ship,level,rnxp,xpneeded,){
 	ctx.drawImage(avatar, 18, 18, 200, 200);
 
 	let attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'rankcard.png');
-	channel.send(attachment);
+	glob.reply(event,{embdes:[attachment]},isMessage);
 }
 
 const applyText = (canvas, text) => {

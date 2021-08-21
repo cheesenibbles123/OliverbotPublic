@@ -1,10 +1,11 @@
 const fs = require('fs');
 const Discord = require("discord.js");
 const config = require("./../config.json");
+const {reply} = require("./_globalFunctions.js");
 
 let bot;
 
-function checkPerms(message,command){
+function checkPerms(event,command,isMessage){
 
 	// Check permissions
 	if (bot.commands[command.name].roles){
@@ -13,7 +14,7 @@ function checkPerms(message,command){
 
 		// Loop over all allowed roles
 		for (let i=0; i<roles.length; i++){
-			if (message.member.roles.cache.has(roles[i])){
+			if (event.member.roles.cache.has(roles[i])){
 				missingRole = false;
 			}
 		}
@@ -29,7 +30,7 @@ function checkPerms(message,command){
 		let notFound = true;
 
 		for (let i=0; i < users.length; i++){
-			if (users[i] === message.author.id){
+			if (users[i] === (isMessage ? event.author.id : event.member.user.id)){
 				notFound = false;
 			}
 		}
@@ -45,13 +46,30 @@ function checkPerms(message,command){
 module.exports = {
 	name: "help",
 	args: [0,1],
-	help: "",
+	help: "Provides help regarding to commands",
 	category: "help",
+	interactionSupport: true,
+	options: [
+		{
+			name : "command",
+			description : "Command to recieve more information about",
+			type : 3,
+			required: false
+		}
+	],
 	init: (botInstance) => {
 		bot = botInstance;
 	},
 	execute: (message,args) => {
-		let embed = new Discord.MessageEmbed();
+		mainHandler(message,args,true);
+	},
+	executeInteraction: (interaction,args)=> {
+		mainHandler(interaction,args,false);
+	}
+}
+
+function mainHandler(event,args,isMessage){
+	let embed = new Discord.MessageEmbed();
 
 		if (args.length === 0){
 			embed.setTitle("All commands");
@@ -60,9 +78,8 @@ module.exports = {
 			let allCommands = Object.keys(bot.commands);
 
 			for (let i = 0;	i < allCommands.length; i++){
-				//console.log("Checking: " + allCommands[i]);
 				let command = bot.commands[allCommands[i]];
-				let isAllowed = checkPerms(message,command);
+				let isAllowed = checkPerms(event,command,isMessage);
 
 				if (isAllowed && command.category !== 'help'){
 
@@ -84,11 +101,12 @@ module.exports = {
 					embed.addField(categories[i], list[categories[i]], true);
 				}
 			}
+			let author = isMessage ? event.author : event.member.user;
 
-			message.author.send(embed).then(msg => {
-				message.channel.send("Check your DMs!");
+			author.send({embeds:[embed]}).then(msg => {
+				reply(event,"Check your DMs!",isMessage);
 			}).catch(e => {
-				message.channel.send('It appears you currently can\'t receive Direct Messages.\nPlease enable \"Allow direct messages from server members\" under the Privacy & Safety tab in you user settings.');
+				reply(event,'It appears you currently can\'t receive Direct Messages.\nPlease enable \"Allow direct messages from server members\" under the Privacy & Safety tab in you user settings.',isMessage);
 			});
 		}else{
 			let cmd = args[0].toLowerCase();
@@ -110,9 +128,7 @@ module.exports = {
 				embed.setTitle("Help")
 					.setDescription(help);
 
-				message.channel.send(embed);
+				reply(event,{embeds:[embed]},isMessage);
 			}
 		}
-
-	}
 }
