@@ -1,6 +1,6 @@
 const db = require("./../../startup/database.js");
 const glob = require("./../_globalFunctions.js");
-const {reply} = require("./_combinedResponses");
+const {reply} = require("./../_combinedResponses");
 
 module.exports = {
 	name: "beg",

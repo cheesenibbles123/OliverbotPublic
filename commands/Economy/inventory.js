@@ -1,6 +1,6 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
-const {reply} = require("./_combinedResponses");
+const {reply} = require("./../_combinedResponses");
 
 module.exports = {
 	name: "inventory",

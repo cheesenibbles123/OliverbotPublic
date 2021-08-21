@@ -1,7 +1,7 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
-const {reply} = require("./_combinedResponses");
+const {reply} = require("./../_combinedResponses");
 let bot;
 
 module.exports = {
