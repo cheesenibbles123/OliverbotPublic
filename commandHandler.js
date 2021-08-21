@@ -151,8 +151,9 @@ module.exports = {
 			message.react("🤔");
 		}
 	},
-	slashHandler: (interaction) => {
+	slashHandler: async (interaction) => {
 		if (!interaction.isCommand()) return;
+		await interaction.deferReply();
 		let command = interaction.commandName;
 		if (bot.commands[command]){
 
@@ -169,14 +170,14 @@ module.exports = {
 						if (bot.commands[command].usage){
 							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
-						return interaction.reply(msg);
+						return await interaction.editReply(msg);
 					}
 				// if arguments are a fixed length
 				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
 					if (bot.commands[command].usage){
 							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
 						}
-					return interaction.reply(msg);
+					return await interaction.editReply(msg);
 				}
 			}
 
@@ -203,22 +204,22 @@ module.exports = {
 
 			// Check if server only
 			if (bot.commands[command].guildOnly && !interaction.guild_id){
-				return interaction.reply("I can't execute that command within DMs!");
+				return await interaction.editReply("I can't execute that command within DMs!");
 			}
 
 			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
 				if (bot.commands[command].interactionSupport){
-					interaction.reply("Completed commandHandler");
-					//bot.commands[command].executeInteraction(interaction);
+					//interaction.reply("Completed commandHandler");
+					bot.commands[command].executeInteraction(interaction);
 					//db.updateTracking(command);
 				}else{
-					interaction.reply("This command does not currently have support for slash commands.");
+					await interaction.editReply("This command does not currently have support for slash commands.");
 				}
 			}else{
-				interaction.reply("You do not have permission to use this command!");
+				await interaction.editReply("You do not have permission to use this command!");
 			}
 		}else{
-			interaction.reply("This command doesn't seem to exist 🤔");
+			await interaction.editReply("This command doesn't seem to exist 🤔");
 		}
 	},
 }
