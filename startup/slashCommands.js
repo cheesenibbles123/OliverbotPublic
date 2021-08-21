@@ -21,11 +21,10 @@ module.exports = {
 		let slashCommands = [];
 		let addedCommands = [];
 
-		console.log('Entering for loop');
 		for (let commandName in bot.commands){
 			let command = bot.commands[commandName];
-			if (!command.roles && !command.users && (command.interactionSupport || typeof(command.executeGlobal === "function")) && addedCommands.indexOf(command.name) === -1){
-				console.log("[LOADING SLASH] " + commandName);
+			if (!command.roles && !command.users && (command.interactionSupport || typeof(command.executeGlobal) === "function") && addedCommands.indexOf(command.name) === -1){
+				console.info("[LOADING SLASH] " + commandName);
 				let data = {
 					name : command.name,
 					description : command['help'] ? command.help : (command['description'] ? command.description : "N/A"),
@@ -41,12 +40,10 @@ module.exports = {
 		};
 
 		try{
-			console.log('Beginning slash registration');
 			await rest.put(
 				Routes.applicationGuildCommands(config.botID, config.serverInfo.serverId),
 				{body : slashCommands},
 			);
-			console.log('Finished slash registration');
 		}catch(e){
 			console.error(e);
 		}
