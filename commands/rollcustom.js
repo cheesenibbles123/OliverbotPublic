@@ -1,4 +1,4 @@
-const {reply} = require("./_combinedFunctions");
+const {reply} = require("./_combinedResponses");
 const glob = require("./_globalFunctions");
 
 module.exports = {
