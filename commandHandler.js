@@ -48,6 +48,10 @@ function loadFromDatabase(){
 	});
 }
 
+async function reply(event,contents,isMessage){
+	isMessage ? event.reply(contents) : await event.editReply(contents);
+}
+
 module.exports = {
 	init: async (botInstance) => {
 		botInstance['loadedCommands'] = false;
@@ -58,6 +62,79 @@ module.exports = {
 		loopOverFolders(folder);
 		await loadFromDatabase();
 		bot.loadedCommands = true;
+	},
+	newHandler: async (event,isMessage,command,args) => {
+
+		if (bot.commands[command]){
+
+			let missingRole = true;
+			let allowedUser = false;
+
+			// Check arguments
+			if (bot.commands[command].args){
+				let msg = "Please check your argument length";
+
+				if (typeof(bot.commands[command].args) === typeof([])){
+					// if arguments are a range between [min,max]
+					if (bot.commands[command].args[0] > args || bot.commands[command].args[1] < args){
+						if (bot.commands[command].usage){
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
+						}
+						return reply(event,msg,isMessage);
+					}
+				// if arguments are a fixed length
+				}else if (bot.commands[command].args < args.length || bot.commands[command].args > args.length){
+					if (bot.commands[command].usage){
+							msg += `\nExample usage: \`${config.prefix}${bot.commands[command].name} ${bot.commands[command].usage}\``;
+						}
+					return reply(event,msg,isMessage);
+				}
+			}
+
+			// Check permissions
+			if (bot.commands[command].roles){
+				let roles = bot.commands[command].roles;
+
+				// Loop over all allowed roles
+				for (let i=0; i<roles.length; i++){
+					if (message.member.roles.cache.has(roles[i])){
+						missingRole = false;
+					}
+				}
+			}
+
+			// Check Users
+			if (bot.commands[command].users){
+				let users = bot.commands[command].users;
+
+				for (let i=0; i < users.length; i++){
+					if (users[i] === message.author.id){
+						allowedUser = true;
+					}
+				}
+			}
+
+			// Check if server only
+			if (bot.commands[command].guildOnly && message.channel.type === 'DM'){
+				return reply(event,"I can't execute that command within DMs!",isMessage);
+			}
+
+			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
+				if (isMessage){
+					bot.commands[command].execute(event,args);
+					db.updateTracking(command);
+				}else if (bot.commands[command].interactionSupport){
+					bot.commands[command].executeInteraction(event,args);
+					db.updateTracking(command);
+				}else{
+					reply(event,"Invalid command",isMessage);
+				}
+			}else{
+				reply(event,"You do not have permission to use this command!",isMessage);
+			}
+		}else if (isMessage){
+			event.react("🤔");
+		}
 	},
 	handler: async (message,command,args) => {
 		if (bot.commands[command]){
