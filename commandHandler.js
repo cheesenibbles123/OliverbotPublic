@@ -48,33 +48,6 @@ function loadFromDatabase(){
 	});
 }
 
-async function setupSlashCommands(){
-
-	let rest = new REST({ version: '9' }).setToken(token);
-
-	let timer = ms => new Promise( res => setTimeout(res, ms));
-
-	for (let commandName in bot.commands){
-		let command = bot.commands[commandName];
-		console.log(command);
-		if (!command.roles && !command.users){
-			let data = {
-				name : command.name,
-				description : command['help'] ? command.help : "N/A",
-			}
-
-			if (command.options){
-				data['options'] = command.options;
-			}
-
-			bot.api.applications(bot.user.id).guilds(config.serverInfo.serverId).commands.post({data});
-			
-			bot.api.applications(bot.user.id).commands.post({data});
-		}
-		await timer(500); // avoid getting rate-limited
-	};
-}
-
 module.exports = {
 	init: async (botInstance) => {
 		botInstance['loadedCommands'] = false;
