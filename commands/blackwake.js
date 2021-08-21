@@ -59,7 +59,7 @@ module.exports = {
 	],
 	init: (botInstance) =>{
 		bot = botInstance;
-		adjustableConfig = require("./databaseSetup.js").adjustableConfig;
+		adjustableConfig = db.adjustableConfig;
 		bw.init(config.apiKeys.steam);
 	},
 	execute: (message,args) => {
