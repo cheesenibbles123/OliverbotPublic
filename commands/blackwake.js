@@ -61,15 +61,15 @@ module.exports = {
 		adjustableConfig = require("./databaseSetup.js").adjustableConfig;
 		bw.init(config.apiKeys.steam);
 	},
-	execute: async (message,args) => {
+	execute: (message,args) => {
 		mainHandler(message,args,false);
 	},
-	executeInteraction: async (interaction,args) => {
+	executeInteraction: (interaction,args) => {
 		mainHandler(message,args,true);
 	}
 }
 
-function mainHandler(event,args,isMessage){
+async function mainHandler(event,args,isMessage){
 	let steamID;
 	if (args.length === 1){
 		steamID = await checkifInDatabaseBWHandler(event,isMessage);
