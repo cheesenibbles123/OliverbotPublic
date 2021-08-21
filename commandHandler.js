@@ -1,7 +1,7 @@
 const fs = require('fs');
 const db = require('./startup/database.js');
 const config = require('./config.json');
-
+const { reply } = require('./commands/_globalFunctions.js');
 let bot;
 
 function loopOverFolders(folder){
@@ -46,10 +46,6 @@ function loadFromDatabase(){
 			}
 		});
 	});
-}
-
-async function reply(event,contents,isMessage){
-	isMessage ? event.reply(contents) : await event.editReply(contents);
 }
 
 module.exports = {
@@ -120,14 +116,19 @@ module.exports = {
 			}
 
 			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
-				if (isMessage){
-					bot.commands[command].execute(event,args);
+
+				if (typeof(bot.commands[command].executeGlobal) === "function"){ // If the combined function exists call it
+					bot.commands[command].executeGlobal(event,args,isMessage);
 					db.updateTracking(command);
-				}else if (bot.commands[command].interactionSupport){
+				}else
+				if (isMessage){
+					bot.commands[command].execute(event,args); // If command supports text responses
+					db.updateTracking(command);
+				}else if (bot.commands[command].interactionSupport){ // If command supports slash responses
 					bot.commands[command].executeInteraction(event,args);
 					db.updateTracking(command);
 				}else{
-					reply(event,"Invalid command",isMessage);
+					reply(event,"Invalid slash command.",isMessage); // Slash command is invalid (e.g. incorrect registration occured)
 				}
 			}else{
 				reply(event,"You do not have permission to use this command!",isMessage);
