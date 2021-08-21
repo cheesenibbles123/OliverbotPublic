@@ -283,7 +283,9 @@ async function manageJoinReaction(event){
 }
 
 bot.on("interactionCreate", async interaction => {
-	//commands.slashHandler(interaction);
+	if (!interaction.isCommand()) return;
+	await interaction.deferReply();
+	
 	commands.newHandler(interaction, false, interaction.commandName, null);
 });
 
