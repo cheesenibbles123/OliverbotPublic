@@ -283,9 +283,6 @@ async function manageJoinReaction(event){
 }
 
 bot.on("interactionCreate", async interaction => {
-	console.log("Triggered interaction");
-	console.log(interaction);
-	interaction.reply("test");
 	commands.slashHandler(interaction);
 });
 
