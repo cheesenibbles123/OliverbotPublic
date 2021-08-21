@@ -7,7 +7,7 @@ module.exports = {
 	args: 1,
 	help: "Searches for the word on urban dictionary",
 	usage: "<word>",
-	interactionSupport = true,
+	interactionSupport : true,
 	options: [
 		{
 			name : "word",
