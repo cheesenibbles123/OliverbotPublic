@@ -10,7 +10,7 @@ module.exports = {
 			message.channel.send(response[0].url);
 		});
 	},
-	executeInteraction: (interaction) => {
+	executeInteraction: (interaction,args) => {
 		fetch("https://api.thecatapi.com/v1/images/search").then(res => res.json()).then(async response =>{
 			await interaction.editReply(response[0].url);
 		});
