@@ -1,5 +1,5 @@
 const config = require("./config.json");
-const { Client, Intents } = require('discord.js');
+const { Client, Intents, MessageEmbed } = require('discord.js');
 const bot = new Client({intents: returnIntents()});
 
 const commands = require("./commandHandler.js");
@@ -45,7 +45,7 @@ function returnIntents(){
 
 function GetMarsWeatherData(message){
 	fetch(`https://api.nasa.gov/insight_weather/?api_key=${config.apiKeys.nasa}&feedtype=json&ver=1.0`).then(res => res.json()).then(response => {
-		let marsWeatherEmbed = new Discord.MessageEmbed()
+		let marsWeatherEmbed = new MessageEmbed()
 			.setTitle("Mars Weather Data");
 			text="";
 
@@ -115,7 +115,7 @@ function customizeShip(ID,args,message){
 }
 
 function craftItem(message,args){
-	let craftEmbed = new Discord.MessageEmbed();
+	let craftEmbed = new MessageEmbed();
 	mainDatabaseConnectionPool.query(`SELECT * FROM crafting WHERE Name=${args[0]}`, (err,craftingRows) => {
 		if (craftingRows[0]){
 			mainDatabaseConnectionPool.query(`SELECT * FROM skills WHERE id=${ID}`, (err,skillRows) => {
@@ -323,7 +323,7 @@ bot.on("warn", (e) => console.warn(e));
 
 bot.on("messageDelete", function(message){
 	if (message.channel.id === "562013905426317322" || message.channel.id === "522864242626658305") return;
-	let msgDeleteEmbed = new Discord.MessageEmbed()
+	let msgDeleteEmbed = new MessageEmbed()
 		.setTitle(`${message.author}`)
 		.setDescription(`${message.content}`)
 		.setFooter(`From: ${message.channel}`)
