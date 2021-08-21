@@ -62,66 +62,59 @@ module.exports = {
 		adjustableConfig = db.adjustableConfig;
 		bw.init(config.apiKeys.steam);
 	},
-	execute: (message,args) => {
-		mainHandler(message,args,true);
-	},
-	executeInteraction: (interaction,args) => {
-		mainHandler(interaction,args,false);
-	}
-}
+	executeGlobal: async (event,args,isMessage) => {
+		let steamID;
+		if (args.length === 1){
+			steamID = await checkifInDatabaseBWHandler(event,isMessage);
+		}else if (!isNaN(parseInt(args[1]))){
+			steamID = args[1];
+		}
 
-async function mainHandler(event,args,isMessage){
-	let steamID;
-	if (args.length === 1){
-		steamID = await checkifInDatabaseBWHandler(event,isMessage);
-	}else if (!isNaN(parseInt(args[1]))){
-		steamID = args[1];
-	}
+		if (args[0] === "monthly"){
+			fetchEloStuff(event, steamID, args[0], isMessage);
+		}else{
 
-	if (args[0] === "monthly"){
-		fetchEloStuff(event, steamID, args[0], isMessage);
-	}else{
+			bw.handler(args[0], steamID).then(data => {
+				if (data.isValid){
 
-		bw.handler(args[0], steamID).then(data => {
-			if (data.isValid){
+					let embed = new Discord.MessageEmbed()
+						.setTitle(data.type);
 
-				let embed = new Discord.MessageEmbed()
-					.setTitle(data.type);
+					switch (data.type){
+						case "overview":
+							embed.addField("General",data.content.playerStats.formatted,true)
+								.addField("Captain Stats",data.content.captainStats.formatted,true)
+								.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
+							break;
+						case "weaponstats":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "shipstats":
+							embed.addField("Ships",data.content.ships.formatted,true)
+								.addField("General",data.content.general.formatted,true);
+							break;
+						case "shipweaponry":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "maintenance":
+							embed.setDescription(data.content.formatted);
+							break;
+						case "misc":
+							embed.setDescription(data.content.formatted);
+							break;
+						default:
+							break;
+					}
 
-				switch (data.type){
-					case "overview":
-						embed.addField("General",data.content.playerStats.formatted,true)
-							.addField("Captain Stats",data.content.captainStats.formatted,true)
-							.addField("Fav Weapon",data.content.playerStats.faveWeapon.formatted,true);
-						break;
-					case "weaponstats":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "shipstats":
-						embed.addField("Ships",data.content.ships.formatted,true)
-							.addField("General",data.content.general.formatted,true);
-						break;
-					case "shipweaponry":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "maintenance":
-						embed.setDescription(data.content.formatted);
-						break;
-					case "misc":
-						embed.setDescription(data.content.formatted);
-						break;
-					default:
-						break;
-				}
+					reply(event,{embeds : [embed]}, isMessage);
 
-				reply(event,{embeds : [embed]}, isMessage);
-
-			}else{
-				reply(event, "Invalid type and/or SteamID provided.", isMessage);
-			}	
-		}).catch(err => {
-			reply(event, "Please ensure you entered a valid **SteamID64** and your profile is set to **Public**.", isMessage);
-		});
+				}else{
+					reply(event, "Invalid type and/or SteamID provided.", isMessage);
+				}	
+			}).catch(err => {
+				reply(event, "Please ensure you entered a valid **SteamID64** and your profile is set to **Public**.", isMessage);
+			});
+		}
 	}
 }
 
