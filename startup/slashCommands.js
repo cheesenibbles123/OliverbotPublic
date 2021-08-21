@@ -19,13 +19,15 @@ module.exports = {
 		let rest = new REST({ version: '9' }).setToken(config.token);
 
 		let slashCommands = [];
+		let addedCommands = [];
+
 		console.log('Entering for loop');
 		for (let commandName in bot.commands){
 			let command = bot.commands[commandName];
-			if (!command.roles && !command.users){
+			if (!command.roles && !command.users && comand.interactionSupport && addedCommands.indexOf(command.name) === -1){
 				let data = {
 					name : command.name,
-					description : command['help'] ? command.help : "N/A",
+					description : command['help'] ? command.help : (command['description'] ? command.description : "N/A"),
 				}
 
 				if (command.options){
@@ -33,6 +35,7 @@ module.exports = {
 				}
 
 				slashCommands.push(data);
+				addedCommands.push(command.name);
 			}
 		};
 
