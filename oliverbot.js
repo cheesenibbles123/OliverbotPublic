@@ -246,7 +246,7 @@ bot.on("messageCreate", async message => {
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 
-	commands.newHandler(message, true, command, args);
+	commands.handler(message, true, command, args);
 
 	}catch(e){
 		console.log("###########################################################");
@@ -286,7 +286,7 @@ bot.on("interactionCreate", async interaction => {
 	if (!interaction.isCommand()) return;
 	await interaction.deferReply();
 	
-	commands.newHandler(interaction, false, interaction.commandName, null);
+	commands.handler(interaction, false, interaction.commandName, null);
 });
 
 //Pure Logging of events for administrative purposes

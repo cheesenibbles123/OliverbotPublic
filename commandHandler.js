@@ -63,7 +63,7 @@ module.exports = {
 		await loadFromDatabase();
 		bot.loadedCommands = true;
 	},
-	newHandler: async (event,isMessage,command,args) => {
+	handler: async (event,isMessage,command,args) => {
 
 		if (bot.commands[command]){
 
