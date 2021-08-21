@@ -3,6 +3,10 @@ let bot;
 const db = require("./../startup/database.js");
 const fs = require('fs');
 
+exports.reply = async function reply(event, contents, isMessage){
+	isMessage ? event.reply(contents) : await event.editReply(contents);
+}
+
 exports.init = function init(botInstance){
 	adjustableConfig = require("./../oliverbot.js").adjustableConfig;
 	bot = botInstance;
