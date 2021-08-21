@@ -1,7 +1,7 @@
 const fs = require('fs');
 const db = require('./startup/database.js');
 const config = require('./config.json');
-const { reply } = require('./commands/_globalFunctions.js');
+const { reply } = require('./commands/_combinedResponses.js');
 let bot;
 
 function loopOverFolders(folder){
