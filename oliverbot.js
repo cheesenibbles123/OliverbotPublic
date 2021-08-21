@@ -246,7 +246,7 @@ bot.on("messageCreate", async message => {
 	//Split messages into the command and arguments
 	let args = messagearray.slice(1);
 
-	commands.handler(message,command,args);
+	commands.newHandler(message, true, command, args);
 
 	}catch(e){
 		console.log("###########################################################");
@@ -283,7 +283,8 @@ async function manageJoinReaction(event){
 }
 
 bot.on("interactionCreate", async interaction => {
-	commands.slashHandler(interaction);
+	//commands.slashHandler(interaction);
+	commands.newHandler(interaction, false, interaction.commandName, null);
 });
 
 //Pure Logging of events for administrative purposes
