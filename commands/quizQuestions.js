@@ -11,7 +11,6 @@ module.exports = {
 	args: [0,1],
 	help: "Displays a quiz question for you to awnser",
 	usage: "<income>",
-	interactionSupport: true,
 	options : [
 		{
 			name : "income",
@@ -29,28 +28,14 @@ module.exports = {
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	execute: (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 		if (isNotLocked){
-			switch (args[0]){
+			switch(args[0]){
 				case "income":
-					checkQuizAllowances(message,args,true);
+					checkQuizAllowances(event,args,isMessage);
 					break;
 				default:
-					getRandomQuizQuestion(message,false,true);
-					break;
-			}
-		}
-	},
-	executeInteraction: (interaction,args) => {
-		if (isNotLocked){
-			switch (args[0]){
-				case "income":
-					interaction.editReply("Setting up income...");
-					checkQuizAllowances(interaction,args,false);
-					break;
-				default:
-					interaction.editReply("Setting up quiz...");
-					getRandomQuizQuestion(interaction,false,false);
+					getRandomQuizQuestion(event,false,isMessage);
 					break;
 			}
 		}

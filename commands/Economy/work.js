@@ -1,15 +1,15 @@
 const db = require("./../../startup/database.js");
 const glob = require("./../_globalFunctions.js");
+const {reply} = require("./_combinedResponses");
 const Discord = require("discord.js");
 
 module.exports = {
 	name: "work",
-	args: 0,
 	help: "Work for coins",
 	category: "Economy",
-	execute: async (message,args) => {
-
-		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows,fields) =>{
+	executeGlobal: (event,args,isMessage) => {
+		let ID = isMessage ? event.author.id : event.member.user.id;
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${ID}'`, (err,rows,fields) =>{
 			let result = glob.getRandomInt(30);
 			let workingEmbed = new Discord.MessageEmbed().setTimestamp()
 				.setTitle("Check");
@@ -17,7 +17,7 @@ module.exports = {
 
 			if (rows.length != 0 && rows.length < 2){
 				if (rows[0].lastWorked === null){
-					db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+					db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${ID}'`);
 					let income = 10;
 					if (rows[0].inventory.length){
 						for (let i = 0; i < inv.length; i++){
@@ -26,7 +26,7 @@ module.exports = {
 							}
 						}
 					}
-					db.giveUserMoney(income, message.author.id);
+					db.giveUserMoney(income, ID);
 					if (rows[0].giraffeCoins){
 						workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(income * 100)) / 100).toFixed(2)}`);
 					}else{
@@ -42,8 +42,8 @@ module.exports = {
 								income += inv[i].value;
 							}
 						}
-						db.giveUserMoney(income, message.author.id);
-						db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${message.author.id}'`);
+						db.giveUserMoney(income, ID);
+						db.mainDatabaseConnectionPool.query(`UPDATE inventoryGT SET lastWorked='${new Date().getTime()}' WHERE ID='${ID}'`);
 						workingEmbed.setDescription(`You have earnt: ${income}GC!\nCurrent Balance: ${parseFloat((parseInt(rows[0].giraffeCoins * 100) + parseInt(income * 100)) / 100).toFixed(2)}`);
 					}
 					else{
@@ -74,10 +74,10 @@ module.exports = {
 						workingEmbed.setDescription(`You cannot work yet! You must wait until ${finalDate} CEST\nTime Remaining:  ${remainingTime}`);
 					}
 				}
-				message.channel.send({embeds : [workingEmbed]});
+				reply(event,{embeds : [workingEmbed]},isMessage);
 				//displayRichestUsers();
 			}else{
-				message.channel.send("Ping archie. Errors go brrr.");
+				reply(event,"Ping archie. Errors go brrr.",isMessage);
 				console.log(rows);
 			}
 		});

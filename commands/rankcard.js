@@ -1,6 +1,6 @@
 const Canvas = require("canvas");
 const db = require("./../startup/database.js");
-const glob = require("./_globalFunctions");
+const {reply} = require("./_combinedResponses");
 const Discord = require("discord.js");
 const config = require("./../config.json");
 
@@ -10,7 +10,6 @@ module.exports = {
 	help : "Displays your rank",
 	usage : "@user",
 	guildOnly : true,
-	interactionSupport: true,
 	options : [
 		{
 			name : "user",
@@ -19,56 +18,49 @@ module.exports = {
 			type : 6
 		}
 	],
-	execute: (message,args) => {
-		mainHandler(message,args,true);
-	},
-	executeInteraction: (interaction,args) => {
-		mainHandler(interaction,args,false);
-	}
-}
+	executeGlobal: (event,args,isMessage) => {
+		let UserID;
+		let member;
 
-async function mainHandler(event,args,isMessage){
-	let UserID;
-	let member;
-
-	if (args[0]){
-		let matches = args[0].match(/^<@!?(\d+)>$/);
-		if (!matches){
-			return glob.reply(event,"Please ensure you have used a ping.",isMessage);
-		}else{
-			UserID = matches[1];
-			member = await bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(UserID);
-		}
-	}else{
-		UserID = isMessage ? event.author.id : event.member.user.id;
-		member = event.member;
-	}
-
-	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${UserID}'`, (err,rows) => {
-		if(err) console.log(err);
-		if(rows.length !== 1){
-			createDefaultRankCard(event, member, UserID, isMessage);
-		}else{
-			let inventory = JSON.parse(rows[0].inventory);
-			let notFound = true;
-			let shipName = "";
-
-			for (let i = 0; i < inventory.length; i++){
-				if (inventory[i].type === "largeShips"){
-					shipName = inventory[i].name;
-					notFound = false;
-					break;
-				}
+		if (args[0]){
+			let matches = args[0].match(/^<@!?(\d+)>$/);
+			if (!matches){
+				return reply(event,"Please ensure you have used a ping.",isMessage);
+			}else{
+				UserID = matches[1];
+				member = await bot.guilds.cache.get(config.serverInfo.serverId).members.cache.get(UserID);
 			}
+		}else{
+			UserID = isMessage ? event.author.id : event.member.user.id;
+			member = event.member;
+		}
 
-			if (notFound){
+		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${UserID}'`, (err,rows) => {
+			if(err) console.log(err);
+			if(rows.length !== 1){
 				createDefaultRankCard(event, member, UserID, isMessage);
 			}else{
-				createRankCanvas(event, member, shipName, UserID, isMessage);
-			}
+				let inventory = JSON.parse(rows[0].inventory);
+				let notFound = true;
+				let shipName = "";
 
-		}
-	});
+				for (let i = 0; i < inventory.length; i++){
+					if (inventory[i].type === "largeShips"){
+						shipName = inventory[i].name;
+						notFound = false;
+						break;
+					}
+				}
+
+				if (notFound){
+					createDefaultRankCard(event, member, UserID, isMessage);
+				}else{
+					createRankCanvas(event, member, shipName, UserID, isMessage);
+				}
+
+			}
+		});
+	}
 }
 
 function createDefaultRankCard(event,member,id,isMessage){
@@ -91,7 +83,7 @@ function createDefaultRankCard(event,member,id,isMessage){
 			.setAuthor(`Rank card`)
 			.setThumbnail(`${member.user.displayAvatarURL()}`)
 			.setDescription(`xp ${rnxp} / ${xpneeded}. lvl ${level}`);
-		glob.reply(event, {embeds: [rankcard]},isMessage);
+		reply(event, {embeds: [rankcard]},isMessage);
 	});
 
 	return null;
@@ -150,7 +142,7 @@ async function creatingCanvas(event,member,ship,level,rnxp,xpneeded,isMessage){
 	ctx.drawImage(avatar, 18, 18, 200, 200);
 
 	let attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'rankcard.png');
-	glob.reply(event,{embdes:[attachment]},isMessage);
+	reply(event,{embdes:[attachment]},isMessage);
 }
 
 const applyText = (canvas, text) => {

@@ -1,6 +1,7 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 const displays = require("./_displays");
+const {reply} = require("./_combinedResponses");
 
 let bot;
 
@@ -10,26 +11,34 @@ module.exports = {
 	help: "Sell an item",
 	usage: "<itemID>",
 	category: "Economy",
+	options: [
+		{
+			name : "itemid",
+			description : "ID of the item you wish to sell",
+			type : 3,
+			required : true
+		}
+	],
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	execute: async (message,args) => {
-
+	executeGlobal: (event,args,isMessage) => {
 		if (args[0] && args.length < 2){
 			
-			let ID = message.author.id;
+			let ID = event.member.user.id;
 			let item = args[0];
 
 			if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
-				message.channel.send("Please enter an appropriate search term!");
+				reply(event,"Please enter an appropriate search term!",isMessage);
 			}
 
 			db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
-				if(err) console.log(err);
+				if(err) return console.log(err);
 				if(rows.length < 1){
-					message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
+					reply(event,"You are not yet stored on the system! Please send a few messages so that you are added to the database.",isMessage);
 				}else if(rows.length > 1){
-					message.channel.send(`Something has gone wrong, please message <@${config.ownerId}>`);
+					reply(event,`Something has gone wrong, please message Archie`,isMessage);
+					console.log(rows);
 				}else{
 					let inventory = JSON.parse(rows[0].inventory);
 					let notFound = true;
@@ -55,10 +64,10 @@ module.exports = {
 							let itemInfo = JSON.parse(rows2[0].info);
 							let sellEmbed = new Discord.MessageEmbed()
 								.setTitle("Item Sold")
-								.setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${message.author}`);
-							message.channel.send(sellEmbed);
+								.setDescription(`Item: ${itemInfo.name} has been sold for ${worth}.\nSold by: ${bot.members.cache.get(ID).user}`);
+							reply(event,{embeds:[sellEmbed]},isMessage);
 							if (worth > 10000){
-								bot.channels.cache.get("718232760388550667").send(sellEmbed);
+								bot.channels.cache.get("718232760388550667").send({embeds:[sellEmbed]});
 							}
 							displays.handler(0);
 							// displayRichestUsers();
@@ -66,13 +75,13 @@ module.exports = {
 					}
 
 					if (notFound){
-						message.channel.send("You cannot sell this item as you do not own it!");
+						reply(event,"You cannot sell this item as you do not own it!",isMessage);
 					}
 				}
 			});
 
 		}else{
-			message.channel.send("Please enter the correct format:\n`;sell` `Item Name`");
+			reply(event,"Please enter the correct format:\n`;sell` `Item_ID`",isMessage);
 		}
 	}
 }

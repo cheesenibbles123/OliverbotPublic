@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Discord = require("discord.js");
 const config = require("./../config.json");
-const {reply} = require("./_globalFunctions.js");
+const {reply} = require("./_combinedResponses.js");
 
 let bot;
 
@@ -48,7 +48,6 @@ module.exports = {
 	args: [0,1],
 	help: "Provides help regarding to commands",
 	category: "help",
-	interactionSupport: true,
 	options: [
 		{
 			name : "command",
@@ -60,16 +59,8 @@ module.exports = {
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	execute: (message,args) => {
-		mainHandler(message,args,true);
-	},
-	executeInteraction: (interaction,args)=> {
-		mainHandler(interaction,args,false);
-	}
-}
-
-function mainHandler(event,args,isMessage){
-	let embed = new Discord.MessageEmbed();
+	executeGlobal: (message,args) => {
+		let embed = new Discord.MessageEmbed();
 
 		if (args.length === 0){
 			embed.setTitle("All commands");
@@ -131,4 +122,5 @@ function mainHandler(event,args,isMessage){
 				reply(event,{embeds:[embed]},isMessage);
 			}
 		}
+	}
 }

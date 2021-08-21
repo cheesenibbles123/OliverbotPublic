@@ -1,26 +1,26 @@
 const Canvas = require("canvas");
 const db = require("./../../startup/database.js");
+const {reply} = require("./../combinedResponses")
 const Discord = require("discord.js");
 
 module.exports = {
 	name: "wallet",
 	help: "Displays your bank info.",
-	execute: async (message,args) =>{
-		let user = await getUserInfo(message,message.author.id);
+	executeGlobal: async (event,args,isMessage) =>{
+		let user = await getUserInfo(event,isMessage,event.member.user.id);
 		if (typeof(user) !== "boolean"){
-			let image = await generateImage(user,message.member);
-			message.channel.send(image);
+			let image = await generateImage(user,event.member);
+			reply(event,image,isMessage);
 		}
 	}
-
 }
 
-function getUserInfo(message,id){
+function getUserInfo(event,isMessage,id){
 	return new Promise((resolve,reject) => {
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID=${id}`, (err,rows) => {
 			if (rows){
 				if (rows.length !== 1){
-					message.channel.send("You are not in the database!");
+					reply(event,"You are not in the database!",isMessage);
 					resolve(false);
 				}else{
 					let GC = rows[0].giraffeCoins;
@@ -46,7 +46,7 @@ function getUserInfo(message,id){
 
 				}
 			}else{
-				message.channel.send("Invalid query detected. Please contact Archie.");
+				reply(event,"Invalid query detected. Please contact Archie.",isMessage);
 				resolve(false);
 			}
 		});

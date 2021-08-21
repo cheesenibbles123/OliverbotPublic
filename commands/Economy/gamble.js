@@ -1,6 +1,7 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
+const {reply} = require("./_combinedResponses");
 
 let bot;
 
@@ -10,20 +11,30 @@ module.exports = {
 	help: "Search for an item by its ID",
 	usage: "<amount>",
 	category: "Economy",
+	options: [
+		{
+			name : "amount",
+			description : "Amount of coins to gamble",
+			type : 4,
+			required : true
+		}
+	],
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	execute: async (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 
 		if (args[0] && (args.length === 1)){
 			let amount = args[0];
-			db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
+			let ID = event.member.user.id;
+
+			db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${ID}'`, (err,rows) =>{
 				if (isNaN(amount)){
-					message.channel.send("Please enter a correct value!");
+					reply(event,"Please enter a correct value!",isMessage);
 				}else if (amount > parseFloat(rows[0].giraffeCoins)){
-					message.channel.send("You cannot gamble more than you have!");
+					reply(event,"You cannot gamble more than you have!",isMessage);
 				}else if (amount < 5){
-					message.channel.send("You must gamble a minimum of 5 coins!");
+					reply(event,"You must gamble a minimum of 5 coins!",isMessage);
 				}else{
 					let result = glob.getRandomInt(30);
 					switch(true){
@@ -44,8 +55,8 @@ module.exports = {
 							break;
 					}
 					if ((income * amount) !== amount){
-						db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${message.author.id}'`, (err,rows) =>{
-							db.mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(((rows[0].giraffeCoins * 100) + (((income * amount) - amount) * 100)) / 100).toFixed(2)}' where ID='${message.author.id}'`);
+						db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${ID}'`, (err,rows) =>{
+							db.mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${(((rows[0].giraffeCoins * 100) + (((income * amount) - amount) * 100)) / 100).toFixed(2)}' where ID='${ID}'`);
 						});
 					}
 					if (((income * amount) - amount).toFixed(2) < 0){
@@ -57,13 +68,13 @@ module.exports = {
 						.setTitle("Gamble")
 						.setDescription(`Profit: ${((income * amount) - amount).toFixed(2)}`)
 						.setTimestamp();
-					message.channel.send(gambleEmbed);	
+					reply(event,{embeds:[gambleEmbed]},isMessage);	
 					// displayRichestUsers();
 				}
 			});
 
 		}else{
-			message.channel.send("Please use the correct format! `;gamble` `amount`");
+			reply(event,"Please use the correct format! `;gamble` `amount`",isMessage);
 		}
 	}
 }

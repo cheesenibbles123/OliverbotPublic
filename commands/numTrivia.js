@@ -1,17 +1,12 @@
 const fetch = require("node-fetch");
+const {reply} = require("./_combinedResponses");
 
 module.exports = {
 	name: "numtrivia",
 	help: "Gives you info about a random number",
-	interactionSupport: true,
-	execute: (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 		fetch("http://numbersapi.com/random").then(res => res.text()).then(response =>{
-			message.channel.send("```"+`${response}`+"```");
-		});
-	},
-	executeInteraction: (interaction,args) => {
-		fetch("http://numbersapi.com/random").then(res => res.text()).then(response =>{
-			interaction.editReply("```"+`${response}`+"```");
+			reply("```"+`${response}`+"```");
 		});
 	}
 }

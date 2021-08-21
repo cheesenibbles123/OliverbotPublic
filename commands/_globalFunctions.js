@@ -1,10 +1,10 @@
-let adjustableConfig;
-let bot;
 const db = require("./../startup/database.js");
 const fs = require('fs');
+const combinedResponses = require("./_combinedResponses");
+
+let bot;
 
 exports.init = function init(botInstance){
-	adjustableConfig = require("./../oliverbot.js").adjustableConfig;
 	bot = botInstance;
 }
 
@@ -27,19 +27,17 @@ exports.getUserFromMention = function getUserFromMention(mention) {
 	return bot.users.cache.get(id);
 }
 
-exports.loadDataFromFile = function loadFromDatafile(commandUsed,data,message){
+exports.loadDataFromFile = function loadFromDatafile(event,isMessage,commandUsed,data){
 	let file = fs.readFileSync("./datafile.json").toString();
 	file = JSON.parse(file);
 	let p = 0
 	try{
 	switch (commandUsed){
 		case "randomsong":
-			let voiceChannel = message.member.voice.channel;
+			let voiceChannel = event.member.voice.channel;
 			if (!voiceChannel){ return; }
 			else if (isPlaying){ return; }
-			else if (!adjustableConfig.music.generalAudio){
-				message.reply("That command is currently disabled, please ask an admin to re-enable it!");
-			}else{
+			else{
 			let song = file.randomsongs[getRandomInt(file.randomsongs.length)];
 			voiceChannel.join().then(connection => {
 			isPlaying = true;
@@ -60,37 +58,38 @@ exports.loadDataFromFile = function loadFromDatafile(commandUsed,data,message){
 			}
 			break;
 		case "quote":
-			message.channel.send(file.quotes[getRandomInt(file.quotes.length+1)]);
+			combinedResponses.reply(event,file.quotes[getRandomInt(file.quotes.length+1)],isMessage);
 			break;
 		case "nootnoot":
-			message.channel.send(file.nootnoot[getRandomInt(file.nootnoot.length+1)]);
+			combinedResponses.reply(event,file.nootnoot[getRandomInt(file.nootnoot.length+1)],isMessage);
 			break;
 		case "dance":
 			p = getRandomInt(file.Responses.dance.length);
-			message.channel.send(file.Responses.dance[p]);
+			combinedResponses.reply(event,file.Responses.dance[p],isMessage);
 			break;
 		case "beg":
 			p = getRandomInt(file.Responses.beg.length);
-			message.channel.send(file.Responses.beg[p]);
+			combinedResponses.reply(event,file.Responses.beg[p],isMessage);
 			break;
 		case "dad":
-			message.channel.send(file.dadjokes[getRandomInt(file.dadjokes.length+1)]);
+			combinedResponses.reply(event,file.dadjokes[getRandomInt(file.dadjokes.length+1)],isMessage);
 			break;
 		case "insult":
-			if (message.content.includes("everyone") || message.content.includes("here"))
+			let checkString = args.join(' ');
+			if (checkString.includes("everyone") || checkString.includes("here"))
 			{
-				message.channel.send("nah");
+				combinedResponses.reply(event,"nah",isMessage);
 			}else{
 				let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
 				try{
 					if (typeof data === "undefined"){
-						message.reply("Please ensure you have use the correct syntax.");
+						combinedResponses.reply(event,"Please ensure you have use the correct syntax.",isMessage);
 					}else{
 						insult = insult.replace("TARGET",`${data}`);
-						message.channel.send(insult);
+						combinedResponses.reply(event,insult,isMessage);
 					}
 				}catch(e){
-					message.reply("Please ensure you have use the correct syntax.");
+					combinedResponses.reply(event,"Please ensure you have use the correct syntax.",isMessage);
 				}
 			}
 			break;

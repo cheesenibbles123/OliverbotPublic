@@ -1,5 +1,6 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
+const {reply} = require("./_combinedResponses");
 
 let bot;
 
@@ -9,15 +10,23 @@ module.exports = {
 	help: "Search for an item by its ID",
 	usage: "<itemID>",
 	category: "Economy",
+	options: [
+		{
+			name : "itemid",
+			description : "ID of the item you wish to search for",
+			type : 3,
+			required : true
+		}
+	],
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	execute: async (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 
 		if (typeof(args) !== 'string' && args.length >= 1){
 			let item = args[0];
 			if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
-				message.channel.send("Please enter an appropriate search term!");
+				reply(event,"Please enter an appropriate search term!",isMessage);
 			}
 
 			if (Array.isArray(item)){
@@ -29,15 +38,15 @@ module.exports = {
 				if(err) console.log(err);
 				let sql;
 				if(rows.length < 1){
-					message.channel.send("That item does not exist.");
+					reply(event,"That item does not exist.",isMessage);
 				} else if(rows.length > 1 && rows.length < 10){
 					let allNames = "Results:\n```\n";
 					for (i=0; i< rows.length; i++){
 						allNames = allNames + rows[i].name + "\n";
 					}
-					message.channel.send(allNames+"```");
+					reply(event,allNames+"```",isMessage);
 				}else if( rows.length >= 10){
-					message.channel.send("Could you be more specific? Using your term I got " + rows.length + " results.");
+					reply(event,"Could you be more specific? Using your term I got " + rows.length + " results.",isMessage);
 				}else{
 					let itemInfo = JSON.parse(rows[0].info);
 					let searchEmbed = new Discord.MessageEmbed()
@@ -53,11 +62,11 @@ module.exports = {
 					}
 
 					searchEmbed.addFields({name : `Value`, value: `Cost: ${rows[0].value * (parseInt(rows[0].inStock) / rows[0].initialStock)}\nIn Stock: ${rows[0].inStock}`,inline: true},{name : `To Purchase`, value: "`"+`;purchase`+"` `"+`${rows[0].name}`+"`", inline: true});
-					message.channel.send(searchEmbed);
+					reply(event,{embeds:[searchEmbed]},isMessage);
 				}
 			});
 		}else{
-			message.channel.send("Please enter the correct format:\n`;search` `Item {ID}/{Name}`");
+			reply(event,"Please enter the correct format:\n`;search` `Item {ID}/{Name}`",isMessage);
 		}
 	}
 }

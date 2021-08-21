@@ -1,10 +1,11 @@
+const {reply} = require("./_combinedResponses");
+
 module.exports = {
 	name: "execute",
-	args: 1,
+	args: [1,100],
 	help: "Executes the provided target",
 	usage: "<target>",
 	category: "Meme",
-	interactionSupport: true,
 	options : [
 		{
 			name : "target",
@@ -13,22 +14,14 @@ module.exports = {
 			required : true
 		}
 	],
-	execute: (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
+		let checkString = args.join(' ').toLowerCase();
 		if (typeof args[0] === undefined){
-			message.channel.send("You need to say who to execute! 🤦");
-		}else if (args[0].toLowerCase().includes("everyone") || args[0].toLowerCase().includes("here")){
-			message.channel.send("Nah.");
+			rely("You need to say who to execute! 🤦");
+		}else if (checkString.includes("@everyone") || checkString.includes("@here")){
+			rely("Nah.");
 		}else{
-			message.channel.send(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
-		}
-	},
-	executeInteraction: (interaction, args) => {
-		if (typeof args[0] === undefined){
-			interaction.editReply("You need to say who to execute! 🤦");
-		}else if (args[0].toLowerCase().includes("everyone") || args[0].toLowerCase().includes("here")){
-			interaction.editReply("Nah.");
-		}else{
-			interaction.editReply(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
+			rely(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
 		}
 	}
 }

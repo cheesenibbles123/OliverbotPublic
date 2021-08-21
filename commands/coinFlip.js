@@ -1,22 +1,38 @@
 const glob = require("./_globalFunctions");
-const combinedResponses = require("./_combinedResponses.js");
 
 module.exports = {
 	name: "coinflip",
+	args: 0,
 	help: "Flips a coin.",
-	executeGlobal: (event,args,isMessage) => {
+	interactionSupport: true,
+	execute: (message,args) => {
 		let coin = glob.getRandomInt(2);
-		combinedResponses.new(event,"💰",isMessage).then((msg)=>{
-			combinedResponses.edit(msg,"💰🤔",isMessage).then((msg)=>{
-				combinedResponses.edit(msg,"💰",isMessage).then((msg)=>{
-					combinedResponses.edit(msg,"😯",isMessage);	
+		message.channel.send("💰").then((msg)=>{
+			msg.edit("💰🤔").then((msg)=>{
+				msg.edit("💰").then((msg)=>{
+					msg.edit("😯");	
 				});
 			});
 		});
 		if (coin === 0){
-			combinedResponses.new("Tails!");
+			message.channel.send("Tails!");
 		}else{
-			combinedResponses.new("Heads!");
+			message.channel.send("Heads!");
 		}
+	},
+	executeInteraction: (interaction,args) => {
+		let coin = glob.getRandomInt(2);
+		interaction.editReply("💰").then((msg)=>{
+			interaction.editReply("💰🤔").then((msg)=>{
+				interaction.editReply("💰").then((msg)=>{
+					interaction.editReply("😯");	
+					if (coin === 0){
+						interaction.followUp("Tails!");
+					}else{
+						interaction.followUp("Heads!");
+					}
+				});
+			});
+		});
 	}
 }

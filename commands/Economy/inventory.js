@@ -1,22 +1,22 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
+const {reply} = require("./_combinedResponses");
 
 module.exports = {
 	name: "inventory",
-	args: 0,
 	help: "List your inventory",
 	category: "Economy",
-	execute: async (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 
-		let ID = message.author.id;
+		let ID = event.member.user.id;
 
 		db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 			if(err) console.log(err);
 
 			if(rows.length === 0){
-				message.channel.send("You are not in the database.");
+				reply(event,"You are not in the database.",isMessage);
 			}else if(rows.length > 1){
-				message.channel.send("An error has occured, please contact Archie.");
+				reply(event,"An error has occured, please contact Archie.",isMessage);
 			}else{
 				let inv = JSON.parse(rows[0].inventory);
 				let response = "";
@@ -30,12 +30,13 @@ module.exports = {
 						response = "N/A";
 					}
 
-					inventoryEmbed.setTitle(`Inventory for ${message.author.username}`)
+					inventoryEmbed.setTitle(`Inventory for ${event.member.user.username}`)
 						.setDescription(`${response}`);
 				}else{
 					let notFound = true;
 					for (let i=0;i<inv.length;i++){
-						if (inv[i].name === args.join(" ") || inv[i].properName === args.join(" ")){
+						let searchItem = args.join(" ");
+						if (inv[i].name === searchItem || inv[i].properName === searchItem){
 							notFound = false;
 							inventoryEmbed.setTitle(inv[i].name);
 							switch (inv[i].type){
@@ -52,7 +53,7 @@ module.exports = {
 						inventoryEmbed.setDescription("Either you do not own this item, or you didn't type it correctly.");
 					}
 				}
-				message.channel.send(inventoryEmbed);
+				reply(event,{embeds:[inventoryEmbed]},isMessage);
 			}
 		});
 	}

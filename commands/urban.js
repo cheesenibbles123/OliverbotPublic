@@ -1,13 +1,13 @@
 const fetch = require("node-fetch");
 const glob = require("./_globalFunctions");
 const Discord = require("discord.js");
+const {reply} = require("./_combinedResponses");
 
 module.exports = {
 	name: "urban",
 	args: 1,
 	help: "Searches for the word on urban dictionary",
 	usage: "<word>",
-	interactionSupport : true,
 	options: [
 		{
 			name : "word",
@@ -16,16 +16,8 @@ module.exports = {
 			required : true
 		}
 	],
-	execute: (message,args) => {
-		mainHandler(message,args,true);
-	},
-	executeInteraction: (interaction,args) => {
-		mainHandler(interaction,args,false);
-	}
-}
-
-function mainHandler(event,args,isMessage){
-	let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
+	executeGlobal: (event,args,isMessage) => {
+		let api = `http://api.urbandictionary.com/v0/define?term=${args[0]}`;
 		fetch(api).then(response => response.json()).then(resp => {
 			let option;
 			if (resp.list.length > 1){
@@ -46,9 +38,10 @@ function mainHandler(event,args,isMessage){
 					.addField(`Example:`,`${option.example}`)
 					.setFooter(`Written: ${option.written_on}, Def_ID: ${option.defid}`)
 					.setTimestamp();
-				glob.reply(event,{embeds : [embed]},isMessage);
+				reply(event,{embeds : [embed]},isMessage);
 			}else{
-				glob.reply(event,"No result found.",isMessage);
+				reply(event,"No result found.",isMessage);
 			}
 		});
+	}
 }

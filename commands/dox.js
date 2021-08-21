@@ -1,10 +1,11 @@
+const { reply } = require('./commands/_combinedResponses.js');
+
 module.exports = {
 	name: "dox",
 	args: [1,10],
 	help: "Doxxes the given target",
 	usage: "<target>",
 	category: "Meme",
-	interactionSupport: true,
 	options : [
 		{
 			name : "target",
@@ -13,16 +14,11 @@ module.exports = {
 			required : true
 		}
 	],
-	execute: (message,args) => {
-		if (args.join(' ').includes("@everyone") || args.join(' ').includes("@here")){
-			return message.channel.send("No.");
+	executeGlobal: (event,args,isMessage) => {
+		let checkString = args.join(' ').toLowerCase();
+		if (checkString.includes("@everyone") || checkString.includes("@here")){
+			return reply(event,"No.",isMessage);
 		}
-		message.channel.send(`Doxing ${args.join(" ")}...`);
-	},
-	executeInteraction: (interaction,args) => {
-		if (args.join(' ').includes("@everyone") || args.join(' ').includes("@here")){
-			return interaction.editReply("No.");
-		}
-		interaction.editReply(`Doxing ${args.join(" ")}...`);
+		reply(event,`Doxing ${args.join(" ")}...`,isMessage);
 	}
 }

@@ -2,6 +2,7 @@ const db = require("./../../startup/database.js");
 const glob = require("./../_globalFunctions.js");
 const Discord = require("discord.js");
 const displays = require("./_displays");
+const {reply} = require("./_combinedResponses");
 
 let bot;
 
@@ -11,34 +12,42 @@ module.exports = {
 	help: "Purchase an item",
 	usage: "<itemID>",
 	category: "Economy",
+	options: [
+		{
+			name : "itemid",
+			description : "ID of the item you wish to purchase",
+			type : 3,
+			required : true
+		}
+	],
 	init: (botInstance) => {
 		bot = botInstance;
 		displays.initDisplays(botInstance);
 	},
-	execute: async (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 
 		if (args[0] && args.length < 3){
 
 			let item = args[0];
-			let ID = message.author.id;
+			let ID = event.member.user.id;
 
 			if (item.includes("drop") || item.includes("tables") || item.includes("delete") || item.includes("select" || item.includes("*"))){
-				message.channel.send("Please enter an appropriate search term!");
+				reply(event,"Please enter an appropriate search term!",isMessage);
 			}
 
 			db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID = '${ID}'`, (err,rows) => {
 				if (rows.length < 1){
-					message.channel.send("You are not yet stored on the system! Please send a few messages so that you are added to the database.");
+					reply(event,"You are not yet stored on the system! Please send a few messages so that you are added to the database.",isMessage);
 				}
 				db.mainDatabaseConnectionPool.query(`SELECT * FROM shop WHERE name='${item}'`, (err2, rows2) => {
 					if (rows2.length < 1){
-						message.channel.send( "Please make sure you entered the correct name!");
+						reply(event,"Please make sure you entered the correct name!",isMessage);
 					}else if(rows2.length > 1){
-						message.channel.send(`Could you be a bit more specific? Using your search term I have ${rows.length} results.`);
+						reply(event,`Could you be a bit more specific? Using your search term I have ${rows.length} results.`,isMessage);
 					}else if (parseFloat(rows[0].giraffeCoins) < (rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock)){
-						message.channel.send(`You have insufficient coins to afford this item! You need another ${(rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock) - rows[0].giraffeCoins}GC`);
+						reply(events,`You have insufficient coins to afford this item! You need another ${(rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock) - rows[0].giraffeCoins}GC`,isMessage);
 					}else if(parseInt(rows2[0].inStock) <= 0){
-						message.channel.send( "This item is currently out of stock! Try get someone else to sell theirs so you can buy it, or wait for the next increase in stock!");
+						reply(events, "This item is currently out of stock! Try get someone else to sell theirs so you can buy it, or wait for the next increase in stock!",isMessage);
 					}else{
 
 						let inventory = JSON.parse(rows[0].inventory);
@@ -51,11 +60,11 @@ module.exports = {
 							if (itemInfo.type === "constructionResources"){
 								let resourceAmountPurchased = parseInt(args[1]);
 								if (isNaN(resourceAmountPurchased)){
-									message.channel.send("Please enter a valid amount!");
+									reply(events,"Please enter a valid amount!",isMessage);
 									continueAnyway = false;
 								}else{
 									if (((rows2[0].value * (parseInt(rows2[0].inStock)) / rows2[0].initialStock) * resourceAmountPurchased) > parseFloat(rows[0].giraffeCoins)){
-										message.channel.send(`You have insufficient coins to afford this item! You need another ${((rows2[0].value * (parseInt(rows2[0].inStock))/ rows2[0].initialStock) * resourceAmountPurchased) - rows[0].giraffeCoins}GC`);
+										reply(events,`You have insufficient coins to afford this item! You need another ${((rows2[0].value * (parseInt(rows2[0].inStock))/ rows2[0].initialStock) * resourceAmountPurchased) - rows[0].giraffeCoins}GC`,isMessage);
 										continueAnyway = false;
 									}
 								}
@@ -64,13 +73,13 @@ module.exports = {
 								for (i=0; i< inventory.length; i++){
 										if (inventory[i].name === rows2[0].name){
 											if (inventory[i].type !== "constructionResources"){
-												message.channel.send("You already own that item!");
+												reply(event,"You already own that item!",isMessage);
 												continueAnyway = false;
 											}
 										}else if(inventory[i].type === itemInfo.type){
 											counter = counter + 1;
 											if (counter >= maxCount){
-												message.channel.send("You already own an item of this type!");
+												reply(event,"You already own an item of this type!",isMessage);
 												continueAnyway = false;
 											}
 										}
@@ -119,18 +128,18 @@ module.exports = {
 									db.mainDatabaseConnectionPool.query(`update shop set inStock = ${rows2[0].inStock - 1} where name='${item}'`);
 								}
 								db.mainDatabaseConnectionPool.query(`update inventoryGT set giraffeCoins='${rows[0].giraffeCoins - (rows2[0].value * (parseInt(rows2[0].inStock))/ rows2[0].initialStock)}', inventory='${JSON.stringify(inventory)}' where ID = '${ID}'`);
-								message.channel.send(fancyPurchaseEmbed);
+								reply(event,{embeds:[fancyPurchaseEmbed]},isMessage);
 								if (parseInt(rows2[0].value) > 5000){
 									let desc = "";
 									if (itemInfo.type !== "constructionResources"){
-										desc = `${itemInfo.name}\nPurchased by <@${message.author.id}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`;
+										desc = `${itemInfo.name}\nPurchased by <@${ID}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`;
 									}else{
-										desc = `${itemInfo.name} (${parseInt(args[1])})\nPurchased by <@${message.author.id}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`
+										desc = `${itemInfo.name} (${parseInt(args[1])})\nPurchased by <@${ID}> for ${rows2[0].value * (parseInt(rows2[0].inStock) / rows2[0].initialStock)}GC`
 									}
 									let logEmbed = new Discord.MessageEmbed()
 										.setTitle("Transaction Occured")
 										.setDescription(desc);
-									bot.channels.cache.get("718232760388550667").send(logEmbed);
+									bot.channels.cache.get("718232760388550667").send({embeds:[logEmbed]});
 								}
 								displays.handler(0);
 								// displayRichestUsers();
@@ -141,7 +150,7 @@ module.exports = {
 			});
 
 		}else{
-			message.channel.send("Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!");
+			reply(events,"Please enter the correct format:\n`;purchase` `Item To Purchase`\nTo search for an item to get the purchasing info use the `;search` command!",isMessage);
 		}
 	}
 }
