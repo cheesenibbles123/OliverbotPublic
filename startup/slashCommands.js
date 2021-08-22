@@ -24,7 +24,6 @@ module.exports = {
 		for (let commandName in bot.commands){
 			let command = bot.commands[commandName];
 			if (!command.roles && !command.users && (command.interactionSupport || typeof(command.executeGlobal) === "function") && addedCommands.indexOf(command.name) === -1){
-				console.info("[LOADING SLASH] " + commandName);
 				let data = {
 					name : command.name,
 					description : command['help'] ? command.help : (command['description'] ? command.description : "N/A"),
