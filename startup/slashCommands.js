@@ -20,7 +20,8 @@ module.exports = {
 		let addedCommands = [];
 
 		for (let commandName in bot.commands){
-
+			const command = bot.commands[commandName];
+			
 			if (/*!command.roles && !command.users &&*/ (command.interactionSupport || typeof(command.executeGlobal) === "function") && addedCommands.indexOf(command.name) === -1){
 				let data = {
 					name : command.name,
