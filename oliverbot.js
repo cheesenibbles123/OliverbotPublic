@@ -67,7 +67,6 @@ function GetMarsWeatherData(message){
 		marsWeatherEmbed.addField("",`${text}`);
 		message.channel.send(marsWeatherEmbed);
 	});
-	return;
 }
 
 async function getUserFromID(ID){
@@ -111,8 +110,6 @@ function customizeShip(ID,args,message){
 		}
 		mainDatabaseConnectionPool.query(sql);
 	});
-
-	return;
 }
 
 function craftItem(message,args){
@@ -284,14 +281,24 @@ async function manageJoinReaction(event){
 }
 
 bot.on("interactionCreate", async interaction => {
-	if (!interaction.isCommand()) return;
-	await interaction.deferReply();
+	if (interaction.isCommand()){
+		await interaction.deferReply();
 
-	let args = [];
-	for (let i=0; i < interaction.options._hoistedOptions.length; i++){
-		args.push(interaction.options._hoistedOptions[i].value);
+		let args = [];
+		for (let i=0; i < interaction.options._hoistedOptions.length; i++){
+			args.push(interaction.options._hoistedOptions[i].value);
+		}
+		commands.handler(interaction, false, interaction.commandName, args);
+	}else if (interaction.isSelectMenu()){
+		await interaction.deferUpdate();
+		const data = interaction.values[0].split(' ');
+		if (data.length < 1) return;
+		const command = data[0];
+		data.shift();
+		commands.handler(interaction, false, command, data);
+	}else{
+		return;
 	}
-	commands.handler(interaction, false, interaction.commandName, args);
 });
 
 //Pure Logging of events for administrative purposes

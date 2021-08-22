@@ -61,7 +61,7 @@ module.exports = {
 	},
 	handler: async (event,isMessage,command,args) => {
 
-		if (bot.commands[command]){
+		if (bot.commands[command] && (isMessage || !event.isSelectMenu())){
 
 			let missingRole = true;
 			let allowedUser = false;
@@ -133,7 +133,18 @@ module.exports = {
 			}else{
 				reply(event,"You do not have permission to use this command!",isMessage);
 			}
-		}else if (isMessage){
+		}else if (!isMessage) {
+			const functionToRun = args[0];
+			if (bot.commands[command] && typeof(bot.commands[command][functionToRun]) === "function"){
+				args.shift();
+				bot.commands[command][functionToRun](event,args,isMessage);
+			}else{
+				console.log(isMessage);
+				console.log(command);
+				console.log(args);
+				reply(event,"🤔",isMessage);
+			}
+		}else{
 			event.react("🤔");
 		}
 	},
