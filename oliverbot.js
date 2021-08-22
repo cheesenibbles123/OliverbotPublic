@@ -326,7 +326,7 @@ bot.on('raw', async event => {
 
 
 bot.on('error', console.error);
-bot.on('debug', console.log)
+//bot.on('debug', console.log)
 bot.on("warn", (e) => console.warn(e));
 /*
 bot.on("messageDelete", function(message){
