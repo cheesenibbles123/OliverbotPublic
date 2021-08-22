@@ -28,8 +28,7 @@ module.exports = {
 		bot = botInstance;
 	},
 	executeGlobal: (event,args,isMessage) => {
-
-		let user = glob.getUserFromMention(args[0]);
+		let user = isMessage ? glob.getUserFromMention(args[0]) : args[0];
 		let gifterID = event.member.user.id;
 		let recieverID = user.id;
 		let amount = args[1];
