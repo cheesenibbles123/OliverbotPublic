@@ -9,7 +9,6 @@ module.exports = {
 		let timer = ms => new Promise( res => setTimeout(res, ms));
 		let commandsNotFound = false;
 		while (commandsNotFound){
-			console.log('Looping while');
 			await timer(500);
 			if (bot.loadedCommands){
 				break;
