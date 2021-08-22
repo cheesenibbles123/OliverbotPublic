@@ -142,7 +142,7 @@ module.exports = {
 				console.log(isMessage);
 				console.log(command);
 				console.log(args);
-				reply(event,"🤔",isMessage);
+				reply(event,{content:"🤔",components:[]},isMessage);
 			}
 		}else{
 			event.react("🤔");
