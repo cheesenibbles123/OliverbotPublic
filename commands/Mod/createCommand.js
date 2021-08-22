@@ -17,8 +17,10 @@ module.exports = {
 			db.configurationDatabaseConnectionPool.query(`INSERT INTO CustomCommands VALUES ('${args[0]}' , '${args.slice(1)}' )`);
 			let command = {
 				name: args[0],
+				help: "Custom Command",
+				category: "Custom",
 				execute: (message,args) => {
-					message.channel.send(args.slice(1));
+					message.channel.send(args.slice(1).join(' '));
 				}
 			}
 			bot.commands[args[0]] = command;
