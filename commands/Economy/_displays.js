@@ -356,7 +356,7 @@ async function displayRichestUsers(){
 						
 						let user = await bot.users.cache.get(rows[s].ID);
 						if (user === undefined){
-							name = rows[i].ID;
+							name = rows[s].ID;
 						}else{
 							name = user.username;
 						}
