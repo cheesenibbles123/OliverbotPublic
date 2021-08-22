@@ -1,4 +1,5 @@
 const config = require("./../config.json");
+const colours = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -16,13 +17,13 @@ module.exports = {
 		try{
 			entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_KICK'}).then(audit => audit.entries.first());
 			if (entry.createdTimestamp > (Date.now() - 5000)){
-				rawEmbed.setColor(config.embedColours.bans)
+				rawEmbed.setColor(colours.ban)
 					.setTitle("User Kicked")
 					.addField("User",`${entry.target}`)
 					.addField("Executor",`${entry.executor}`)
 					.addField("Reason",`${entry.reason}`)
 					.setThumbnail(`${entry.target.displayAvatarURL()}`);
-					bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+					bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
 			}
 		}catch(e){
 			console.log("Someone left :(");

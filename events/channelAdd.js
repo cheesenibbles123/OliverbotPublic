@@ -1,4 +1,5 @@
 const config = require("./../config.json");
+const colours = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -16,10 +17,10 @@ module.exports = {
 		let createChannel = bot.channels.cache.get(event.d.id);
 		if (event.d.type !== 'dm'){
 
-			rawEmbed.setColor(config.embedColours.channels)
+			rawEmbed.setColor(colours.channel)
 				.setTitle("Channel Created")
 				.addField("Info:",`Name: ${event.d.name}\n<#${event.d.id}>`);
 		}
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
 	}
 }

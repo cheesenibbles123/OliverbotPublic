@@ -1,4 +1,5 @@
 const config = require("./../config.json");
+const colours = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -13,10 +14,10 @@ module.exports = {
 		let rawEmbed = new Discord.MessageEmbed()
 			.setTimestamp();
 
-		rawEmbed.setColor(config.embedColours.channels)
+		rawEmbed.setColor(colours.channel)
 			.setTitle(`Message Pinned`)
 			.setDescription(`Channel: <#${event.d.channel_id}>\nID: ${event.d.channel_id}`);
 
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(rawEmbed);
+		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
 	}
 }
