@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
 const { MODERATOR, ADMINISTRATOR } = require("./../../structs/roles");
-const embedColours = require("./../../structs/eventColours");
+const { WARNING_ADMIN, WARNING_MOD } = require("./../../structs/eventColours");
 const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
 let bot;
@@ -30,15 +30,15 @@ module.exports = {
 			.setFooter(`ID: ${member.id}`);
 
 		if (message.member.roles.cache.has(ADMINISTRATOR)){
-			loggingWarningEmbed.setColor(embedColours.warningAdmin);
-			warningEmbed.setColor(embedColours.warningAdmin);
+			loggingWarningEmbed.setColor(WARNING_ADMIN);
+			warningEmbed.setColor(WARNING_ADMIN);
 		}else{
-			loggingWarningEmbed.setColor(embedColours.warningMod);
-			warningEmbed.setColor(embedColours.warningMod);
+			loggingWarningEmbed.setColor(WARNING_MOD);
+			warningEmbed.setColor(WARNING_MOD);
 		}
 
 		try{
-			member.send(warningEmbed).catch(() => message.channel.send("This user does not have open DMs."));
+			member.send({embeds:[warningEmbed]}).catch(() => message.channel.send("This user does not have open DMs."));
 			bot.channels.cache.get(LOGGING_CHANNEL).send(loggingWarningEmbed);
 		}catch(e){
 			message.reply("This isnt working currently. Tell archie to go look at the logs.");
