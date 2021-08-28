@@ -1,7 +1,7 @@
 exports.colours = colours = {
-	channel : "#013220",
-	ban : "#0099ff",
-	role : "#FFFF00",
-	warningAdmin : "FF0000",
-	warningMod : "FFFF00"
+	CHANNEL : "#013220",
+	BAN : "#0099ff",
+	ROLE : "#FFFF00",
+	WARNING_ADMIN : "FF0000",
+	WARNIND_MOD : "FFFF00"
 }
