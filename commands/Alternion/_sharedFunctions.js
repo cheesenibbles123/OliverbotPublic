@@ -244,9 +244,9 @@ async function globalJsonUpdate(){
 
 exports.globalJsonUpdate = globalJsonUpdate;
 
-exports.checkIfTL = function checkIfTL(event){
+exports.checkIfTL = function checkIfTL(ID){
 	return new Promise((resolve,reject) => {
-		db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User Where Discord_ID='${event.member.user.id}'`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User Where Discord_ID='${ID}'`, (err,rows) => {
 			if (rows){
 				if (rows[0].tl_ID === 0){
 					reply(event,"You are not a team leader!",isMessage);
