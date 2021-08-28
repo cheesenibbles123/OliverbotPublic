@@ -6,7 +6,7 @@ module.exports = {
 	help: "Gives you info about a random number",
 	executeGlobal: (event,args,isMessage) => {
 		fetch("http://numbersapi.com/random").then(res => res.text()).then(response =>{
-			reply("```"+`${response}`+"```");
+			reply(event,"```"+`${response}`+"```",isMessage);
 		});
 	}
 }
