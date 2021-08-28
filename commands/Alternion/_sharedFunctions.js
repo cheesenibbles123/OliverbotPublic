@@ -2,6 +2,7 @@ const main = require("./mainHandler.js");
 const config = require("./../../config.json");
 const fs = require("fs");
 const db = require("./../../startup/database.js");
+const {reply} = require("./../_combinedResponses.js");
 let alternionJsonFile = null;
 
 exports.iterateOver = function iterateOver(rows, type){
@@ -243,21 +244,21 @@ async function globalJsonUpdate(){
 
 exports.globalJsonUpdate = globalJsonUpdate;
 
-exports.checkIfTL = function checkIfTL(message){
+exports.checkIfTL = function checkIfTL(event){
 	return new Promise((resolve,reject) => {
-		db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User Where Discord_ID='${message.author.id}'`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User Where Discord_ID='${event.member.user.id}'`, (err,rows) => {
 			if (rows){
 				if (rows[0].tl_ID === 0){
-					message.channel.send("You are not a team leader!");
+					reply(event,"You are not a team leader!",isMessage);
 					resolve(false);
 				}else if (rows.length > 1){
-					message.channel.send("Something went wrong, you appear to be in the DB twice.");
+					reply(event,"Something went wrong, you appear to be in the DB twice.",isMessage);
 					resolve(false);
 				}else{
 					resolve(true);
 				}
 			}else{
-				message.channel.send("You are not in the database, please contact Archie.");
+				reply(event,"You are not in the database, please contact Archie.",isMessage);
 				resolve(false);
 			}
 		});

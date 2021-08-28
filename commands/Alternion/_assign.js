@@ -1,12 +1,13 @@
 const db = require("./../../startup/database.js");
 const shared = require("./_sharedFunctions.js");
 const Discord = require("discord.js");
+const {reply} = require("./../_combinedResponses.js");
 
 module.exports = {
 	name: "assign",
 	args: 4,
 	help: "Assigns an item to your loadout",
-	execute: (message,args) => {
+	execute: (event,args,isMessage) => {
 
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Assign");
@@ -16,18 +17,19 @@ module.exports = {
 		let table2Name = dbData.tbl2N;
 		let fieldName = dbData.field1Name;
 		let table2Field = dbData.field2Name;
+		let authorId = event.member ? event.member.user.id : event.user.id;
 
 		if (table1Name != "NA"){
-			db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${message.author.id}`, (err,userRow) => {
-				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${message.author.id}'`, (err, rows) => {
+			db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${authorId}`, (err,userRow) => {
+				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${authorId}'`, (err, rows) => {
 					db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${userRow[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
 						let found = false;
 						let assignedBadge = "";
 						if (rows){
 							for (let i = 0; i < rows.length; i++){
 								if (args[2] === rows[i].Name){
-									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${message.author.id}'`);
-									console.log(`Setting: -${message.author.id}- ==> -${rows[i].Name}-`);
+									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${authorId}'`);
+									console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
 									assignedBadge = rows[i].Display_Name;
 									found = true;
 									break;
@@ -38,8 +40,8 @@ module.exports = {
 						if (rows2 && !found){
 							for (let i = 0; i < rows2.length; i++){
 								if (args[2] === rows2[i].Name){
-									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${message.author.id}'`);
-									console.log(`Setting: -${message.author.id}- ==> -${rows2[i].Name}-`);
+									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${authorId}'`);
+									console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
 									assignedBadge = rows2[i].Display_Name;
 									found = true;
 									break;
@@ -54,12 +56,12 @@ module.exports = {
 							shared.globalJsonUpdate();
 						}
 
-						message.channel.send(embed);
+						reply(event,{embeds:[embed]},isMessage);
 					});
 				});
 			});
 		}else{
-			message.channel.send("That is not a valid item to assign!");
+			reply(event,"That is not a valid item to assign!",isMessage);
 		}
 	}
 }

@@ -1,25 +1,25 @@
 const db = require("./../../startup/database.js");
 const shared = require("./_sharedFunctions.js");
 const Discord = require("discord.js");
-
+const {reply} = require("./../_combinedResponses.js");
 module.exports = {
 	name: "forceupdateuser",
 	args: 3,
 	help: "Forces a team member to equip a given item.",
-	execute: async (message,args) => {
+	execute: async (event,args,isMessage) => {
 
-		let isTL = await shared.checkIfTL(message);
+		let isTL = await shared.checkIfTL(event);
 
 		if (isTL){
 
 			let embed = new Discord.MessageEmbed();
 
-			teamLeaderForceLoadoutUser(message,message.author.id,args[1].toLowerCase(),args[2],args[3],embed);
+			teamLeaderForceLoadoutUser(event,event.member.user.id,args[1].toLowerCase(),args[2],args[3],embed);
 		}
 	}
 }
 
-function teamLeaderForceLoadoutUser(message,tlID,item,itemID,targetID,alternionHandlerEmbed){
+function teamLeaderForceLoadoutUser(event,tlID,item,itemID,targetID,alternionHandlerEmbed){
 	let field;
 	let table;
 	switch (item){

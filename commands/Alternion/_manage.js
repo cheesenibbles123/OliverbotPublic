@@ -1,26 +1,27 @@
 const db = require("./../../startup/database.js");
 const shared = require("./_sharedFunctions.js");
 const Discord = require("discord.js");
+const { reply } = require("./../_combinedResponses.js");
 
 module.exports = {
 	name: "manage",
 	args: 2,
 	help: "Allows TLs to add/remove members from their team.",
-	execute: async (message,args) => {
+	execute: async (event,args,isMessage) => {
 
-		let isTL = await shared.checkIfTL(message);
+		let isTL = await shared.checkIfTL(event);
 
 		if (isTL){
 
 			let action = args[1].toLowerCase();
-			let team = await getTeamLeaderInfo(message.author.id);
+			let team = await getTeamLeaderInfo(event.member.user.id);
 
 			if (action === "remove"){
-				teamLeaderUpdateUser(message,0,team,args[2],action);
+				teamLeaderUpdateUser(event,0,team,args[2],action,isMessage);
 			}else if (action === "add"){
-				teamLeaderUpdateUser(message,team,null,args[2],action);
+				teamLeaderUpdateUser(event,team,null,args[2],action,isMessage);
 			}else{
-				message.channel.send("Invalid action");
+				reply(event,"Invalid action",isMessage);
 			}
 		}
 	}
@@ -38,27 +39,27 @@ function getTeamLeaderInfo(discord_id){
 	});
 }
 
-function teamLeaderUpdateUser(message,team,tlTeam,userID,action){
+function teamLeaderUpdateUser(event,team,tlTeam,userID,action,isMessage){
 	let alternionHandlerEmbed = new Discord.MessageEmbed()
 		.setTitle(`${action}ing user`);
 
 	db.alternionConnectionPool.query(`SELECT ID,Team_ID FROM User WHERE ID='${userID}'`, (err,rows) => {
 		if (rows.length < 1){
-			message.channel.send("That user is not in the database!");
+			reply(event,"That user is not in the database!",isMessage);
 		}else if (action === "remove" && tlTeam !== rows[0].Team_ID){
-			message.channel.send("You cannot remove members that are not on your team!");
+			reply(event,"You cannot remove members that are not on your team!",isMessage);
 		}else if (action === "add" && rows[0].Team_ID !== 0){
-			message.channel.send("You cannot add members that are on a team!");
+			reply(event,"You cannot add members that are on a team!",isMessage);
 		}else{
 			db.alternionConnectionPool.query(`UPDATE User SET Team_ID=${team} WHERE ID=${rows[0].ID}`);
 			if (team === 0){
 				alternionHandlerEmbed.setDescription(`User of ID \`${rows[0].ID}\` updated!\nThey are now free (for the time being)`);
 				removeAllEquipped(rows[0].ID,tlTeam);
-				message.channel.send(alternionHandlerEmbed);
+				reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
 			}else{
 				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${team}`, (err,rows2) => {
 					alternionHandlerEmbed.setDescription(`User of ID \`${userID}\` updated!\nNew Team: **${rows2[0].Name}**`);
-					message.channel.send(alternionHandlerEmbed);
+					reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
 				});
 			}
 		}

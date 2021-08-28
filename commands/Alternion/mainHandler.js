@@ -1,5 +1,6 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
+const { reply } = require("./../_combinedResponses.js");
 const fs = require('fs');
 
 let bot;
@@ -27,12 +28,50 @@ module.exports = {
 	args: [1,4],
 	help: "Alternion command handler",
 	category: "Api",
+	guildOnly: true,
+	options: [
+		{
+			name : "assign",
+			description : "The command you wish to run",
+			type : 2,
+			options : [
+				{
+					name : "type",
+					description : "Type of item to assign to",
+					type : 3,
+					required : true
+				},
+				{
+					name : "ID",
+					description : "ID of the skin you wish to equip",
+					type : 3,
+					required : true
+				}
+			]
+
+		},
+		{
+			name : "list",
+			description : "List the skins of a certain type",
+			type : 3,
+			choices : [
+				{
+					name : "Main Sails",
+					value : "listmainsails"
+				},
+				{
+					name : "Badges",
+					value : "listbadges"
+				}
+			]
+		}
+	],
 	init: (botInstance) => {
 		botInstance['alternionCommands'] = {};
 		bot = botInstance;
 		loadCommands();
 	},
-	execute: (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 		// Check arguments
 		let command = args[0].toLowerCase();
 		if (bot.alternionCommands[command]){
@@ -40,13 +79,11 @@ module.exports = {
 				if (typeof(bot.alternionCommands[command].args) === typeof([])){
 					// if arguments are a range between [min,max]
 					if (bot.alternionCommands[command].args[0] > args || bot.alternionCommands[command].args[1] < args){
-						message.channel.send("Please check your argument length");
-						return;
+						return reply(event,"Please check your argument length",isMessage);
 					}
 				// if arguments are a fixed length
 				}else if (bot.alternionCommands[command].args.length < args.length || bot.alternionCommands[command].args.length > args.length){
-					message.channel.send("Please check your argument length");
-					return;
+					return reply(event,"Please check your argument length",isMessage);
 				}
 			}
 
@@ -57,13 +94,13 @@ module.exports = {
 
 				// Loop over all allowed roles
 				for (let i=0; i<roles.length; i++){
-					if (message.member.roles.cache.has(roles[i])){
+					if (event.member.roles.cache.has(roles[i])){
 						missingRole = false;
 					}
 				}
 
 				if (missingRole){
-					message.channel.send("You do not have permission to use this command!");
+					reply(event,"You do not have permission to use this command!");
 					return;
 				}
 			}
@@ -74,20 +111,20 @@ module.exports = {
 				let notFound = true;
 
 				for (let i=0; i < users.length; i++){
-					if (users[i] === message.author.id){
+					if (users[i] === event.member.user.id){
 						notFound = false;
 					}
 				}
 
 				if (notFound){
-					message.channel.send("You do not have permission to use this command!");
+					reply(event,"You do not have permission to use this command!",isMessage);
 					return;
 				}
 			}
 
-			bot.alternionCommands[args[0].toLowerCase()].execute(message,args);
+			bot.alternionCommands[args[0].toLowerCase()].execute(event,args,isMessage);
 		}else{
-			message.react('🤔');
+			reply(event,'🤔',isMessage);
 		}
 	}
 }

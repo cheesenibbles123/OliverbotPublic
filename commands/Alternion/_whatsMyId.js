@@ -1,26 +1,27 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
+const {reply} = require("./../_combinedResponses.js");
 
 module.exports = {
 	name: "whatsmyid",
 	args: 0,
-	execute: (message, args) => {
+	execute: (event, args,isMessage) => {
 
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Your ID");
 			
-		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${message.author.id}'`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${event.member.user.id}'`, (err,rows) => {
 			if (rows){
 				if (rows.length < 1){
-					message.channel.send("You are currently not in the database.");
+					reply(event,"You are currently not in the database.",isMessage);
 				}else if (rows.length > 1){
-					message.channel.send("There seems to be an issue, you are recorded multiple times.");
+					reply(event,"There seems to be an issue, you are recorded multiple times.",isMessage);
 				}else{
 					embed.setDescription("`" + rows[0].ID + "`");
-					message.channel.send(embed);
+					reply(event,{embeds:[embed]},isMessage);
 				}
 			}else{
-				message.channel.send("Error getting users, ping archie.");
+				reply(event,"Error getting users, ping archie.",isMessage);
 				console.log(rows);
 			}
 		});

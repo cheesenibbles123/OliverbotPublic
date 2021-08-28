@@ -1,25 +1,25 @@
 const db = require("./../../startup/database.js");
 const shared = require("./_sharedFunctions.js");
 const Discord = require("discord.js");
-
+const {reply} = require("./../_combinedResponses.js");
 module.exports = {
 	name: "forceupdateteam",
 	args: 3,
 	help: "Forces all team members to equip a given item.",
-	execute: async (message,args) => {
+	execute: async (event,args,isMessage) => {
 
-		let isTL = await shared.checkIfTL(message);
+		let isTL = await shared.checkIfTL(event);
 
 		if (isTL){
 
 			let embed = new Discord.MessageEmbed();
 
-			teamLeaderForceLoadout(message,message.author.id,args[1].toLowerCase(),args[2],embed);
+			teamLeaderForceLoadout(event,event.member.user.id,args[1].toLowerCase(),args[2],embed);
 		}
 	}
 }
 
-function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
+function teamLeaderForceLoadout(event,tlID,item,itemID,alternionHandlerEmbed){
 	let field;
 	let table;
 	switch (item){
@@ -70,22 +70,22 @@ function teamLeaderForceLoadout(message,tlID,item,itemID,alternionHandlerEmbed){
 									alternionHandlerEmbed.setTitle("Setup " + item +"(s)")
 										.setDescription(`Set all members of team \`${rows4[0].Name}\`\nNew ${item}: ${rows3[s].Display_Name}`);
 
-									message.channel.send(alternionHandlerEmbed);
+									reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
 								});
 								break;
 							}
 						}
 
 						if (hasNotFound){
-							message.channel.send(`Could not find any **${item}(s)** with ID \`${itemID}\``);
+							reply(event,`Could not find any **${item}(s)** with ID \`${itemID}\``,isMessage);
 						}
 					});
 				});
 			}else{
-				message.channel.send("This command is for Team Leaders only!");
+				reply(event,"This command is for Team Leaders only!",isMessage);
 			}
 		});
 	}else{
-		message.channel.send("Incorrect input, double check your inputs.");
+		reply(event,"Incorrect input, double check your inputs.",isMessage);
 	}
 }
