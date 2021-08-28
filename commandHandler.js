@@ -119,10 +119,6 @@ module.exports = {
 
 			if (((bot.commands[command].roles && !missingRole) || (!bot.commands[command].roles && missingRole && !bot.commands[command].users)) || allowedUser){
 
-				console.log(bot.commands[command].roles && !missingRole);
-				console.log(!bot.commands[command].roles && missingRole && !bot.commands[command].users);
-				console.log(allowedUser);
-
 				if (typeof(bot.commands[command].executeGlobal) === "function"){ // If the combined function exists call it
 					bot.commands[command].executeGlobal(event,args,isMessage);
 					db.updateTracking(command);
