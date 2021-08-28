@@ -12,38 +12,72 @@ module.exports = {
 		bot = botInstance;
 	},
 	execute: (event,args,isMessage) => {
-		console.log(args);
 		let ID = isMessage ? event.author.id : event.user.id;
 		let type = args[0].toLowerCase();
-		let isPrivate = typeof(args[1]) !== "undefined" ? args[1].toLowerCase() === "private" : false;
+		if (type === "members"){
+			manageTeam(event,ID,isMessage);
+		}else{
+			let isPrivate = typeof(args[1]) !== "undefined" ? args[1].toLowerCase() === "private" : false;
 
-		let tableData = fetchTables(type);
+			let tableData = fetchTables(type);
 
-		let embed = new Discord.MessageEmbed()
-			.setTitle(`Available ${tableData.table1}s - ${isPrivate ? "Private" : "Public"}`)
-			.setFooter(`The formatting is: - ${type}_id : ${tableData.table1} Name -`);
-		if (tableData.table1Name === "N/A"){
-			reply(event,"Please ensure you have entered a valid type.",isMessage);
-		}else if (isPrivate){
-			db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
-				db.alternionConnectionPool.query(`(SELECT ${tableData.table1}.Name, ${tableData.table1}.Display_Name FROM ${tableData.table2} INNER JOIN User ON User_ID = User.ID INNER JOIN ${tableData.table1} ON ${tableData.field} = ${tableData.table1}.ID WHERE User.Discord_ID='${ID}') UNION ( SELECT Name,Display_Name FROM ${tableData.table1} WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
+			let embed = new Discord.MessageEmbed()
+				.setTitle(`Available ${tableData.table1}s - ${isPrivate ? "Private" : "Public"}`)
+				.setFooter(`The formatting is: - ${type}_id : ${tableData.table1} Name -`);
+
+			if (tableData.table1Name === "N/A"){
+				reply(event,"Please ensure you have entered a valid type.",isMessage);
+			}else if (isPrivate){
+				db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
+					db.alternionConnectionPool.query(`(SELECT ${tableData.table1}.Name, ${tableData.table1}.Display_Name FROM ${tableData.table2} INNER JOIN User ON User_ID = User.ID INNER JOIN ${tableData.table1} ON ${tableData.field} = ${tableData.table1}.ID WHERE User.Discord_ID='${ID}') UNION ( SELECT Name,Display_Name FROM ${tableData.table1} WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
+						
+						embed.setDescription(shared.iterateOver(rows,"Badges"));
+						reply(event,{embeds:[embed]},isMessage);
+
+					});
+				});
+			}else if (tableData.table1 !== "WeaponSkin"){
+				db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM ${tableData.table1} where Limited!=1`, (err,rows) => {
 					
 					embed.setDescription(shared.iterateOver(rows,"Badges"));
 					reply(event,{embeds:[embed]},isMessage);
 
 				});
-			});
-		}else if (tableData.table1 !== "WeaponSkin"){
-			db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM ${tableData.table1} where Limited!=1`, (err,rows) => {
-				
-				embed.setDescription(shared.iterateOver(rows,"Badges"));
-				reply(event,{embeds:[embed]},isMessage);
-
-			});
-		}else{
-			reply(event,"Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.",isMessage);
+			}else{
+				reply(event,"Please ensure you have entered valid terms. Currently supported: `Private`, `Public`.",isMessage);
+			}
 		}
 
+	}
+}
+
+async function manageTeam(event,authorId,isMessage){
+	let isTL = await shared.checkIfTL(authorId);
+	if (isTL){
+
+		let embed = new Discord.MessageEmbed();
+
+		db.alternionConnectionPool.query(`SELECT Team_Leader, Team_ID FROM User WHERE discord_id=${authorId}`, (err,rows) => {
+			if (rows.length === 1 && rows[0].Team_Leader !== 0){
+				db.alternionConnectionPool.query(`SELECT ID, Steam_ID, Discord_ID FROM User WHERE Team_ID=${rows[0].Team_ID}`, (err,rows2) => {
+					let list = "";
+					for (let i=0; i < rows2.length; i++){
+						if (rows2[i].Discord_ID != 'NULL'){
+							list += `\`${rows2[i].ID}\` : <@${rows2[i].Discord_ID}>\n`;
+						}else{
+							list += `\`${rows2[i].ID}\` : \`${rows2[i].Steam_ID}\`\n`;
+						}
+					}
+					db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${rows[0].Team_ID}`, (err,rows3) => {
+						embed.setTitle(rows3[0].Name)
+							.setDescription(list);
+						reply(event,{embeds: [embed]},isMessage);
+					});
+				});
+			}else{
+				reply(event,"This command is for Team Leaders only!",isMessage);
+			}
+		});
 	}
 }
 
