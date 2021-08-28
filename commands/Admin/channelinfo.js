@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const db = require("./../../startup/database.js");
+const { ADMINISTRATOR } = require("./../../structs/roles");
 
 let bot;
 
@@ -7,7 +8,7 @@ module.exports = {
 	name: "channelinfo",
 	args: 0,
 	help: "Displays the channel information",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	guildOnly: true,
 	init: (botInstance) => {

@@ -1,10 +1,11 @@
 const db = require("./../../startup/database.js");
+const { ADMINISTRATOR } = require("./../../structs/roles");
 
 module.exports = {
 	name: "deleterole",
 	args: 1,
 	help: "Deletes a reaction role",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	execute: (message,args) => {
 		if (args[0].indexOf(":") !== -1){

@@ -1,10 +1,12 @@
 const Discord = require('discord.js');
+const { ADMINISTRATOR } = require("./../../structs/roles");
+const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
 module.exports = {
 	name: "botinfo",
 	args: 0,
 	help: "Displays the bot information",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	execute: (message,args) => {
 		let totalSeconds = (bot.uptime / 1000);

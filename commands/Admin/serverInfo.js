@@ -1,10 +1,11 @@
 const Discord = require("discord.js");
+const { ADMINISTRATOR } = require("./../../structs/roles");
 
 module.exports = {
 	name: "serverinfo",
 	args: 0,
 	help: "Displays the server information",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	guildOnly: true,
 	execute: (message,args) => {
@@ -31,6 +32,6 @@ module.exports = {
 							.addField('Features', `${features}`)
 							.addField('AFK', `Channel: ${message.guild.afkChannel}\nTimeout: ${message.guild.afkTimeout}sec`,true)
 							.setImage(`${message.guild.iconURL()}`);
-		message.channel.send(serverinfo);
+		message.channel.send({embeds:[serverinfo]});
 	}
 }

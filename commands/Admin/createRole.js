@@ -1,10 +1,12 @@
 const db = require("./../../startup/database.js");
+const { ADMINISTRATOR } = require("./../../structs/roles");
+const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
 module.exports = {
 	name: "createrole",
 	args: 2,
 	help: "Creates a role that can be assigned through a reaction",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	execute: (message,args) => {
 		if (args[0].indexOf(":") !== -1){

@@ -1,6 +1,8 @@
-const commandHandler = require("./../../commandHandler.js");
-const db = require("./../../startup/database.js");
+const commandHandler = require("./../../commandHandler");
+const db = require("./../../startup/database");
 const fs = require("fs");
+const { ADMINISTRATOR } = require("./../../structs/roles");
+const config = require("./../../config");
 
 let bot;
 
@@ -55,8 +57,8 @@ module.exports ={
 	name: "reload",
 	args: [0,1],
 	help: "Reloads a given command, or if none given, reloads all.",
-	roles: ["665939545371574283"],
-	users: ["337541914687569920"],
+	roles: [ ADMINISTRATOR ],
+	users: [ config.ownerId ],
 	init: (botInstance) => {
 		bot = botInstance;
 	},

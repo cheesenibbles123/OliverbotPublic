@@ -1,12 +1,13 @@
 const glob = require("./../_globalFunctions");
 const Discord = require("discord.js");
 const db = require("./../../startup/database.js");
+const { ADMINISTRATOR } = require("./../../structs/roles");
 
 module.exports = {
 	name: "nwordcount",
 	args: 1,
 	help: "Displays number of n words said by the pinged individual",
-	roles: ["665939545371574283"],
+	roles: [ ADMINISTRATOR ],
 	category: "Admin",
 	execute: (message,args) => {
 		if (Array.isArray(args)){
@@ -22,7 +23,7 @@ module.exports = {
 						let nWordEmbed = new Discord.MessageEmbed()
 							.setTitle("N Word Count")
 							.setDescription(`User ${user.username} has said the N word ${rows[0].count} times!`);
-						message.channel.send(nWordEmbed);
+						message.channel.send({embeds: [nWordEmbed]});
 					}
 				});
 			}catch(e){
