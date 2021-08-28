@@ -10,7 +10,7 @@ module.exports = {
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Your ID");
 			
-		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${event.member.user.id}'`, (err,rows) => {
+		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${event.user.id}'`, (err,rows) => {
 			if (rows){
 				if (rows.length < 1){
 					reply(event,"You are currently not in the database.",isMessage);
