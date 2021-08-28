@@ -2,12 +2,16 @@ const Discord = require('discord.js');
 const { ADMINISTRATOR } = require("./../../structs/roles");
 const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
+let bot;
+
 module.exports = {
 	name: "botinfo",
-	args: 0,
 	help: "Displays the bot information",
 	roles: [ ADMINISTRATOR ],
 	category: "Admin",
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
 		let totalSeconds = (bot.uptime / 1000);
 		let days = Math.floor(totalSeconds / 86400);
@@ -25,7 +29,7 @@ module.exports = {
 		ramusage = ramusage.slice(0,ramusage.indexOf(".") + 3);
 
 		let botInfo = new Discord.MessageEmbed()
-			.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB\nPlaying Audio: ${audio.isPlaying}`)
+			.addField(`Overview`,`Uptime: ${uptime}\nRam: ${ramusage}MB`)/*\nPlaying Audio: ${audio.isPlaying}`)*/
 			.setTimestamp();
 
 		if (args[0] === "adv"){
@@ -39,11 +43,11 @@ module.exports = {
 			}
 			botInfo.addField("Memory Information", `${memoryInformation}`,true);
 
-			let procInf = `Node Version: ${process.env.node_version}\nVersion: ${env.version}\nRestarts: ${process.env.restart_time}\nArgs: ${process.env.node_args}\nAutorestart: ${process.env.autorestart}`;
+			let procInf = `Node Version: ${process.env.node_version}\nVersion: ${process.env.version}\nRestarts: ${process.env.restart_time}\nArgs: ${process.env.node_args}\nAutorestart: ${process.env.autorestart}`;
 
 			botInfo.addField(`Process info`,procInf,true);
 		}
 
-		message.channel.send(botInfo);
+		message.channel.send({embeds:[botInfo]});
 	}
 }
