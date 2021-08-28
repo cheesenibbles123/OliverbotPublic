@@ -8,11 +8,10 @@ module.exports = {
 	args: 4,
 	help: "Assigns an item to your loadout",
 	execute: (event,args,isMessage) => {
-
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Assign");
 
-		let dbData = getTablesAndFields(args[1].toLowerCase());
+		let dbData = getTablesAndFields(args[0].toLowerCase());
 		let table1Name = dbData.tbl1N;
 		let table2Name = dbData.tbl2N;
 		let fieldName = dbData.field1Name;
@@ -27,7 +26,7 @@ module.exports = {
 						let assignedBadge = "";
 						if (rows){
 							for (let i = 0; i < rows.length; i++){
-								if (args[2] === rows[i].Name){
+								if (args[1] === rows[i].Name){
 									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${authorId}'`);
 									console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
 									assignedBadge = rows[i].Display_Name;
@@ -39,7 +38,7 @@ module.exports = {
 
 						if (rows2 && !found){
 							for (let i = 0; i < rows2.length; i++){
-								if (args[2] === rows2[i].Name){
+								if (args[1] === rows2[i].Name){
 									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${authorId}'`);
 									console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
 									assignedBadge = rows2[i].Display_Name;
@@ -48,6 +47,7 @@ module.exports = {
 								}
 							}
 						}
+
 
 						if (!found){
 							embed.setDescription("You cannot assign that Item!");
