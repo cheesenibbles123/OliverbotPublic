@@ -95,6 +95,7 @@ module.exports = {
 				for (let i=0; i<roles.length; i++){
 					if (event.member.roles.cache.has(roles[i])){
 						missingRole = false;
+						break;
 					}
 				}
 			}
@@ -104,10 +105,9 @@ module.exports = {
 				let users = bot.commands[command].users;
 
 				for (let i=0; i < users.length; i++){
-					console.log("Checking: " + users[i]);
 					if (users[i] === (isMessage ? event.author.id : event.member.user.id)){
-						console.log("Found: " + users[i]);
 						allowedUser = true;
+						break;
 					}
 				}
 			}
@@ -139,7 +139,7 @@ module.exports = {
 			}else{
 				reply(event,"You do not have permission to use this command!",isMessage);
 			}
-		}else if (!isMessage) {
+		}else if (!isMessage && interaction.isSelectMenu()) {
 			const functionToRun = args[0];
 			if (bot.commands[command] && typeof(bot.commands[command][functionToRun]) === "function"){
 				args.shift();
