@@ -1,7 +1,7 @@
 const glob = require("./_globalFunctions");
 const db = require("./../startup/database.js");
 const Discord = require("discord.js");
-const { reply } = require("./_globalFunctions.js");
+const { reply } = require("./_combinedResponses.js");
 
 let bot;
 let isNotLocked = true;
@@ -19,7 +19,7 @@ module.exports = {
 			required : false,
 			choices : [
 				{
-					name : "Income",
+					name : "type",
 					value: "income"
 				}
 			]
