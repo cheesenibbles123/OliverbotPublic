@@ -155,7 +155,7 @@ async function fetchEloStuff(event,steamID,type,isMessage){
 			case "monthly":
 				user = response.monthly[steamID];
 				if (user === undefined){
-					message.channel.send("You are not on the monthly leaderboard. Play a game or two on the GT server to be added.");
+					reply(event,"You are not on the monthly leaderboard. Play a game or two on the GT server to be added.",isMessage);
 					break;
 				}
 				
