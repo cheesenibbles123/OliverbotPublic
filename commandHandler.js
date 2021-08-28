@@ -104,7 +104,9 @@ module.exports = {
 				let users = bot.commands[command].users;
 
 				for (let i=0; i < users.length; i++){
-					if (users[i] === isMessage ? event.author.id : event.member.user.id){
+					console.log("Checking: " + users[i]);
+					if (users[i] === (isMessage ? event.author.id : event.member.user.id)){
+						console.log("Found: " + users[i]);
 						allowedUser = true;
 					}
 				}
@@ -115,7 +117,11 @@ module.exports = {
 				return reply(event,"I can't execute that command within DMs!",isMessage);
 			}
 
-			if ((bot.commands[command].roles && !missingRole) || ((!bot.commands[command].roles && missingRole) && !bot.commands[command].users) || allowedUser){
+			if (((bot.commands[command].roles && !missingRole) || (!bot.commands[command].roles && missingRole && !bot.commands[command].users)) || allowedUser){
+
+				console.log(bot.commands[command].roles && !missingRole);
+				console.log(!bot.commands[command].roles && missingRole && !bot.commands[command].users);
+				console.log(allowedUser);
 
 				if (typeof(bot.commands[command].executeGlobal) === "function"){ // If the combined function exists call it
 					bot.commands[command].executeGlobal(event,args,isMessage);
