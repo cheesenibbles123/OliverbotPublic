@@ -2,6 +2,8 @@ const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
 const config = require("./../../config.json");
 const { MODERATOR, MUTED } = require("./../../structs/roles");
+const { LOGGING_CHANNEL } = require("./../../structs/channels");
+
 let bot;
 
 module.exports = {
@@ -28,7 +30,7 @@ module.exports = {
 				console.log(e);
 				message.channel.send("Can't mute this person right now, something doesnt seem to be working");
 			}
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send("User: " + muteMember + " has been muted by " + message.member.user.username + ".");
+			bot.channels.cache.get(LOGGING_CHANNEL).send("User: " + muteMember + " has been muted by " + message.member.user.username + ".");
 		}
 	}
 }

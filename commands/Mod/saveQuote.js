@@ -1,5 +1,6 @@
 const Discord = require("discord.js");
 const { MODERATOR } = require("./../../structs/roles");
+const { QUOTES } = require("./../../structs/channels");
 
 let bot;
 
@@ -35,7 +36,7 @@ module.exports = {
 			      			}
 			    		}
 			  		});
-					bot.channels.cache.get(config.serverInfo.channels.quotes).send(quote);
+					bot.channels.cache.get(QUOTES).send({embeds: [quote]});
 				});
 			}catch(e){
 				channel.send("Please make sure you have entered it correctly!");

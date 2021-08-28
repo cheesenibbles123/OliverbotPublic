@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
 const { MODERATOR, ADMINISTRATOR } = require("./../../structs/roles");
 const embedColours = require("./../../structs/eventColours");
+const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
 let bot;
 
@@ -38,7 +39,7 @@ module.exports = {
 
 		try{
 			member.send(warningEmbed).catch(() => message.channel.send("This user does not have open DMs."));
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(loggingWarningEmbed);
+			bot.channels.cache.get(LOGGING_CHANNEL).send(loggingWarningEmbed);
 		}catch(e){
 			message.reply("This isnt working currently. Tell archie to go look at the logs.");
 			console.log(e);

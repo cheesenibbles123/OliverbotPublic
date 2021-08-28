@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
 const shared = require("./_sharedFunctions.js");
 const { MODERATOR, ADMINISTRATOR } = require("./../../structs/roles");
+const { LOGGING_CHANNEL } = require("./../../structs/channels");
 
 let bot;
 
@@ -37,7 +38,7 @@ module.exports = {
 				if (tempmuteGo){
 					let delayTemp = (parseInt(args[1]) * 1000 * 60 * 60);
 					mute(message);
-					bot.channels.cache.get("512331083493277706").send("User: "+member+" has been temporarily muted for "+time+" hour(s) by "+message.member.user.username+".\n"
+					bot.channels.cache.get(LOGGING_CHANNEL).send("User: "+member+" has been temporarily muted for "+time+" hour(s) by "+message.member.user.username+".\n"
 														+"Reason: "+(args.slice(2)).join(" "));
 					setTimeout(() => {
 						unmute(message)
