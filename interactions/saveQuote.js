@@ -1,7 +1,8 @@
-const db = require("./../startup/database.js");
+const db = require("./../startup/database");
 const config = require("./../config.json");
-const glob = require("./../commands/_globalFunctions.js");
+const glob = require("./../commands/_globalFunctions");
 const Discord = require("discord.js");
+const { QUOTES } = require("./../structs/channels");
 
 const autoQuoteNotAllowedCategories = ["408407982926331904","440525688248991764","665972605928341505","585042086542311424","632107333933334539","692084502184329277"];
 
@@ -42,7 +43,7 @@ module.exports = {
 				      			}
 					  		});
 
-							bot.channels.cache.get(config.serverInfo.channels.quotes).send(AutoQuote);
+							bot.channels.cache.get(QUOTES).send({embeds:[AutoQuote]});
 						}catch(e){
 							console.log(e);
 						}
