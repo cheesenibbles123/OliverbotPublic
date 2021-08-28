@@ -7,6 +7,7 @@ module.exports = {
 	help: "Deletes a command",
 	roles: [ MODERATOR ],
 	category: "Mod",
+	guildOnly: true,
 	execute: (message,args) => {
 		let commandToDelete = "";
 		if (Array.isArray(args)){

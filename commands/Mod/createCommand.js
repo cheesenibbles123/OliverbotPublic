@@ -9,6 +9,7 @@ module.exports = {
 	help: "Creates a command",
 	roles: [ MODERATOR ],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

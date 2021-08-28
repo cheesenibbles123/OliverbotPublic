@@ -11,6 +11,7 @@ module.exports = {
 	usage: "@user",
 	roles: [ MODERATOR ],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

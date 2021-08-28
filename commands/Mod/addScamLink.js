@@ -10,6 +10,7 @@ module.exports = {
 	help: "Adds a scam link to the scam filter",
 	roles: [ MODERATOR ],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},

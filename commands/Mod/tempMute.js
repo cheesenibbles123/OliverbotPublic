@@ -11,6 +11,7 @@ module.exports = {
 	help: "Temporarily mutes a user",
 	roles: [ MODERATOR ],
 	category: "Mod",
+	guildOnly: true,
 	init: (botInstance) => {
 		bot = botInstance;
 	},
