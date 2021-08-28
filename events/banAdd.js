@@ -1,5 +1,6 @@
 const config = require("./../config.json");
-const colours = require("./../structs/eventColours.js");
+const { BAN } = require("./../structs/eventColours");
+const { LOGGING_CHANNEL } = require("./../structs/channels");
 
 let bot;
 
@@ -16,13 +17,13 @@ module.exports = {
 
 		entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_ADD'}).then(audit => audit.entries.first());
 		if (entry.createdTimestamp > (Date.now() - 5000)){
-			rawEmbed.setColor(colours.ban)
+			rawEmbed.setColor(BAN)
 				.setTitle("User Banned")
 				.addField("User",`${entry.target}`)
 				.addField("Executor",`${entry.executor}`)
 				.addField("Reason",`${entry.reason}`)
 				.setThumbnail(`${entry.target.displayAvatarUR()}`);
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
+			bot.channels.cache.get(LOGGING_CHANNEL).send({embeds:[rawEmbed]});
 		}
 	}
 }

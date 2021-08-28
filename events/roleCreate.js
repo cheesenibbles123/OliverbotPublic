@@ -1,5 +1,6 @@
 const config = require("./../config.json");
-const colours = require("./../structs/eventColours.js");
+const { ROLE } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -15,9 +16,9 @@ module.exports = {
 			.setTimestamp();
 
 		rawEmbed.setTitle("Role Created")
-			.setColor(colours.role)
+			.setColor(ROLE)
 			.addField("Role:",`${event.d.role.name}\n<@&${event.d.role.id}>`);
 			
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
+		bot.channels.cache.get(LOGGING_CHANNEL).send({embeds:[rawEmbed]});
 	}
 }

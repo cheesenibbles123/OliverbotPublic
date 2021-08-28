@@ -1,5 +1,6 @@
 const config = require("./../config.json");
-const colours = require("./../structs/eventColours.js");
+const { CHANNEL } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -14,9 +15,9 @@ module.exports = {
 		let rawEmbed = new Discord.MessageEmbed()
 			.setTimestamp();
 
-		rawEmbed.setColor(colours.channel)
+		rawEmbed.setColor(CHANNEL)
 			.setTitle(`Thread Created`);
 
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
+		bot.channels.cache.get(LOGGING_CHANNEL).send({embeds:[rawEmbed]});
 	}
 }

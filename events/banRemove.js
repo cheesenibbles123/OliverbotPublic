@@ -1,5 +1,6 @@
 const config = require("./../config.json");
-const colours = require("./../structs/eventColours.js");
+const { BAN } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/channels");
 
 let bot;
 
@@ -15,11 +16,11 @@ module.exports = {
 			.setTimestamp();
 
 		entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'MEMBER_BAN_REMOVE'}).then(audit => audit.entries.first());
-		rawEmbed.setColor(colours.ban)
+		rawEmbed.setColor(BAN)
 			.setTitle("User Unbanned")
 			.addField("User",`${entry.target}`)
 			.addField("Executor",`${entry.executor}`)
 			.setThumbnail(`${entry.target.displayAvatarURL()}`);
-		bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
+		bot.channels.cache.get(LOGGING_CHANNEL).send({embeds:[rawEmbed]});
 	}
 }

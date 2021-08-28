@@ -1,5 +1,6 @@
 const config = require("./../config.json");
-const colours = require("./../structs/eventColours.js");
+const { ROLE } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/eventColours.js");
 
 let bot;
 
@@ -17,9 +18,9 @@ module.exports = {
 		entry = await bot.guilds.cache.get(config.serverInfo.serverId).fetchAuditLogs({type: 'ROLE_DELETE'}).then(audit => audit.entries.first());
 		if (entry.createdTimestamp > (Date.now() - 5000)){
 			rawEmbed.setTitle("Role Deleted")
-				.setColor(colours.role)
+				.setColor(ROLE)
 				.setDescription(`${entry.changes[0].old}\nby: ${entry.executor}`);
-			bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send({embeds:[rawEmbed]});
+			bot.channels.cache.get(LOGGING_CHANNEL).send({embeds:[rawEmbed]});
 		}
 	}
 }
