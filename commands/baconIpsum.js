@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const Discord = require("discord.js");
+const glob = require("./_globalFunctions");
 const {reply} = require("./_combinedResponses.js");
 
 module.exports = {
