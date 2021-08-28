@@ -1,11 +1,12 @@
 const config = require("./../config.json");
 const { CHANNEL } = require("./../structs/eventColours.js");
-const { LOGGING_CHANNEL } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/channels.js");
+const Discord = require("discord.js");
 
 let bot;
 
 module.exports = {
-	name : "THREAD_MEMBER_UPDATE", // This is the event name (event.t) and is what will be used in the eventHandler
+	name : "THREAD_MEMBERS_UPDATE", // This is the event name (event.t) and is what will be used in the eventHandler
 	init : (botInstance) => {  // If you do not need a reference to bot, simply remove this function
 		bot = botInstance;
 	},

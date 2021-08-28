@@ -1,6 +1,7 @@
 const config = require("./../config.json");
 const { CHANNEL } = require("./../structs/eventColours.js");
-const { LOGGING_CHANNEL } = require("./../structs/eventColours.js");
+const { LOGGING_CHANNEL } = require("./../structs/channels.js");
+const Discord = require("discord.js");
 
 let bot;
 

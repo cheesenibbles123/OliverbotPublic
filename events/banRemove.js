@@ -1,6 +1,7 @@
 const config = require("./../config.json");
-const { BAN } = require("./../structs/eventColours.js");
+const { BAN } = require("./../structs/eventColours");
 const { LOGGING_CHANNEL } = require("./../structs/channels");
+const Discord = require("discord.js");
 
 let bot;
 
