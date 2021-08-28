@@ -13,7 +13,7 @@ function loadCommands(){
 
 		if (!bot.alternionCommands[command.name.toLowerCase()]){
 			if (typeof(command.init) === "function"){
-				command.init(botInstance);
+				command.init(bot);
 			}
 			bot.alternionCommands[command.name.toLowerCase()] = command;
 		}else{
@@ -25,43 +25,95 @@ function loadCommands(){
 
 module.exports = {
 	name: "alternion",
-	args: [1,4],
 	help: "Alternion command handler",
 	category: "Api",
 	guildOnly: true,
 	options: [
 		{
 			name : "assign",
-			description : "The command you wish to run",
-			type : 2,
+			description : "Assign a skin to your loadout",
+			type : 1,
 			options : [
 				{
 					name : "type",
 					description : "Type of item to assign to",
 					type : 3,
-					required : true
 				},
 				{
-					name : "ID",
+					name : "id",
 					description : "ID of the skin you wish to equip",
 					type : 3,
-					required : true
 				}
 			]
-
 		},
 		{
 			name : "list",
 			description : "List the skins of a certain type",
-			type : 3,
-			choices : [
+			type : 1,
+			options : [
 				{
-					name : "Main Sails",
-					value : "listmainsails"
+					name : "item",
+					description: "Type of item to list",
+					type : 3,
+					required : true,
+					choices : [
+						{
+							name : "Main Sails",
+							value : "mainsail"
+						},
+						{
+							name : "Badges",
+							value : "badge"
+						},
+						{
+							name : "Team members",
+							value : "members"
+						}
+					]
 				},
 				{
-					name : "Badges",
-					value : "listbadges"
+					name : "visibility",
+					description : "Public or private",
+					type : 3,
+					choices : [
+						{
+							name : "Public",
+							value : "public"
+						},
+						{
+							name : "Private",
+							value : "private"
+						}
+					]
+				}
+			]
+		},
+		{
+			name : "overview",
+			description : "Lists an overview of your currently equipped items",
+			type: 1
+		},
+		{
+			name : "whatsmyid",
+			description : "Tells you your alternion ID",
+			type: 1
+		},
+		{
+			name : "manage",
+			description : "Allows teamleaders to manage team members",
+			type: 1,
+			options : [
+				{
+					name : "action",
+					description : "Whether to `ADD` or `REMOVE` a team member",
+					type : 3,
+					required: true
+				},
+				{
+					name : "id",
+					description : "Alternion ID of the user to manage",
+					type : 3,
+					required : true
 				}
 			]
 		}
@@ -72,8 +124,17 @@ module.exports = {
 		loadCommands();
 	},
 	executeGlobal: (event,args,isMessage) => {
+		console.log(event);
+		let command;
+
+		if (!isMessage){
+			command = event.options._subcommand;
+		}else{
+			command = args[0].toLowerCase();
+			args.shift();
+		}
+
 		// Check arguments
-		let command = args[0].toLowerCase();
 		if (bot.alternionCommands[command]){
 			if (bot.alternionCommands[command].args){
 				if (typeof(bot.alternionCommands[command].args) === typeof([])){
@@ -122,7 +183,7 @@ module.exports = {
 				}
 			}
 
-			bot.alternionCommands[args[0].toLowerCase()].execute(event,args,isMessage);
+			bot.alternionCommands[command].execute(event,args,isMessage);
 		}else{
 			reply(event,'🤔',isMessage);
 		}
