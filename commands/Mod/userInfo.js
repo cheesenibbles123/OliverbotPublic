@@ -1,6 +1,7 @@
 const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
+const { MODERATOR } = require("./../../structs/roles");
 
 let bot;
 
@@ -8,7 +9,7 @@ module.exports = {
 	name: "userinfo",
 	args: 1,
 	help: "Displays information about a user",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	guildOnly: true,
 	init: (botInstance) => {

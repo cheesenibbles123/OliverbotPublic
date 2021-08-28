@@ -1,11 +1,13 @@
 const db = require("./../../startup/database.js");
+const { MODERATOR } = require("./../../structs/roles");
+
 let bot;
 
 module.exports = {
 	name: "createcommand",
 	args: 2,
 	help: "Creates a command",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;

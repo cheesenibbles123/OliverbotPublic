@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const { MODERATOR } = require("./../../structs/roles");
 
 let bot;
 
@@ -7,7 +8,7 @@ module.exports = {
 	args: 1,
 	help: "Saves a message as a quote",
 	usage: "<messageID>",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	guildOnly: true,
 	init: (botInstance) => {

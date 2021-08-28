@@ -1,11 +1,11 @@
 const {reply} = require("./../_combinedResponses");
+const { MODERATOR } = require("./../../structs/roles");
 let bot;
 
 module.exports = {
 	name: "totalusers",
 	help: "Displays total number of users",
-	roles: ["440514569849536512"],
-	users: ["337541914687569920"],
+	roles: [ MODERATOR ],
 	default_permission : false,
 	category: "Mod",
 	guildOnly: true,

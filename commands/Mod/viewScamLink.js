@@ -1,4 +1,5 @@
 const Discord = require("discord.js");
+const { MODERATOR } = require("./../../structs/roles");
 
 let bot;
 
@@ -6,7 +7,7 @@ module.exports = {
 	name: "viewscamlinks",
 	args: 1,
 	help: "Lists all links currently in the scam filter",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;

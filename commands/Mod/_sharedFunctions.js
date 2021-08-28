@@ -1,15 +1,17 @@
+const { MODERATOR, ADMINISTRATOR, OWNER } = require("./../../structs/roles");
+
 exports.roleCheckForMutes = function roleCheckForMutes(member,msg){
 	let response = true;
 	//if commander just do
-	if (msg.member.roles.cache.has("401925172094959616")){
+	if (msg.member.roles.cache.has(OWNER)){
 		response = false;
 	}
 	// if admin mutes, target non admin
-	if (msg.member.roles.cache.has("402120143364423682") & !(member.roles.cache.has("402120143364423682"))){
+	if (msg.member.roles.cache.has(ADMINISTRATOR) & !(member.roles.cache.has(ADMINISTRATOR))){
 		response = false;
 	}
 	//if mode mutes, target non mod
-	if ( (msg.member.roles.cache.has("440514569849536512") & !(msg.member.roles.cache.has("402120143364423682"))) & !(member.roles.cache.has("440514569849536512"))){
+	if ( (msg.member.roles.cache.has(MODERATOR) & !(msg.member.roles.cache.has(ADMINISTRATOR))) & !(member.roles.cache.has(MODERATOR))){
 		response = false;
 	}
 	return response;

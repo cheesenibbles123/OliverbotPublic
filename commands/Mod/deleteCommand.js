@@ -1,10 +1,11 @@
 const db = require("./../../startup/database.js");
+const { MODERATOR } = require("./../../structs/roles");
 
 module.exports = {
 	name: "deletecommand",
 	args: 1,
 	help: "Deletes a command",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	execute: (message,args) => {
 		let commandToDelete = "";

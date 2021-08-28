@@ -1,5 +1,7 @@
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
+const { MODERATOR, ADMINISTRATOR } = require("./../../structs/roles");
+const embedColours = require("./../../structs/eventColours");
 
 let bot;
 
@@ -8,7 +10,7 @@ module.exports = {
 	args: 1,
 	help: "Sends the user a warning",
 	usage: "@user",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR, ADMINISTRATOR ],
 	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;
@@ -25,12 +27,12 @@ module.exports = {
 			.setDescription(`${(args.slice(1)).join(" ")}`)
 			.setFooter(`ID: ${member.id}`);
 
-		if (message.member.roles.cache.has(config.serverInfo.roles.serverAdministrator)){
-			loggingWarningEmbed.setColor(config.embedColours.warningAdmin);
-			warningEmbed.setColor(config.embedColours.warningAdmin);
+		if (message.member.roles.cache.has(ADMINISTRATOR)){
+			loggingWarningEmbed.setColor(embedColours.warningAdmin);
+			warningEmbed.setColor(embedColours.warningAdmin);
 		}else{
-			loggingWarningEmbed.setColor(config.embedColours.warningMod);
-			warningEmbed.setColor(config.embedColours.warningMod);
+			loggingWarningEmbed.setColor(embedColours.warningMod);
+			warningEmbed.setColor(embedColours.warningMod);
 		}
 
 		try{

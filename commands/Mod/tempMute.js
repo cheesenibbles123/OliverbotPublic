@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const glob = require("./../_globalFunctions.js");
 const shared = require("./_sharedFunctions.js");
+const { MODERATOR, ADMINISTRATOR } = require("./../../structs/roles");
 
 let bot;
 
@@ -8,7 +9,7 @@ module.exports = {
 	name: "tempmute",
 	args: [2,20],
 	help: "Temporarily mutes a user",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;

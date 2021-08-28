@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
 const config = require("./../../config.json");
+const { MODERATOR, MUTED } = require("./../../structs/roles");
 let bot;
 
 module.exports = {
@@ -8,7 +9,7 @@ module.exports = {
 	args: 1,
 	help: "Saves a message as a quote",
 	usage: "@user",
-	roles: ["440514569849536512"],
+	roles: [ MODERATOR ],
 	category: "Mod",
 	init: (botInstance) => {
 		bot = botInstance;
@@ -20,7 +21,7 @@ module.exports = {
 			message.channel.send("You can't use this command.");
 		}else{
 			try{
-				member.roles.add(config.serverInfo.roles.muted);
+				member.roles.add(MUTED);
 				message.channel.send(member + " has been muted");
 			}catch (e) {
 				console.log(e);
