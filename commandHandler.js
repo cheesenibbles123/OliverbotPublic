@@ -66,6 +66,11 @@ module.exports = {
 			let missingRole = true;
 			let allowedUser = false;
 
+			// Check if server only
+			if (bot.commands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.cache.get(event.channelId).type === "DM")){
+				return reply(event,"I can't execute that command within DMs!",isMessage);
+			}
+
 			// Check arguments
 			if (bot.commands[command].args){
 				let msg = "Please check your argument length";
@@ -110,11 +115,6 @@ module.exports = {
 						break;
 					}
 				}
-			}
-
-			// Check if server only
-			if (bot.commands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.cache.get(event.channelId).type === "DM")){
-				return reply(event,"I can't execute that command within DMs!",isMessage);
 			}
 
 			if (((bot.commands[command].roles && !missingRole) || (!bot.commands[command].roles && missingRole && !bot.commands[command].users)) || allowedUser){
