@@ -10,12 +10,11 @@ module.exports = {
 	execute: async (event,args,isMessage) => {
 		const ID = isMessage ? event.author.id : event.user.id;
 		let isTL = await shared.checkIfTL(ID);
-		if (isMessage){
-			args.shift();
-		}
-
+		
 		if (isTL){
-
+			if (isMessage){
+				args.shift();
+			}
 			let embed = new Discord.MessageEmbed();
 
 			teamLeaderSearch(event,args[0],args[1],embed,isMessage);
