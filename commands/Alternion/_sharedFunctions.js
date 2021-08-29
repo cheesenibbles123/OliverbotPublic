@@ -19,7 +19,7 @@ exports.iterateOver = function iterateOver(rows, type){
 
 function getLocalJson(discord_id){
 	return new Promise(async (resolve,reject) => {
-		let filepath = config.alternion.jsonFilePath;
+		const filepath = config.alternion.jsonFilePath;
 		if (alternionJsonFile === null){
 			fs.readFile(filepath, async (err,data) => {
 				if (err){

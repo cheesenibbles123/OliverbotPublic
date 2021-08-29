@@ -11,12 +11,16 @@ module.exports = {
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Assign");
 
+		if (isMessage){
+			args.shift(); // If inline args[0] will be the command (aka 'assign')
+		}
+
 		let dbData = getTablesAndFields(args[0].toLowerCase());
-		let table1Name = dbData.tbl1N;
-		let table2Name = dbData.tbl2N;
-		let fieldName = dbData.field1Name;
-		let table2Field = dbData.field2Name;
-		let authorId = event.member ? event.member.user.id : event.user.id;
+		const table1Name = dbData.tbl1N;
+		const table2Name = dbData.tbl2N;
+		const fieldName = dbData.field1Name;
+		const table2Field = dbData.field2Name;
+		const authorId = event.member ? event.member.user.id : event.user.id;
 
 		if (table1Name != "NA"){
 			db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${authorId}`, (err,userRow) => {
@@ -52,7 +56,7 @@ module.exports = {
 						if (!found){
 							embed.setDescription("You cannot assign that Item!");
 						}else{
-							embed.setDescription(`Assigned skin: **${assignedBadge}**`);
+							embed.setDescription(`Assigned ${dbData.table1Name}: **${assignedBadge}**`);
 							shared.globalJsonUpdate();
 						}
 

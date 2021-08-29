@@ -6,7 +6,7 @@ const { reply } = require("./../_combinedResponses.js");
 module.exports = {
 	name: "register",
 	args: 3,
-	help: "Allows a user to be registered into the database\n;Alternion Register `{steamid}` `{discordid}`",
+	help: "Allows a user to be registered into the database\n;Alternion Register `{steam_id}` `{discord_id}`",
 	users: ["337541914687569920"],
 	execute: (event,args,isMessage) => {
 

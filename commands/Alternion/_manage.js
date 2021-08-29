@@ -8,18 +8,23 @@ module.exports = {
 	args: 2,
 	help: "Allows TLs to add/remove members from their team.",
 	execute: async (event,args,isMessage) => {
+		if (isMessage){
+			args.shift(); // If inline args[0] will be the command (aka 'manage')
+		}
 
-		let isTL = await shared.checkIfTL(event);
+		let ID = isMessage ? event.author.id : event.user.id;
+
+		let isTL = await shared.checkIfTL(ID);
 
 		if (isTL){
 
-			let action = args[1].toLowerCase();
-			let team = await getTeamLeaderInfo(event.member.user.id);
+			let action = args[0].toLowerCase();
+			let team = await getTeamLeaderInfo(ID);
 
 			if (action === "remove"){
-				teamLeaderUpdateUser(event,0,team,args[2],action,isMessage);
+				teamLeaderUpdateUser(event,0,team,args[1],action,isMessage);
 			}else if (action === "add"){
-				teamLeaderUpdateUser(event,team,null,args[2],action,isMessage);
+				teamLeaderUpdateUser(event,team,null,args[1],action,isMessage);
 			}else{
 				reply(event,"Invalid action",isMessage);
 			}

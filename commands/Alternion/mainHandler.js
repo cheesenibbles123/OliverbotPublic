@@ -58,13 +58,45 @@ module.exports = {
 					required : true,
 					choices : [
 						{
+							name : "Badges",
+							value : "badge"
+						},
+						{
 							name : "Main Sails",
 							value : "mainsail"
 						},
 						{
-							name : "Badges",
-							value : "badge"
+							name : "Sails",
+							value : "sail"
 						},
+						{
+							name : "Gold Masks",
+							value : "goldmask"
+						},
+						{
+							name : "Cannons",
+							value : "cannon"
+						},
+						{
+							name : "Swivels",
+							value : "swivel"
+						},
+						{
+							name : "Mortars",
+							value : "mortar"
+						},
+						{
+							name : "Navy Flag",
+							value : "navyflag"
+						},
+						{
+							name : "Pirate Flag",
+							value : "pirateflag"
+						},
+						{
+							name : "Weapons",
+							value : "weapon"
+						},						
 						{
 							name : "Team members",
 							value : "members"
@@ -116,6 +148,86 @@ module.exports = {
 					required : true
 				}
 			]
+		},
+		{
+			name : "update",
+			description : "Allows teamleaders to update team member loadouts",
+			type: 2,
+			options : [
+				{
+					name : "team",
+					description : "Update loadout for the whole team",
+					type : 1,
+					options : [
+						{
+							name : "type",
+							description : "Type of item to assign",
+							type : 3,
+							required : true
+						},
+						{
+							name : "id",
+							description : "ID of the item to assign",
+							type : 3,
+							required : true
+						}
+					]
+				},
+				{
+					name : "user",
+					description : "Item type to update",
+					type : 1,
+					options : [
+						{
+							name : "type",
+							description : "Type of item to assign",
+							type : 3,
+							required : true
+						},
+						{
+							name : "id",
+							description : "ID of the item to assign",
+							type : 3,
+							required : true
+						},
+						{
+							name : "userid",
+							description : "Alternion ID of the user to assign the item to",
+							type : 3,
+							required : true
+						}
+					]
+				}
+			]
+		},
+		{
+			name : "search",
+			description : "Search for a user by their Steam or Discord ID's",
+			type : 1,
+			options : [
+				{
+					name : "type",
+					description : "Search by steam or discord ID",
+					type : 3,
+					required : true,
+					choices : [
+						{
+							name : "Steam",
+							value : "steam"
+						},
+						{
+							name : "Discord",
+							value : "discord"
+						}
+					]
+				},
+				{
+					name : "id",
+					description : "Id of the user (steam or discord)",
+					type : 3,
+					required : true
+				}
+			]
 		}
 	],
 	init: (botInstance) => {
@@ -124,11 +236,18 @@ module.exports = {
 		loadCommands();
 	},
 	executeGlobal: (event,args,isMessage) => {
-		console.log(event);
 		let command;
 
 		if (!isMessage){
-			command = event.options._subcommand;
+
+			const isGroup = event.options._group !== null;
+			if (isGroup){
+				command = event.options._group;
+				args.unshift(event.options._subcommand)
+			}else{
+				command = event.options._subcommand;
+			}
+
 		}else{
 			command = args[0].toLowerCase();
 			args.shift();
@@ -150,7 +269,7 @@ module.exports = {
 
 			// Check permissions
 			if (bot.alternionCommands[command].roles){
-				let roles = bot.alternionCommands[command].roles;
+				const roles = bot.alternionCommands[command].roles;
 				let missingRole = true;
 
 				// Loop over all allowed roles
@@ -168,7 +287,7 @@ module.exports = {
 
 			// Check Users
 			if (bot.alternionCommands[command].users){
-				let users = bot.alternionCommands[command].users;
+				const users = bot.alternionCommands[command].users;
 				let notFound = true;
 
 				for (let i=0; i < users.length; i++){

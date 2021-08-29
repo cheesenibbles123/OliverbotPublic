@@ -12,14 +12,20 @@ module.exports = {
 		bot = botInstance;
 	},
 	execute: (event,args,isMessage) => {
-		let ID = isMessage ? event.author.id : event.user.id;
-		let type = args[0].toLowerCase();
-		if (type === "members"){
-			manageTeam(event,ID,isMessage);
-		}else{
-			let isPrivate = typeof(args[1]) !== "undefined" ? args[1].toLowerCase() === "private" : false;
+		const ID = isMessage ? event.author.id : event.user.id;
 
-			let tableData = fetchTables(type);
+		if (isMessage){
+			args.shift(); // If inline args[0] will be the command (aka 'list')
+		}
+
+		const type = args[0].toLowerCase();
+
+		if (type === "members"){
+			listTeam(event,ID,isMessage);
+		}else{
+			const isPrivate = typeof(args[1]) !== "undefined" ? args[1].toLowerCase() === "private" : false;
+
+			const tableData = fetchTables(type);
 
 			let embed = new Discord.MessageEmbed()
 				.setTitle(`Available ${tableData.table1}s - ${isPrivate ? "Private" : "Public"}`)
@@ -51,7 +57,7 @@ module.exports = {
 	}
 }
 
-async function manageTeam(event,authorId,isMessage){
+async function listTeam(event,authorId,isMessage){
 	let isTL = await shared.checkIfTL(authorId);
 	if (isTL){
 
@@ -132,122 +138,7 @@ function fetchTables(input_type){
 				table2Name = "LimitedFlags";
 				table2Field = "Allowed_Flag_ID";
 				break;
-			case "musket":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "blunderbuss":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "nockgun":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "handmortar":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "pistol":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "shortpistol":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "duckfoot":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "matchlock":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "annely":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "axe":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "rapier":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "dagger":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "bottle":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "cutlass":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "pike":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "tomahawk":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "spyglass":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "grenade":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "healitem":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "teacup":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "teawater":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "bucket":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "hammer":
-				table1Name = "WeaponSkin";
-				table2Name = "LimitedWeaponSkins";
-				table2Field = "Allowed_Weapon_Skin_ID";
-				break;
-			case "atlas":
+			case "weapon":
 				table1Name = "WeaponSkin";
 				table2Name = "LimitedWeaponSkins";
 				table2Field = "Allowed_Weapon_Skin_ID";

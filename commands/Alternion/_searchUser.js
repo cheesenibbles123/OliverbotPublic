@@ -8,14 +8,19 @@ module.exports = {
 	args: 3,
 	help: "Searches for a user by steamID or discordID",
 	execute: async (event,args,isMessage) => {
-
-		let isTL = await shared.checkIfTL(event);
+		const ID = isMessage ? event.author.id : event.user.id;
+		let isTL = await shared.checkIfTL(ID);
+		if (isMessage){
+			args.shift();
+		}
 
 		if (isTL){
 
 			let embed = new Discord.MessageEmbed();
 
-			teamLeaderSearch(event,args[1],args[2],embed,isMessage);
+			teamLeaderSearch(event,args[0],args[1],embed,isMessage);
+		}else{
+			reply(event,"This command is for team leaders only!",isMessage);
 		}
 	}
 }
@@ -30,40 +35,23 @@ function teamLeaderSearch(event, type, ID, alternionHandlerEmbed, isMessage){
 			}else if (rows[0].Team_Leader === 0){
 				reply(event,"You must be a team leader to use this command!",isMessage);
 			}else{
-				if (type === "discord"){
-					db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Discord_ID='${ID}'`, (err,rows) => {
-						if (rows){
-							if (rows.length < 1){
-								reply(event,"User is currently not in the database.",isMessage);
-							}else if (rows.length > 1){
-								reply(event,"There seems to be an issue, this user is recorded multiple times.",isMessage);
-							}else{
-								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
-								reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
-							}
+				db.alternionConnectionPool.query(`SELECT ID FROM User WHERE ${type === "steam" ? "Steam_ID" : "Discord_ID"}='${ID}'`, (err,rows) => {
+					if (rows){
+						if (rows.length < 1){
+							reply(event,"User is currently not in the database.",isMessage);
+						}else if (rows.length > 1){
+							reply(event,"There seems to be an issue, this user is recorded multiple times.",isMessage);
 						}else{
-							reply(event,"No rows found.",isMessage);
+							alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
+							reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
 						}
-					});
-				}else if (type === "steam"){
-					db.alternionConnectionPool.query(`SELECT ID FROM User WHERE Steam_ID='${ID}'`, (err,rows) => {
-						if (rows){
-							if (rows.length < 1){
-								reply(event,"User is currently not in the database.",isMessage);
-							}else if (rows.length > 1){
-								reply(event,"There seems to be an issue, this user is recorded multiple times.",isMessage);
-							}else{
-								alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
-								reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
-							}
-						}else{
-							reply(event,"No rows found.",isMessage);
-						}
-					});
-				}
+					}else{
+						reply(event,"No User found.",isMessage);
+					}
+				});
 			}
 		}else{
-			reply(event,"No rows found.",isMessage);
+			reply(event,"No User found.",isMessage);
 		}
 	});
 }
