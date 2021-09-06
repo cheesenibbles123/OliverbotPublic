@@ -12,6 +12,7 @@ module.exports = {
 		const ID = isMessage ? event.author.id : event.user.id;
 
 		const isTL = await shared.checkIfTL(ID);
+		let embed = new Discord.MessageEmbed();
 
 		if (isTL){
 
@@ -19,9 +20,11 @@ module.exports = {
 			const team = await getTeamLeaderInfo(ID);
 
 			if (action === "remove"){
-				teamLeaderUpdateUser(event,0,team,args[1],action,isMessage);
+				embed.setTitle("Removing user");
+				teamLeaderUpdateUser(event,0,team,args[1],action,isMessage,embed);
 			}else if (action === "add"){
-				teamLeaderUpdateUser(event,team,null,args[1],action,isMessage);
+				embed.setTitle("Adding user");
+				teamLeaderUpdateUser(event,team,null,args[1],action,isMessage,embed);
 			}else{
 				reply(event,"Invalid action",isMessage);
 			}
@@ -41,9 +44,7 @@ function getTeamLeaderInfo(discord_id){
 	});
 }
 
-function teamLeaderUpdateUser(event,team,tlTeam,userID,action,isMessage){
-	let alternionHandlerEmbed = new Discord.MessageEmbed()
-		.setTitle(`${action}ing user`);
+function teamLeaderUpdateUser(event,team,tlTeam,userID,action,isMessage,embed){
 
 	db.alternionConnectionPool.query(`SELECT ID,Team_ID FROM User WHERE ID='${userID}'`, (err,rows) => {
 		if (rows.length < 1){
