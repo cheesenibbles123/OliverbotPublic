@@ -16,7 +16,6 @@ module.exports = {
 		const table2Name = dbData.tbl2N;
 		const fieldName = dbData.field1Name;
 		const table2Field = dbData.field2Name;
-		console.log(event);
 		const authorId = isMessage ? event.author.id : event.user.id;
 
 		if (table1Name != "NA"){
