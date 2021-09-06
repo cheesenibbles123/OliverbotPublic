@@ -1,6 +1,6 @@
 const config = require("./config.json");
 const { Client, Intents, MessageEmbed } = require('discord.js');
-const bot = new Client({intents: returnIntents()});
+const bot = new Client({intents: returnIntents(), partials: ['CHANNEL']});
 
 const commands = require("./commandHandler.js");
 const startup = require("./startupHandler.js");
@@ -210,6 +210,10 @@ bot.once("ready", () => {
 
 bot.on("messageCreate", async message => {
 	try{
+
+	if (message.partial){
+		message = await message.fetch();
+	}
 
 	//dont respond to bots
 	if (message.author.bot) return;
