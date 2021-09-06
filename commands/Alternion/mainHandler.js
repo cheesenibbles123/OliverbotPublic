@@ -285,8 +285,7 @@ module.exports = {
 				}
 
 				if (missingRole){
-					reply(event,"You do not have permission to use this command!");
-					return;
+					return reply(event,"You do not have permission to use this command!");
 				}
 			}
 
@@ -302,8 +301,7 @@ module.exports = {
 				}
 
 				if (notFound){
-					reply(event,"You do not have permission to use this command!",isMessage);
-					return;
+					return reply(event,"You do not have permission to use this command!",isMessage);
 				}
 			}
 
