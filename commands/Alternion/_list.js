@@ -95,7 +95,7 @@ function listTeamLeaders(event,authorId,isMessage){
 			let list = "";
 
 		for (let i=0; i < rows.length; i++){
-			list += `\`${rows[i].ID} : <@${rows[i].discord_id}>\``;
+			list += `\`${rows[i].ID}\` : <@${rows[i].discord_id}>\n`;
 		}
 
 		embed.setDescription(list);
