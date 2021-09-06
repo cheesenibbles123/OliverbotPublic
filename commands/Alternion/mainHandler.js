@@ -27,7 +27,6 @@ module.exports = {
 	name: "alternion",
 	help: "Alternion command handler",
 	category: "Api",
-	guildOnly: true,
 	options: [
 		{
 			name : "assign",
@@ -253,8 +252,14 @@ module.exports = {
 			args.shift();
 		}
 
-		// Check arguments
 		if (bot.alternionCommands[command]){
+
+			// Check if server only
+			if (bot.alternionCommands[command].guildOnly && (isMessage ? event.channel.type === "DM" : bot.channels.cache.get(event.channelId).type === "DM")){
+				return reply(event,"I can't execute that command within DMs!",isMessage);
+			}
+
+			// Check arguments
 			if (bot.alternionCommands[command].args){
 				if (typeof(bot.alternionCommands[command].args) === typeof([])){
 					// if arguments are a range between [min,max]
