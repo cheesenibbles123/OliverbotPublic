@@ -2,6 +2,7 @@ const db = require("./../../startup/database.js");
 const Discord = require("discord.js");
 const shared = require("./_sharedFunctions.js");
 const {reply} = require("./../_combinedResponses.js");
+const { ARCHIE } = require("./../../structs/users.js");
 
 let bot;
 
@@ -18,6 +19,8 @@ module.exports = {
 
 		if (type === "members"){
 			listTeam(event,ID,isMessage);
+		}else if (type === "teamleaders"){
+			listTeamLeaders(event,ID,isMessage);
 		}else{
 			const isPrivate = typeof(args[1]) !== "undefined" ? args[1].toLowerCase() === "private" : false;
 
@@ -81,6 +84,23 @@ async function listTeam(event,authorId,isMessage){
 			}
 		});
 	}
+}
+
+function listTeamLeaders(event,authorId,isMessage){
+	if (authorId !== ARCHIE) return reply(event,"You do not have permission to use this command.",isMessage);
+	db.alternionConnectionPool.query("SELECT * FROM User WHERE Team_Leader != 0", (err,rows) => {
+		let embed = new Discord.MessageEmbed()
+			.setTitle("Team Leaders");
+
+			let list = "";
+
+		for (let i=0; i < rows.length; i++){
+			list += `\`${rows[i].ID} : <@${rows[i].discord_id}>\``;
+		}
+
+		embed.setDescription(list);
+		reply(event,{embeds:[embed]},isMessage);
+	});
 }
 
 function fetchTables(input_type){
