@@ -7,7 +7,7 @@ module.exports = {
 	name: "update",
 	execute: async (event,args,isMessage) => {
 		const ID = isMessage ? event.author.id : event.user.id;
-		let isTL = await shared.checkIfTL(ID);
+		const isTL = await shared.checkIfTL(ID);
 
 		if (!isTL) return reply(event,"This command is for Team Leaders only!",isMessage);
 

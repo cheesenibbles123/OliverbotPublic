@@ -9,7 +9,7 @@ module.exports = {
 	help: "Searches for a user by steamID or discordID",
 	execute: async (event,args,isMessage) => {
 		const ID = isMessage ? event.author.id : event.user.id;
-		let isTL = await shared.checkIfTL(ID);
+		const isTL = await shared.checkIfTL(ID);
 		
 		if (isTL){
 			if (isMessage){

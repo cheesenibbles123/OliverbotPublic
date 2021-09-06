@@ -58,7 +58,7 @@ module.exports = {
 }
 
 async function listTeam(event,authorId,isMessage){
-	let isTL = await shared.checkIfTL(authorId);
+	const isTL = await shared.checkIfTL(authorId);
 	if (isTL){
 
 		let embed = new Discord.MessageEmbed();

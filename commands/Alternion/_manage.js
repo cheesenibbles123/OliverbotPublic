@@ -12,14 +12,14 @@ module.exports = {
 			args.shift(); // If inline args[0] will be the command (aka 'manage')
 		}
 
-		let ID = isMessage ? event.author.id : event.user.id;
+		const ID = isMessage ? event.author.id : event.user.id;
 
-		let isTL = await shared.checkIfTL(ID);
+		const isTL = await shared.checkIfTL(ID);
 
 		if (isTL){
 
-			let action = args[0].toLowerCase();
-			let team = await getTeamLeaderInfo(ID);
+			const action = args[0].toLowerCase();
+			const team = await getTeamLeaderInfo(ID);
 
 			if (action === "remove"){
 				teamLeaderUpdateUser(event,0,team,args[1],action,isMessage);
@@ -73,46 +73,46 @@ function teamLeaderUpdateUser(event,team,tlTeam,userID,action,isMessage){
 
 function removeAllEquipped(userID,teamID){
 	db.alternionConnectionPool.query(`SELECT Badge_ID,Sail_ID,Main_Sail_ID,Flag_ID FROM User WHERE ID=${userID}`,(err,rows) => {
-		console.log("Removing stuff from " + userID);
+		//console.log("Removing stuff from " + userID);
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM Badge WHERE ID=${rows[0].Badge_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Badge_ID=0 WHERE ID=${userID}`);
-				console.log("Reset badge");
+				//console.log("Reset badge");
 			}
 		});
 
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM NormalSail WHERE ID=${rows[0].Sail_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Sail_ID=0 WHERE ID=${userID}`);
-				console.log("Reset Sail");
+				//console.log("Reset Sail");
 			}
 		});
 
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM MainSail WHERE ID=${rows[0].Main_Sail_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Main_Sail_ID=0 WHERE ID=${userID}`);
-				console.log("Reset MainSail");
+				//console.log("Reset MainSail");
 			}
 		});
 
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM Flag WHERE ID=${rows[0].Flag_Navy_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Flag_Navy_ID=0 WHERE ID=${userID}`);
-				console.log("Reset Flag");
+				//console.log("Reset Flag");
 			}
 		});
 
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM Flag WHERE ID=${rows[0].Flag_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Flag_ID=0 WHERE ID=${userID}`);
-				console.log("Reset Flag");
+				//console.log("Reset Flag");
 			}
 		});
 
 		db.alternionConnectionPool.query(`SELECT Team_ID FROM Swivel WHERE ID=${rows[0].Swivel_ID}`, (err,rows2) => {
 			if (rows2[0].Team_ID === teamID){
 				db.alternionConnectionPool.query(`UPDATE User SET Swivel_ID=0 WHERE ID=${userID}`);
-				console.log("Reset Swivel");
+				//console.log("Reset Swivel");
 			}
 		});
 

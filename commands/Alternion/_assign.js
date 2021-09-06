@@ -15,7 +15,7 @@ module.exports = {
 			args.shift(); // If inline args[0] will be the command (aka 'assign')
 		}
 
-		let dbData = getTablesAndFields(args[0].toLowerCase());
+		const dbData = getTablesAndFields(args[0].toLowerCase());
 		const table1Name = dbData.tbl1N;
 		const table2Name = dbData.tbl2N;
 		const fieldName = dbData.field1Name;
@@ -32,7 +32,7 @@ module.exports = {
 							for (let i = 0; i < rows.length; i++){
 								if (args[1] === rows[i].Name){
 									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${authorId}'`);
-									console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
+									//console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
 									assignedBadge = rows[i].Display_Name;
 									found = true;
 									break;
@@ -44,7 +44,7 @@ module.exports = {
 							for (let i = 0; i < rows2.length; i++){
 								if (args[1] === rows2[i].Name){
 									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${authorId}'`);
-									console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
+									//console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
 									assignedBadge = rows2[i].Display_Name;
 									found = true;
 									break;

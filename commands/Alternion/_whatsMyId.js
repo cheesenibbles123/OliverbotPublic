@@ -4,12 +4,13 @@ const {reply} = require("./../_combinedResponses.js");
 
 module.exports = {
 	name: "whatsmyid",
-	args: 0,
 	execute: (event, args,isMessage) => {
 
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Your ID");
+
 		const ID = isMessage ? event.author.id : event.user.id;
+
 		db.alternionConnectionPool.query(`SELECT ID FROM User WHERE discord_ID='${ID}'`, (err,rows) => {
 			if (rows){
 				if (rows.length < 1){
