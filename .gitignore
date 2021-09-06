@@ -4,6 +4,7 @@ SQL/
 Backups/
 shipsForRankcards/
 walletImages/
+structs/users.js
 
 # Logs
 logs
