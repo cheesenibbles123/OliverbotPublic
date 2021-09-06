@@ -17,7 +17,7 @@ module.exports = {
 				}else if (rows.length > 1){
 					reply(event,"There seems to be an issue, you are recorded multiple times.",isMessage);
 				}else{
-					embed.setDescription("`" + rows[0].ID + "`");
+					embed.setDescription(`${rows[0].ID}`);
 					reply(event,{embeds:[embed]},isMessage);
 				}
 			}else{

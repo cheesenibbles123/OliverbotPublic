@@ -41,7 +41,7 @@ function teamLeaderSearch(event, type, ID, alternionHandlerEmbed, isMessage){
 						}else if (rows.length > 1){
 							reply(event,"There seems to be an issue, this user is recorded multiple times.",isMessage);
 						}else{
-							alternionHandlerEmbed.setDescription("`" + rows[0].ID + "`");
+							alternionHandlerEmbed.setDescription(`${rows[0].ID}`);
 							reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
 						}
 					}else{
