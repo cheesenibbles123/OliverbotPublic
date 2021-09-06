@@ -24,7 +24,7 @@ module.exports = {
 			const tableData = fetchTables(type);
 
 			let embed = new Discord.MessageEmbed()
-				.setTitle(`Available ${tableData.table1}s - ${isPrivate ? "Private" : "Public"}`)
+				.setTitle(`Available ${tableData.table1 === "NA" ? `${args[0]}(s)` : `${tableData.table1}(s)`} - ${isPrivate ? "Private" : "Public"}`)
 				.setFooter(`The formatting is: - ${type}_id : ${tableData.table1} Name -`);
 
 			if (tableData.table1Name === "N/A"){
@@ -33,7 +33,7 @@ module.exports = {
 				db.alternionConnectionPool.query(`SELECT Team_ID from User where discord_id='${ID}'`, (err,rows1) => {
 					db.alternionConnectionPool.query(`(SELECT ${tableData.table1}.Name, ${tableData.table1}.Display_Name FROM ${tableData.table2} INNER JOIN User ON User_ID = User.ID INNER JOIN ${tableData.table1} ON ${tableData.field} = ${tableData.table1}.ID WHERE User.Discord_ID='${ID}') UNION ( SELECT Name,Display_Name FROM ${tableData.table1} WHERE Team_ID=${rows1[0].Team_ID} AND IF ( ${rows1[0].Team_ID} != 0, 1, 0) = 1 )`, (err,rows) => {
 						
-						embed.setDescription(shared.iterateOver(rows,"Badges"));
+						embed.setDescription(shared.iterateOver(rows,`${args[0]}(s)`));
 						reply(event,{embeds:[embed]},isMessage);
 
 					});
@@ -41,7 +41,7 @@ module.exports = {
 			}else if (tableData.table1 !== "WeaponSkin"){
 				db.alternionConnectionPool.query(`SELECT Name, Display_Name FROM ${tableData.table1} where Limited!=1`, (err,rows) => {
 					
-					embed.setDescription(shared.iterateOver(rows,"Badges"));
+					embed.setDescription(shared.iterateOver(rows,`${args[0]}(s)`));
 					reply(event,{embeds:[embed]},isMessage);
 
 				});

@@ -16,7 +16,8 @@ module.exports = {
 		const table2Name = dbData.tbl2N;
 		const fieldName = dbData.field1Name;
 		const table2Field = dbData.field2Name;
-		const authorId = event.member ? event.member.user.id : event.user.id;
+		console.log(event);
+		const authorId = isMessage ? event.author.id : event.user.id;
 
 		if (table1Name != "NA"){
 			db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${authorId}`, (err,userRow) => {
@@ -52,7 +53,7 @@ module.exports = {
 						if (!found){
 							embed.setDescription("You cannot assign that Item!");
 						}else{
-							embed.setDescription(`Assigned ${dbData.table1Name}: **${assignedBadge}**`);
+							embed.setDescription(`Assigned ${table1Name}: **${assignedBadge}**`);
 							shared.globalJsonUpdate();
 						}
 
