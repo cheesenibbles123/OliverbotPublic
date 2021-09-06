@@ -1,10 +1,11 @@
 const db = require("./../../startup/database.js");
+const { ARCHIE } = require("./../../structs/users.js");
 
 module.exports = {
 	name: "database",
 	args: [1,200],
 	help: "Queries the database",
-	users: ["337541914687569920"],
+	users: [ ARCHIE ],
 	category: "Owner",
 	execute: async (message,args) => {
 		try{

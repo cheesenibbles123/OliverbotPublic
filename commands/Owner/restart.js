@@ -1,11 +1,13 @@
 const db = require("./../../startup/database.js");
+const { ARCHIE } = require("./../../structs/users.js");
+
 let bot;
 
 module.exports = {
 	name: "restart",
 	args: 0,
 	help: "Restarts the bot",
-	users: ["337541914687569920"],
+	users: [ ARCHIE ],
 	category: "Owner",
 	init: (botInstance) => {
 		bot = botInstance;

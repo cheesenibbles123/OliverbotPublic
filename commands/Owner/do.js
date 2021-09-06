@@ -1,10 +1,12 @@
+const { ARCHIE } = require("./../../structs/users.js");
+
 let bot;
 
 module.exports = {
 	name: "do",
 	args: [1,200],
 	help: "Runs provided text as code",
-	users: ["337541914687569920"],
+	users: [ ARCHIE ],
 	category: "Owner",
 	init: (botInstance)=> {
 		bot = botInstance;
