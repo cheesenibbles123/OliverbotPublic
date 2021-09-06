@@ -6,7 +6,7 @@ const {reply} = require("./../_combinedResponses.js");
 let alternionJsonFile = null;
 
 exports.iterateOver = function iterateOver(rows, type){
-	if (rows.length < 1){
+	if (rows === undefined || rows.length < 1){
 		return `No ${type} found.`;
 	}else{
 		let returnString = "";
