@@ -1,9 +1,14 @@
 const glob = require("./_globalFunctions");
 
+let bot;
+
 module.exports = {
 	name: "playdie",
 	help: "Rolls a normal die against the bot",
 	interactionSupport: true,
+	init: (botInstance) => {
+		bot = botInstance;
+	},
 	execute: (message,args) => {
 		let user = glob.getRandomInt(7);
 		let botroll = glob.getRandomInt(7);
