@@ -8,9 +8,6 @@ module.exports = {
 	args: 2,
 	help: "Allows TLs to add/remove members from their team.",
 	execute: async (event,args,isMessage) => {
-		if (isMessage){
-			args.shift(); // If inline args[0] will be the command (aka 'manage')
-		}
 
 		const ID = isMessage ? event.author.id : event.user.id;
 

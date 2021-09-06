@@ -14,10 +14,6 @@ module.exports = {
 	execute: (event,args,isMessage) => {
 		const ID = isMessage ? event.author.id : event.user.id;
 
-		if (isMessage){
-			args.shift(); // If inline args[0] will be the command (aka 'list')
-		}
-
 		const type = args[0].toLowerCase();
 
 		if (type === "members"){

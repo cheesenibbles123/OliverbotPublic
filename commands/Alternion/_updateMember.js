@@ -11,10 +11,6 @@ module.exports = {
 
 		if (!isTL) return reply(event,"This command is for Team Leaders only!",isMessage);
 
-		if (isMessage){
-			args.shift();
-		}
-
 		const type = args[0].toLowerCase();
 		let embed = new Discord.MessageEmbed();
 

@@ -12,9 +12,6 @@ module.exports = {
 		const isTL = await shared.checkIfTL(ID);
 		
 		if (isTL){
-			if (isMessage){
-				args.shift();
-			}
 			let embed = new Discord.MessageEmbed();
 
 			teamLeaderSearch(event,args[0],args[1],embed,isMessage);

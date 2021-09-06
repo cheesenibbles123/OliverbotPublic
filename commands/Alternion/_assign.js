@@ -11,10 +11,6 @@ module.exports = {
 		let embed = new Discord.MessageEmbed()
 			.setTitle("Assign");
 
-		if (isMessage){
-			args.shift(); // If inline args[0] will be the command (aka 'assign')
-		}
-
 		const dbData = getTablesAndFields(args[0].toLowerCase());
 		const table1Name = dbData.tbl1N;
 		const table2Name = dbData.tbl2N;
