@@ -56,13 +56,13 @@ function teamLeaderUpdateUser(event,team,tlTeam,userID,action,isMessage,embed){
 		}else{
 			db.alternionConnectionPool.query(`UPDATE User SET Team_ID=${team} WHERE ID=${rows[0].ID}`);
 			if (team === 0){
-				alternionHandlerEmbed.setDescription(`User of ID \`${rows[0].ID}\` updated!\nThey are now free (for the time being)`);
+				embed.setDescription(`User of ID \`${rows[0].ID}\` updated!\nThey are now free (for the time being)`);
 				removeAllEquipped(rows[0].ID,tlTeam);
-				reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
+				reply(event,{embeds:[embed]},isMessage);
 			}else{
 				db.alternionConnectionPool.query(`SELECT Name FROM team WHERE ID=${team}`, (err,rows2) => {
-					alternionHandlerEmbed.setDescription(`User of ID \`${userID}\` updated!\nNew Team: **${rows2[0].Name}**`);
-					reply(event,{embeds:[alternionHandlerEmbed]},isMessage);
+					embed.setDescription(`User of ID \`${userID}\` updated!\nNew Team: **${rows2[0].Name}**`);
+					reply(event,{embeds:[embed]},isMessage);
 				});
 			}
 		}
