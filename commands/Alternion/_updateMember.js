@@ -15,14 +15,14 @@ module.exports = {
 		let embed = new Discord.MessageEmbed();
 
 		if (type === "team"){
-			teamLeaderForceLoadout(event,ID,args[1].toLowerCase(),args[2],embed);
+			teamLeaderForceLoadout(event,ID,args[1].toLowerCase(),args[2],embed,isMessage);
 		}else{
-			teamLeaderForceLoadoutUser(event,ID,args[1].toLowerCase(),args[2],args[3],embed);
+			teamLeaderForceLoadoutUser(event,ID,args[1].toLowerCase(),args[2],args[3],embed,isMessage);
 		}
 	}
 }
 
-function teamLeaderForceLoadout(event,tlID,item,itemID,alternionHandlerEmbed){
+function teamLeaderForceLoadout(event,tlID,item,itemID,alternionHandlerEmbed,isMessage){
 	
 	let { field, table } = getFieldAndTable(item);
 
@@ -65,7 +65,7 @@ function teamLeaderForceLoadout(event,tlID,item,itemID,alternionHandlerEmbed){
 	}
 }
 
-function teamLeaderForceLoadoutUser(event,tlID,item,itemID,targetID,alternionHandlerEmbed){
+function teamLeaderForceLoadoutUser(event,tlID,item,itemID,targetID,alternionHandlerEmbed,isMessage){
 
 	let { field, table } = getFieldAndTable(item);
 
