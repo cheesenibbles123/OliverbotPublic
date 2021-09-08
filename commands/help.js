@@ -59,7 +59,7 @@ module.exports = {
 	init: (botInstance) => {
 		bot = botInstance;
 	},
-	executeGlobal: (message,args) => {
+	executeGlobal: (event,args,isMessage) => {
 		let embed = new Discord.MessageEmbed();
 
 		if (args.length === 0){
@@ -122,5 +122,65 @@ module.exports = {
 				reply(event,{embeds:[embed]},isMessage);
 			}
 		}
+	},
+	/*executeGlobal: (event,args,isMessage) => {
+		let categories = generateCategoriesRow(event,isMessage);
+		reply(event,{content: `**Help ${isMessage ? "Message" : "Interaction"} Menu**`, components: [categories]},isMessage);
+	},*/
+	category: (interaction,args,isMessage) => {
+		let commands = generateCommandsRow(event, isMessage);
+		interaction.components.push(commands);
+		reply(event,{content: interaction.message.content, components: [interaction.components]},isMessage);
+	},
+	command: (interaction,args,isMessage) => {
+		console.log("COMMAND");
+		console.log(args);
 	}
+}
+
+function generateCategoriesRow(event, isMessage){
+
+	let categoryObjects = [];
+	let addedCategories = [];
+
+	Object.keys(bot.commands).forEach(commandName => {
+		if (addedCategories.indexOf(bot.commands[commandName].category) === -1 && bot.commands[commandName].category && checkPerms(event,bot.commands[commandName],isMessage)){
+			categoryObjects.push({
+				label: `${bot.commands[commandName].category}`,
+				value: `help category ${bot.commands[commandName].category}`
+			});
+			addedCategories.push(bot.commands[commandName].category);
+		}
+	});
+	
+	return new Discord.MessageActionRow()
+		.addComponents(
+			new Discord.MessageSelectMenu()
+				.setCustomId('help')
+				.setPlaceholder('Category...')
+				.addOptions(categoryObjects)
+		);
+}
+
+function generateCommandsRow(event, isMessage){
+	let addedCategories = [];
+	let categoryObjects = [];
+
+	Object.keys(bot.commands).forEach(commandName => {
+		if (addedCategories.indexOf(commandName) === -1 && checkPerms(event,bot.commands[commandName],isMessage)){
+			categoryObjects.push({
+				label: `${bot.commands[commandName].displayName ? bot.commands[commandName].displayName : commandName}`,
+				value: `help command ${commandName}`
+			});
+			addedCategories.push(bot.commands[commandName].category);
+		}
+	});
+
+	return new Discord.MessageActionRow()
+		.addComponents(
+			new Discord.MessageSelectMenu()
+				.setCustomId('help')
+				.setPlaceholder('Command...')
+				.addOptions(categoryObjects)
+		);
 }
