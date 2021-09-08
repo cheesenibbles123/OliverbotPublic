@@ -248,16 +248,13 @@ exports.checkIfTL = function checkIfTL(ID){
 		db.alternionConnectionPool.query(`SELECT Team_Leader as tl_ID from User Where Discord_ID='${ID}'`, (err,rows) => {
 			if (rows){
 				if (rows[0].tl_ID === 0){
-					reply(event,"You are not a team leader!",isMessage);
 					resolve(false);
 				}else if (rows.length > 1){
-					reply(event,"Something went wrong, you appear to be in the DB twice.",isMessage);
 					resolve(false);
 				}else{
 					resolve(true);
 				}
 			}else{
-				reply(event,"You are not in the database, please contact Archie.",isMessage);
 				resolve(false);
 			}
 		});
