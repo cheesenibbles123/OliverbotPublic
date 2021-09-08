@@ -21,17 +21,19 @@ These are the oliverbot files, used for powering the discord bot.
 
 **Dependencies:**
  - @cheesenibbles123/blackwakehandler: ^3.1.3
- - @discordjs/opus: ^0.3.2
+ - @discordjs/opus: ^0.5.0
+ - @discordjs/rest: ^0.1.0-canary.0,
  - btoa: ^1.2.1
  - canvas: ^2.6.1
- - discord.js: ^12.4.0
+ - discord-api-types: ^0.22.0,
+ - discord.js: ^13.1.0
  - fs: 0.0.1-security
  - ftp: ^0.3.10
  - mysql: ^2.18.1
  - node-opus: ^0.3.3
  - sightengine: ^1.3.1
- - tail: ^2.0.4
- - ytdl-core: "^2.1.7
+ - tail: ^2.2.2
+ - ytdl-core: "^4.8.2
 
 **System Info:**
  - OS: Ubuntu
