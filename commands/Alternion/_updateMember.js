@@ -9,7 +9,7 @@ module.exports = {
 		const ID = isMessage ? event.author.id : event.user.id;
 		const isTL = await shared.checkIfTL(ID);
 
-		if (!isTL) return reply(event,"This command is for Team Leaders only!",isMessage);
+		if (!isTL) return reply(event,"This command is for Team Leaders only.",isMessage);
 
 		const type = args[0].toLowerCase();
 		let embed = new Discord.MessageEmbed();

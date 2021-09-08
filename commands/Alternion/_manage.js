@@ -28,6 +28,8 @@ module.exports = {
 			}else{
 				reply(event,"Invalid action",isMessage);
 			}
+		}else{
+			reply(event,"This is for team leaders only.",isMessage);
 		}
 	}
 }

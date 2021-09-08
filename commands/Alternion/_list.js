@@ -83,6 +83,8 @@ async function listTeam(event,authorId,isMessage){
 				reply(event,"This command is for Team Leaders only!",isMessage);
 			}
 		});
+	}else{
+		reply(event,"This command is for team leaders only.",isMessage);
 	}
 }
 
