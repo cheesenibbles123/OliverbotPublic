@@ -146,8 +146,19 @@ module.exports = {
 				console.log(args);
 				reply(event,{content:"🤔",components:[]},isMessage);
 			}
+		}else if (!isMessage && interaction.isButton()) {
+			const functionToRun = args[0];
+			if (bot.commands[command] && typeof(bot.commands[command][functionToRun]) === "function"){
+				args.shift();
+				bot.commands[command][functionToRun](event,args,isMessage);
+			}else{
+				console.log(isMessage);
+				console.log(command);
+				console.log(args);
+				reply(event,{content:"🤔",components:[]},isMessage);
+			}
 		}else{
 			event.react("🤔");
 		}
-	},
+	}
 }
