@@ -20,45 +20,51 @@ module.exports = {
 
 		if (table1Name != "NA"){
 			db.alternionConnectionPool.query(`SELECT Team_ID FROM User WHERE Discord_ID=${authorId}`, (err,userRow) => {
-				db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${authorId}'`, (err, rows) => {
-					db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${userRow[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
-						let found = false;
-						let assignedBadge = "";
-						if (rows){
-							for (let i = 0; i < rows.length; i++){
-								if (args[1] === rows[i].Name){
-									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${authorId}'`);
-									//console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
-									assignedBadge = rows[i].Display_Name;
-									found = true;
-									break;
+				if (userRow.length < 1){
+					reply(event,"You are currently not in the database, please contact Archie.", isMessage);
+				}else if (userRow.length > 2){
+					reply(event,"You are in the database twice, please contact Archie.",isMessage);
+				}else{
+					db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table2Name} INNER JOIN User ON User_ID = User.ID INNER JOIN ${table1Name} ON ${table2Field} = ${table1Name}.ID WHERE User.Discord_ID='${authorId}'`, (err, rows) => {
+						db.alternionConnectionPool.query(`SELECT ${table1Name}.Name, ${table1Name}.Team_ID, ${table1Name}.Display_Name, ${table1Name}.ID, ${table1Name}.Value FROM ${table1Name} WHERE Limited!=True OR ( Team_ID=${userRow[0].Team_ID} AND IF ( ${userRow[0].Team_ID} != 0, 1, 0) = 1 )`, (err, rows2) => {
+							let found = false;
+							let assignedBadge = "";
+							if (rows){
+								for (let i = 0; i < rows.length; i++){
+									if (args[1] === rows[i].Name){
+										db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows[i].ID} WHERE Discord_ID='${authorId}'`);
+										//console.log(`Setting: -${authorId}- ==> -${rows[i].Name}-`);
+										assignedBadge = rows[i].Display_Name;
+										found = true;
+										break;
+									}
 								}
 							}
-						}
 
-						if (rows2 && !found){
-							for (let i = 0; i < rows2.length; i++){
-								if (args[1] === rows2[i].Name){
-									db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${authorId}'`);
-									//console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
-									assignedBadge = rows2[i].Display_Name;
-									found = true;
-									break;
+							if (rows2 && !found){
+								for (let i = 0; i < rows2.length; i++){
+									if (args[1] === rows2[i].Name){
+										db.alternionConnectionPool.query(`UPDATE User SET ${fieldName}=${rows2[i].ID} WHERE Discord_ID='${authorId}'`);
+										//console.log(`Setting: -${authorId}- ==> -${rows2[i].Name}-`);
+										assignedBadge = rows2[i].Display_Name;
+										found = true;
+										break;
+									}
 								}
 							}
-						}
 
 
-						if (!found){
-							embed.setDescription("You cannot assign that Item!");
-						}else{
-							embed.setDescription(`Assigned ${table1Name}: **${assignedBadge}**`);
-							shared.globalJsonUpdate();
-						}
+							if (!found){
+								embed.setDescription("You cannot assign that Item!");
+							}else{
+								embed.setDescription(`Assigned ${table1Name}: **${assignedBadge}**`);
+								shared.globalJsonUpdate();
+							}
 
-						reply(event,{embeds:[embed]},isMessage);
+							reply(event,{embeds:[embed]},isMessage);
+						});
 					});
-				});
+				}
 			});
 		}else{
 			reply(event,"That is not a valid item to assign!",isMessage);
