@@ -23,7 +23,7 @@ module.exports = {
 				let finalMsg = `Badge       : **${rows[0].bad}**\n`
 							+	`Gold Mask   : **${rows[0].mas}**\n`
 							+	`Sail        : **${rows[0].sai}**\n`
-							+	`Mail Sail   : **${rows[0].msa}**\n`
+							+	`Main Sail   : **${rows[0].msa}**\n`
 							+	`Cannon      : **${rows[0].can}**\n`
 							+	`Swivel      : **${rows[0].swi}**\n`
 							+	`Flag Navy   : **${rows[0].flg2}**\n`
