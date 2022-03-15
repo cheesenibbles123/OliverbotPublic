@@ -174,7 +174,7 @@ module.exports = {
 				},
 				{
 					name : "user",
-					description : "Item type to update",
+					description : "Update loadout for an individual user",
 					type : 1,
 					options : [
 						{
