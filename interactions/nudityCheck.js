@@ -1,5 +1,5 @@
 const config = require("./../config.json");
-
+const Discord = require('discord.js');
 let bot;
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
 	        		if (attachment.url.includes(".png") || attachment.url.includes(".jpg") || attachment.url.includes(".jpeg")){
 	          			let sightengine = require('sightengine')('1166252206', 'aSwRzSN88ndBsSHyrUWJ');
 	          			sightengine.check(['nudity']).set_url(`${attachment.url}`).then(function(result) {
-	            			if (result.nudity.raw > 0.65){
+	            			if (result.nudity.raw > 0.7){
 	              				let nudityEmbed = new Discord.MessageEmbed()
 	                			  .addField("image posted containing possible nudity",`Nudity rating of ${result.nudity.raw * 100}%\nAuthor: ${message.author}     Channel: ${message.channel}\nImage Link: [link](${attachment.url})`);
 	             				bot.channels.cache.get(config.serverInfo.channels.loggingChannel).send(nudityEmbed);
