@@ -1,7 +1,4 @@
-const variables = require("./_sharedFunctions.js").variables;
-
 let bot;
-//let variables;
 
 module.exports = {
 	name: "queue",
@@ -10,16 +7,15 @@ module.exports = {
 	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
-		//variables = glob.variables;
 	},
 	execute: (message,args) => {
-		if (variables.isPlaying){
+		if (bot.audio.isPlaying){
 			let finalMsg = "```\n";
-			for (let i=0; i < variables.songQueue.length; i++){
+			for (let i=0; i < bot.audio.songQueue.length; i++){
 				if (finalMsg.length < 500){
-					finalMsg += `${i} : ${variables.songQueue[i].title}\n`;
+					finalMsg += `${i} : ${bot.audio.songQueue[i].title}\n`;
 				}else{
-					finalMsg += `Displaying ${i}/${variables.songQueue.length}\n`;
+					finalMsg += `Displaying ${i}/${bot.audio.songQueue.length}\n`;
 					break;
 				}
 			}

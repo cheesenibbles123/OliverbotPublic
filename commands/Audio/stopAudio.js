@@ -1,7 +1,4 @@
-//const glob = require("./_sharedFunctions.js");
-
 let bot;
-const variables = require("./_sharedFunctions.js").variables;
 
 module.exports = {
 	name: "stopaudio",
@@ -10,23 +7,27 @@ module.exports = {
 	category: "Audio",
 	init: (botInstance) => {
 		bot = botInstance;
-		//variables = glob.variables;
 	},
 	execute: (message,args) => {
-		if (!variables.isPlaying){
+		if (!bot.audio.isPlaying){
 			message.channel.send("I am not currently in a voice channel!");
-		}else if (!variables.currentDispatcher){
+		}else if (!bot.audio.player){
 			message.channel.send("I am not currently playing anything!");
 		}else if (!message.member.voice.channel){
 			message.channel.send("You must be in the same voice channel!");
-		}else if (message.member.voice.channel.id !== bot.voice.connections.get(message.guild.id).channel.id){
+		}else if (message.member.voice.channel.id !== bot.audio.channel){
 			message.channel.send("You must be in the same voice channel!");
 		}else{
-			variables.currentDispatcher.destroy();
-			bot.voice.connections.get(message.guild.id).disconnect();
-			variables.isPlaying = false;
+			bot.audio.player.stop();
+			bot.audio.connection.destroy();
+			bot.audio.isPlaying = false;
+			bot.audio.isSubscribed = false;
+			bot.audio.player = null;
+			bot.audio.connection = null;
+			bot.audio.channel = null;
+			bot.audio.songQueue = [];
 			message.react("🛑");
-			message.channel.send("I have stopped");
+			message.reply("I have stopped");
 		}
 	},
 }
