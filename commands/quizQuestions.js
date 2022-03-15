@@ -9,7 +9,7 @@ let isNotLocked = true;
 module.exports = {
 	name: "quiz",
 	args: [0,1],
-	help: "Displays a quiz question for you to awnser",
+	help: "Displays a quiz question for you to answer",
 	usage: "<income>",
 	options : [
 		{
@@ -76,7 +76,17 @@ function getRandomQuizQuestion(event,isGainingIncome,isMessage){
 	});
 }
 
-async function textQuizQuestions(event,question,awnsers,timeFactor,worthFactor,maxAttempts,isGainingIncome,isMessage){
+function checkAnswer(answers, input){
+	input = input.toLowerCase();
+	for (let i=0; i < answers.length; i++){
+		if (answers[i] === input && answers[i].length === input.length){
+			return true;
+		}
+	}
+	return false;
+}
+
+async function textQuizQuestions(event,question,answers,timeFactor,worthFactor,maxAttempts,isGainingIncome,isMessage){
 	let baseIncome = 5;
 	isNotLocked = false;
 	let channel = isMessage ? event.channel : bot.channels.cache.get(event.channelId);
@@ -94,9 +104,9 @@ async function textQuizQuestions(event,question,awnsers,timeFactor,worthFactor,m
 			}
 
 			if (response.attachments.size > 0){
-				response.channel.send("Attachments are not supported as awnsers.");
+				response.channel.send("Attachments are not supported as answers.");
 				return false;
-			}else if ( awnsers.indexOf(response.content.toLowerCase()) !== -1 && list.indexOf(response.author) === -1 && !response.author.bot && attempts[response.author.id] <= maxAttempts ){
+			}else if ( checkAnswer(answers, response.content) && list.indexOf(response.author) === -1 && !response.author.bot && attempts[response.author.id] <= maxAttempts ){
 				return true;
 			}else{
 				if (attempts[response.author.id] > maxAttempts && attempts[response.author.id] < maxAttempts + 2 && !response.author.bot){
@@ -112,7 +122,7 @@ async function textQuizQuestions(event,question,awnsers,timeFactor,worthFactor,m
 			if (list.indexOf(msg.author) === -1 && !msg.author.bot){
 				list.push(msg.author);
 				msg.delete();
-				channel.send(`${msg.author} got the correct awnser!`);
+				channel.send(`${msg.author} got the correct answers!`);
 			}
 		});
 
