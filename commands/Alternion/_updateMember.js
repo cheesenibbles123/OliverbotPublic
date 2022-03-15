@@ -135,6 +135,14 @@ function getFieldAndTable(input){
 			field = "Flag_Navy_ID";
 			table = "Flag";
 			break;
+		case "cannon":
+			field = "Cannon_ID";
+			table = "Cannon";
+			break;
+		case "mortar":
+			field = "Mortar_ID";
+			table = "Mortar";
+			break;
 		case "swivel":
 			field = "Swivel_ID";
 			table = "Swivel";
