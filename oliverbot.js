@@ -112,92 +112,6 @@ function customizeShip(ID,args,message){
 	});
 }
 
-function craftItem(message,args){
-	let craftEmbed = new MessageEmbed();
-	mainDatabaseConnectionPool.query(`SELECT * FROM crafting WHERE Name=${args[0]}`, (err,craftingRows) => {
-		if (craftingRows[0]){
-			mainDatabaseConnectionPool.query(`SELECT * FROM skills WHERE id=${ID}`, (err,skillRows) => {
-				let requirements = JSON.parse(craftingRows[0].Requirements);
-				let requiredSkills = [];
-				let requiredMaterials = [];
-				let missingSkills = "";
-				for (i=0;i<requirements.length;i++){
-					if (requirements[i].type === "skill"){
-						requiredSkills.push({"name" : requirements[i].name, "level" : requirements[i].level});
-					}else if (requirements[i].type === "material"){	
-						requiredMaterials.push({"name" : requirements[i].name, "amount" : requirements[i].amount})
-					}
-				}
-				for (let s=0; s<requiredSkills.length;s++){
-					if (skillRows[requiredSkills[s].name] < requiredSkills[s].level){
-						missingSkills += `${missingSkills[i].name} : ${missingSkills[i].level}\n`;
-					}
-				}
-
-				if (missingSkills.length < 1){
-					mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT WHERE ID='${ID}'`,(err,inventoryRows) => {
-						if (inventoryRows.length){
-							if (inventoryRows.length === 1){
-								let inv = JSON.parse(inventoryRows[0].inventory);
-								let possible = true;
-								let missingResources = "";
-								for (let s=0; s<requiredMaterials.length;s++){
-									let val = checkOrRemoveResources(true,inv,requiredMaterials[s].name,requiredMaterials[s].amount);
-									if (val === 0 || val === 2){
-										missingResources += `${requiredMaterials[s].name} : ${requiredMaterials[s].amount}\n`;
-										possible = false;
-									}
-								}
-
-								if (possible){
-
-									//remove the resources
-									for (let s=0;s<requiredMaterials.length;s++){
-										inv = checkOrRemoveResources(false,inv,requiredMaterials[s].name,requiredMaterials[s].amount);
-									}
-
-									let doesntExist = true;
-									for (let i=0;i<inv.length;i++){
-										if (inv[i].name === args[0]){
-											inv[i].amount += 1;
-											doesntExist = false;
-											break;
-										}
-									}
-
-									if (doesntExist){
-										if (craftingRows[0].canBeUsedForCrafting === 1){
-											inv.push({"name" : `${args[0]}`, "amount" : 1, "type" : "constructionResources"});
-										}else{
-											inv.push({"name" : `${args[0]}`, "amount" : 1, "type" : "finalCraft"});
-										}
-									}
-
-									craftEmbed.setTitle("Item crafted")
-										.setDescription(`Crafted: ${craftingRows[0].properName}`);
-										message.channel.send(craftEmbed);
-
-								}else{
-									craftEmbed.setTitle("Missing Resources")
-										.setDescription(missingResources);
-									message.channel.send(craftEmbed);
-								}
-							}
-						}
-					});
-				}else{
-					craftEmbed.setTitle("Missing Skills")
-						.setDescription(missingSkills);
-					message.channel.send(craftEmbed);
-				}
-			});
-		}else{
-			craftEmbed.setDescription("Unable to find that item.");
-			message.channel.send(craftEmbed);
-		}
-	});
-}
-
 allowedCommands = ["savequote"];
 
 bot.once("ready", () => {
@@ -293,7 +207,7 @@ bot.on("interactionCreate", async interaction => {
 			args.push(interaction.options._hoistedOptions[i].value);
 		}
 		commands.handler(interaction, false, interaction.commandName, args);
-	}else if (interaction.isSelectMenu()){
+	}else if (interaction.isSelectMenu() || interaction.isButton()){
 		await interaction.deferUpdate();
 		const data = interaction.values[0].split(' ');
 		if (data.length < 1) return;
