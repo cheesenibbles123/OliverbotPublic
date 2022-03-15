@@ -7,7 +7,7 @@ module.exports = {
 	help: "Gets an image from inspirebot",
 	category: "Meme",
 	interactionSupport: true,
-	executeGlobal: (message,args) => {
+	executeGlobal: (event,message,isMessage) => {
 		fetch("http://inspirobot.me/api?generate=true").then(resp => resp.text()).then(picture => {
 			let InspireImage = new Discord.MessageEmbed()
 				.setImage(`${picture}`)
