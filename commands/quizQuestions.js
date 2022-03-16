@@ -71,13 +71,14 @@ function getRandomQuizQuestion(event,isGainingIncome,isMessage){
 	db.mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
 		let num = glob.getRandomInt(rows.length - 1);
 		if (rows[num].format === "text"){
-			textQuizQuestions(event,rows[num].question,rows[num].awnsers,rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome,isMessage);
+			textQuizQuestions(event,rows[num].question,JSON.parse(rows[num].awnsers),rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome,isMessage);
 		}
 	});
 }
 
 function checkAnswer(answers, input){
 	input = input.toLowerCase();
+
 	for (let i=0; i < answers.length; i++){
 		if (answers[i] === input && answers[i].length === input.length){
 			return true;
@@ -97,6 +98,8 @@ async function textQuizQuestions(event,question,answers,timeFactor,worthFactor,m
 		let attempts = {};
 
 		let filter = response => {
+			if (response.author.bot) return false;
+
 			if (attempts[response.author.id]){
 				attempts[response.author.id] += 1;
 			}else{
@@ -106,10 +109,10 @@ async function textQuizQuestions(event,question,answers,timeFactor,worthFactor,m
 			if (response.attachments.size > 0){
 				response.channel.send("Attachments are not supported as answers.");
 				return false;
-			}else if ( checkAnswer(answers, response.content) && list.indexOf(response.author) === -1 && !response.author.bot && attempts[response.author.id] <= maxAttempts ){
+			}else if (attempts[response.author.id] <= maxAttempts && list.indexOf(response.author) === -1 && checkAnswer(answers, response.content) ){
 				return true;
 			}else{
-				if (attempts[response.author.id] > maxAttempts && attempts[response.author.id] < maxAttempts + 2 && !response.author.bot){
+				if (attempts[response.author.id] > maxAttempts && attempts[response.author.id] < maxAttempts + 2){
 					response.channel.send("You have reached the max number of attempts you can make!");
 				}
 				return false;
