@@ -43,7 +43,7 @@ module.exports = {
 }
 
 function checkQuizAllowances(event,args,isMessage){
-	let id = isMessage ? event.author.id : event.member.user.id;
+	const id = isMessage ? event.author.id : event.member.user.id;
 	db.mainDatabaseConnectionPool.query(`SELECT * FROM inventoryGT where ID='${id}'`, (err,rows,fields) => {
 
 		db.mainDatabaseConnectionPool.query("SELECT * FROM cooldowns WHERE name='quiz'", (err,rows2,fields) => {
@@ -69,7 +69,7 @@ function checkQuizAllowances(event,args,isMessage){
 
 function getRandomQuizQuestion(event,isGainingIncome,isMessage){
 	db.mainDatabaseConnectionPool.query("SELECT * FROM quiz", (err,rows,fields) => {
-		let num = glob.getRandomInt(rows.length - 1);
+		const num = glob.getRandomInt(rows.length - 1);
 		if (rows[num].format === "text"){
 			textQuizQuestions(event,rows[num].question,JSON.parse(rows[num].awnsers),rows[num].timeFactor,rows[num].worthFactor,rows[num].maxAttempts,isGainingIncome,isMessage);
 		}
@@ -88,18 +88,26 @@ function checkAnswer(answers, input){
 }
 
 async function textQuizQuestions(event,question,answers,timeFactor,worthFactor,maxAttempts,isGainingIncome,isMessage){
-	let baseIncome = 5;
+	const baseIncome = 5;
 	isNotLocked = false;
-	let channel = isMessage ? event.channel : bot.channels.cache.get(event.channelId);
+	const channel = isMessage ? event.channel : bot.channels.cache.get(event.channelId);
+	let quizEmbed = new Discord.MessageEmbed()
+		.setTitle("Quiz Question")
+		.setDescription(question)
+		.addField("Max Attempts", `${maxAttempts}`, true);
 
-	channel.send(question).then(() => {
+	if (isGainingIncome){
+		quizEmbed.addField("Reward", `${baseIncome * worthFactor}`,true);
+	}
+	channel.send({ embeds: [quizEmbed] }).then(() => {
 
 		let list = [];
 		let attempts = {};
 
 		let filter = response => {
 			if (response.author.bot) return false;
-
+			if (list.indexOf(response.author) !== -1) return false;
+			
 			if (attempts[response.author.id]){
 				attempts[response.author.id] += 1;
 			}else{
@@ -115,17 +123,22 @@ async function textQuizQuestions(event,question,answers,timeFactor,worthFactor,m
 				if (attempts[response.author.id] > maxAttempts && attempts[response.author.id] < maxAttempts + 2){
 					response.channel.send("You have reached the max number of attempts you can make!");
 				}
+				try{
+					response.react("❎");
+				}catch(e){
+					// ignore, just here incase interactions dont like it
+				}
 				return false;
 			}
 		};
 
-		let collector = channel.createMessageCollector({filter, time: 15000 * timeFactor });
+		const collector = channel.createMessageCollector({filter, time: 15000 * timeFactor });
 
 		collector.on('collect', msg => {
 			if (list.indexOf(msg.author) === -1 && !msg.author.bot){
 				list.push(msg.author);
 				msg.delete();
-				channel.send(`${msg.author} got the correct answers!`);
+				channel.send(`${msg.author} got the correct answer!`);
 			}
 		});
 
