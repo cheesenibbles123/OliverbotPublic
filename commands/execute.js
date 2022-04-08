@@ -17,11 +17,11 @@ module.exports = {
 	executeGlobal: (event,args,isMessage) => {
 		let checkString = args.join(' ').toLowerCase();
 		if (typeof args[0] === undefined){
-			rely("You need to say who to execute! 🤦");
+			reply(event, "You need to say who to execute! 🤦", isMessage);
 		}else if (checkString.includes("@everyone") || checkString.includes("@here")){
-			rely("Nah.");
+			reply(event, "Nah.", isMessage);
 		}else{
-			rely(`Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`);
+			reply(event, `Executing ${args.join(" ")}...\n https://tenor.com/view/gun-to-head-doc-execution-shoot-gif-14690328`, isMessage);
 		}
 	}
 }

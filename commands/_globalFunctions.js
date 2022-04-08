@@ -58,10 +58,10 @@ exports.loadDataFromFile = function loadFromDatafile(event,isMessage,commandUsed
 			}
 			break;
 		case "quote":
-			reply(event,file.quotes[getRandomInt(file.quotes.length+1)],isMessage);
+			reply(event,file.quotes[getRandomInt(file.quotes.length-1)],isMessage);
 			break;
 		case "nootnoot":
-			reply(event,file.nootnoot[getRandomInt(file.nootnoot.length+1)],isMessage);
+			reply(event,file.nootnoot[getRandomInt(file.nootnoot.length-1)],isMessage);
 			break;
 		case "dance":
 			p = getRandomInt(file.Responses.dance.length);
@@ -72,15 +72,14 @@ exports.loadDataFromFile = function loadFromDatafile(event,isMessage,commandUsed
 			reply(event,file.Responses.beg[p],isMessage);
 			break;
 		case "dad":
-			reply(event,file.dadjokes[getRandomInt(file.dadjokes.length+1)],isMessage);
+			reply(event,file.dadjokes[getRandomInt(file.dadjokes.length-1)],isMessage);
 			break;
 		case "insult":
-			let checkString = args.join(' ');
-			if (checkString.includes("everyone") || checkString.includes("here"))
+			if (data.includes("everyone") || data.includes("here"))
 			{
 				reply(event,"nah",isMessage);
 			}else{
-				let insult = file.insults[getRandomInt(file.insults.length+1)].toString();
+				let insult = file.insults[getRandomInt(file.insults.length-1)].toString();
 				try{
 					if (typeof data === "undefined"){
 						reply(event,"Please ensure you have use the correct syntax.",isMessage);
