@@ -1,3 +1,0 @@
-exports.events = {
-	UPDATE : "Update",
-}
